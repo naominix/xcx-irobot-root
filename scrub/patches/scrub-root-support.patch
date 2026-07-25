@@ -1,0 +1,14 @@
+diff --git a/ScratchLinkKit/Sources/ScratchLinkKit/Resources/inject.js b/ScratchLinkKit/Sources/ScratchLinkKit/Resources/inject.js
+index 4c4feeb..f57ca83 100644
+--- a/ScratchLinkKit/Sources/ScratchLinkKit/Resources/inject.js
++++ b/ScratchLinkKit/Sources/ScratchLinkKit/Resources/inject.js
+@@ -110,7 +110,8 @@ class ScratchLinkKit {
+     };
+ }
+ 
+-if (document.getElementById('scratch-link-extension-script')) {
++// Xcratch/TurboWarp extensions also use Scratch Link, but do not create Scratch's marker element.
++if (document.getElementById('scratch-link-extension-script') || location.hostname.includes('xcratch')) {
+     self.Scratch = self.Scratch || {};
+     self.Scratch.ScratchLinkSafariSocket = ScratchLinkKit.Socket;
+ }

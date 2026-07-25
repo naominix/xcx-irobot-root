@@ -1,0 +1,79 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout extension
+        uses: actions/checkout@v4
+        with:
+          path: extension
+
+      - name: Checkout Xcratch editor
+        uses: actions/checkout@v4
+        with:
+          repository: xcratch/scratch-editor
+          path: scratch-editor
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: extension
+
+      - name: Link Scratch VM sources
+        run: npm run setup-dev -- ../scratch-editor/packages/scratch-vm
+        working-directory: extension
+
+      - name: Test
+        run: npm test -- --runInBand
+        working-directory: extension
+
+      - name: Build extension
+        run: npm run build
+        working-directory: extension
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp site/index.html _site/index.html
+          cp assets/root-icon-selected.png _site/root-icon.png
+          cp dist/irobotRoot.mjs _site/irobotRoot.mjs
+          cp dist/irobotRoot.mjs.map _site/irobotRoot.mjs.map
+          cp projects/example.sb3 _site/example.sb3
+          touch _site/.nojekyll
+        working-directory: extension
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: extension/_site
+
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

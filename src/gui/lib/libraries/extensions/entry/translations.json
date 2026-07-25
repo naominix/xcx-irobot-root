@@ -1,0 +1,14 @@
+{
+  "en": {
+    "irobotRoot.entry.name": "iRobot Root",
+    "irobotRoot.entry.description": "Control an iRobot Root robot over Bluetooth"
+  },
+  "ja": {
+    "irobotRoot.entry.name": "iRobot Root",
+    "irobotRoot.entry.description": "iRobot RootロボットをBluetoothで制御します"
+  },
+  "ja-Hira": {
+    "irobotRoot.entry.name": "iRobot Root",
+    "irobotRoot.entry.description": "iRobot RootロボットをBluetoothでせいぎょします"
+  }
+}

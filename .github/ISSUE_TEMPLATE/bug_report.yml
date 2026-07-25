@@ -1,0 +1,38 @@
+name: Bug report
+description: Rootの接続・命令・センサーイベントの問題を報告します
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: dropdown
+    id: model
+    attributes:
+      label: Root model
+      options: [rt0, rt1, Unknown]
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS、ブラウザ、Scratch LinkまたはScrubのバージョン
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: 実行したブロックと操作を順番に記載してください
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: 個人情報やBluetooth識別情報を確認してから貼り付けてください
+      render: text

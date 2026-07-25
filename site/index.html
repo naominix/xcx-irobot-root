@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="XcratchからiRobot Root rt0/rt1をBluetoothで制御する拡張機能">
+  <title>iRobot Root for Xcratch</title>
+  <style>
+    :root { color-scheme: light; --ink:#17202a; --muted:#596775; --green:#2e936d; --blue:#29bfd3; --paper:#f7f8f5; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif; color:var(--ink); background:var(--paper); line-height:1.7; }
+    header { padding:72px 24px 56px; background:linear-gradient(145deg,#e7f8ef,#edf8fb 58%,#fff9d9); text-align:center; border-bottom:1px solid #dce5df; }
+    header img { width:min(210px,48vw); border-radius:24%; filter:drop-shadow(0 14px 24px #31483c24); }
+    h1 { margin:22px 0 8px; font-size:clamp(2rem,6vw,3.7rem); letter-spacing:-.04em; }
+    header p { max-width:720px; margin:0 auto 28px; color:var(--muted); font-size:1.08rem; }
+    .actions { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
+    .button { display:inline-block; padding:12px 20px; border-radius:999px; text-decoration:none; font-weight:700; color:white; background:var(--green); box-shadow:0 7px 18px #2e936d30; }
+    .button.secondary { color:var(--ink); background:white; border:1px solid #ccd8d0; box-shadow:none; }
+    main { width:min(980px,calc(100% - 40px)); margin:0 auto; padding:48px 0 72px; }
+    section { margin:0 0 52px; }
+    h2 { font-size:1.6rem; margin:0 0 18px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+    .card { background:white; padding:22px; border:1px solid #dde5df; border-radius:18px; box-shadow:0 8px 24px #23352b0a; }
+    .card h3 { margin:0 0 8px; font-size:1.05rem; }
+    ol { padding-left:1.4rem; }
+    code { background:#e9efeb; border-radius:6px; padding:.15rem .4rem; overflow-wrap:anywhere; }
+    .note { padding:18px 20px; border-left:5px solid var(--blue); background:#eaf9fc; border-radius:10px; }
+    footer { text-align:center; padding:28px; color:var(--muted); border-top:1px solid #dce5df; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="root-icon.png" alt="iRobot Root rt1を真上から見たアイコン">
+    <h1>iRobot Root for Xcratch</h1>
+    <p>Root rt0/rt1をScratchのブロックから動かす、Xcratch用Bluetooth拡張機能です。日本語と英語、PC/macOSとiPadOSに対応します。</p>
+    <div class="actions">
+      <a class="button" href="https://xcratch.github.io/editor/?extension=https%3A%2F%2Fnaominix.github.io%2Fxcx-irobot-root%2FirobotRoot.mjs%3Fv%3D1.0.0">Xcratchで開く</a>
+      <a class="button secondary" href="https://github.com/naominix/xcx-irobot-root">GitHubと詳しい説明</a>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2>はじめかた</h2>
+      <ol>
+        <li>Rootの電源を入れ、端末の近くへ置きます。</li>
+        <li>上の「Xcratchで開く」を押します。</li>
+        <li>「Rootに接続する」を実行し、一覧からRootを選びます。</li>
+        <li>LEDや音を試してから、低速のモーター命令へ進みます。</li>
+      </ol>
+      <p class="note">iPadではSafariではなく、CoreBluetooth対応パッチを適用したScrubが必要です。導入方法はGitHubのREADMEから確認できます。</p>
+    </section>
+    <section>
+      <h2>主な機能</h2>
+      <div class="grid">
+        <div class="card"><h3>動かす</h3><p>左右モーター、距離移動、回転、弧、停止をScratchブロックで操作します。</p></div>
+        <div class="card"><h3>光・音・描画</h3><p>RGB LEDの点灯・点滅・回転、発音、マーカーと消しゴムを制御します。</p></div>
+        <div class="card"><h3>イベント</h3><p>左右バンパー、4か所のタッチ、崖、バッテリー通知をHATブロックで受け取ります。</p></div>
+        <div class="card"><h3>複数台から選択</h3><p>近くのRootを検索し、デバイス一覧から接続先を選べます。</p></div>
+      </div>
+    </section>
+    <section>
+      <h2>配布ファイル</h2>
+      <p>Extension Loaderには <code>https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs</code> を指定します。</p>
+      <div class="actions">
+        <a class="button secondary" href="irobotRoot.mjs">irobotRoot.mjs</a>
+        <a class="button secondary" href="example.sb3">サンプルプロジェクト</a>
+      </div>
+    </section>
+  </main>
+  <footer>MIT License · © 2026 naominix · 非公式コミュニティプロジェクト</footer>
+</body>
+</html>
