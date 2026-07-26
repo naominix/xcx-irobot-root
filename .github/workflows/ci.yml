@@ -26,13 +26,17 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: extension/package-lock.json
 
       - name: Install dependencies
         run: npm ci
         working-directory: extension
+
+      - name: Install Xcratch dependencies
+        run: npm ci
+        working-directory: scratch-editor
 
       - name: Link Scratch VM sources
         run: npm run setup-dev -- ../scratch-editor/packages/scratch-vm

@@ -29,6 +29,7 @@ workspace/
 ```sh
 git clone https://github.com/xcratch/scratch-editor.git
 git clone https://github.com/naominix/xcx-irobot-root.git
+npm --prefix scratch-editor install
 cd xcx-irobot-root
 npm install
 npm run setup-dev

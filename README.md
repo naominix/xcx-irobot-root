@@ -87,10 +87,11 @@ RGB値による点灯に加え、点滅と回転アニメーションを指定�
 
 ## 開発
 
-Node.js 20以降を推奨します。XcratchのScratch VMソースを隣接ディレクトリへ配置します。
+Node.js 22以降を推奨します。XcratchのScratch VMソースを隣接ディレクトリへ配置します。
 
 ```sh
 git clone https://github.com/xcratch/scratch-editor.git ../scratch-editor
+npm --prefix ../scratch-editor install
 npm install
 npm run setup-dev
 npm test -- --runInBand
