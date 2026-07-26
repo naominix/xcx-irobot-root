@@ -9,6 +9,7 @@ import {
     bytesToBase64,
     crc8,
     getScrubSocketClass,
+    getScrubSocketFromPageRealm,
     selectBLEAdapter,
     supportsWebBluetooth
 } from '../../src/vm/extensions/block/root-ble.js';
@@ -106,6 +107,35 @@ describe('iRobot Root extension', () => {
         const scope = {Scratch: {ScratchLinkSafariSocket: PublishedSocket}};
         expect(getScrubSocketClass(scope)).toBe(PublishedSocket);
         expect(scope.Scratch.ScratchLinkSafariSocket).toBe(PublishedSocket);
+    });
+
+    test('resolves the private Scrub socket through the page realm', () => {
+        class PageSocket {
+            static isSafariHelperCompatible () { return true; }
+        }
+        const scope = {eval: jest.fn(() => PageSocket)};
+        expect(getScrubSocketFromPageRealm(scope)).toBe(PageSocket);
+        expect(scope.eval).toHaveBeenCalledTimes(1);
+    });
+
+    test('uses a temporary page script when eval is unavailable', () => {
+        class PageSocket {
+            static isSafariHelperCompatible () { return true; }
+        }
+        const scope = {};
+        const script = {textContent: '', remove: jest.fn()};
+        scope.document = {
+            createElement: jest.fn(() => script),
+            head: {
+                appendChild: jest.fn(element => {
+                    const match = element.textContent.match(/globalThis\[("[^"]+")\]/);
+                    scope[JSON.parse(match[1])] = PageSocket;
+                })
+            }
+        };
+        expect(getScrubSocketFromPageRealm(scope)).toBe(PageSocket);
+        expect(script.remove).toHaveBeenCalledTimes(1);
+        expect(Object.keys(scope).filter(key => key.startsWith('__irobotRootScrubSocket'))).toEqual([]);
     });
 
     test('retries discovery on the same Scrub socket while Bluetooth permission is pending', async () => {

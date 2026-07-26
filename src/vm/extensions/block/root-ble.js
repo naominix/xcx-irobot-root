@@ -51,9 +51,50 @@ const isScratchLinkSocketClass = candidate => Boolean(candidate &&
     typeof candidate.isSafariHelperCompatible === 'function' &&
     candidate.isSafariHelperCompatible());
 
+const getScrubSocketFromPageRealm = scope => {
+    if (!scope) return null;
+
+    // WKUserScript and an imported ES module can share Window properties while
+    // retaining different lexical environments. Ask the page realm to resolve
+    // ScratchLinkKit before resorting to a short-lived script element.
+    try {
+        if (typeof scope.eval === 'function') {
+            const socket = scope.eval(
+                'typeof ScratchLinkKit === "undefined" ? null : ScratchLinkKit.Socket'
+            );
+            if (isScratchLinkSocketClass(socket)) return socket;
+        }
+    } catch (error) {
+        // Some content-security policies disable eval. Try a script element below.
+    }
+
+    const documentObject = scope.document;
+    if (!documentObject || typeof documentObject.createElement !== 'function') return null;
+    const parent = documentObject.head || documentObject.documentElement;
+    if (!parent || typeof parent.appendChild !== 'function') return null;
+
+    const exportName = `__irobotRootScrubSocket${Date.now()}${Math.random().toString(16).slice(2)}`;
+    try {
+        const script = documentObject.createElement('script');
+        script.textContent = `try { globalThis[${JSON.stringify(exportName)}] = ` +
+            '(typeof ScratchLinkKit === "undefined" ? null : ScratchLinkKit.Socket); } catch (_) {}';
+        parent.appendChild(script);
+        if (typeof script.remove === 'function') script.remove();
+        const socket = scope[exportName];
+        delete scope[exportName];
+        return isScratchLinkSocketClass(socket) ? socket : null;
+    } catch (error) {
+        delete scope[exportName];
+        return null;
+    }
+};
+
 const getScrubSocketClass = (scope = typeof self === 'undefined' ? null : self) => {
     const publishedSocket = scope && scope.Scratch && scope.Scratch.ScratchLinkSafariSocket;
     if (isScratchLinkSocketClass(publishedSocket)) return publishedSocket;
+
+    const globalSocket = scope && scope.ScratchLinkKit && scope.ScratchLinkKit.Socket;
+    if (isScratchLinkSocketClass(globalSocket)) return globalSocket;
 
     // Scrub always injects ScratchLinkKit, but intentionally publishes its Socket
     // only after the standard Scratch marker is present. Xcratch creates that
@@ -62,10 +103,11 @@ const getScrubSocketClass = (scope = typeof self === 'undefined' ? null : self) 
     try {
         // eslint-disable-next-line no-undef
         const injectedSocket = typeof ScratchLinkKit === 'undefined' ? null : ScratchLinkKit.Socket;
-        return isScratchLinkSocketClass(injectedSocket) ? injectedSocket : null;
+        if (isScratchLinkSocketClass(injectedSocket)) return injectedSocket;
     } catch (error) {
-        return null;
+        // Resolve through the page realm below.
     }
+    return getScrubSocketFromPageRealm(scope);
 };
 
 class RootScratchLinkBLE extends ScratchLinkBLE {
@@ -288,6 +330,7 @@ export {
     bytesToBase64,
     crc8,
     getScrubSocketClass,
+    getScrubSocketFromPageRealm,
     selectBLEAdapter,
     supportsWebBluetooth
 };
