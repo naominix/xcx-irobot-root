@@ -12,7 +12,7 @@ src/gui/lib/libraries/extensions/entry/
   translations.json  拡張一覧の日英翻訳
 test/unit/            プロトコル・HAT・翻訳テスト
 projects/example.sb3  サンプルプロジェクト
-scrub/patches/        scratch-link BLESession向けパッチ（変更内容1のみ）
+scrub/patches/        BLESession修正とRoot専用Xcratchブリッジ
 dist/irobotRoot.mjs   配布用ES Module
 ```
 

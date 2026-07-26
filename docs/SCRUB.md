@@ -3,14 +3,14 @@
 iPadOSのSafariはWeb Bluetoothを提供しないため、Rootとの通信にはScrubのCoreBluetoothブリッジを使用します。
 
 > [!IMPORTANT]
-> **2026年7月26日現在、App Store版ScrubはこのRoot BLE拡張の対応対象外です。** 以下では、変更内容1（scratch-linkの`BLESession.swift`修正）だけを適用した開発ビルドを使用します。Scrub / ScratchLinkKit側の変更内容2（ブリッジの公開条件とCoreBluetoothの早期初期化）は元のコードのままです。
+> **2026年7月26日現在、App Store版ScrubはこのRoot BLE拡張の対応対象外です。** 以下では、scratch-linkの`BLESession.swift`修正と、公式Xcratch向けのRoot専用Socket公開だけを適用した開発ビルドを使用します。Scrub標準のSocket公開条件とCoreBluetoothの初期化時期は元のコードのままです。
 
 ## 必要なもの
 
 - macOSとXcode
 - iPad実機
 - [bricklife/Scrub](https://github.com/bricklife/Scrub)のソース
-- このリポジトリの`scrub/patches/scrub-ble-session.patch`
+- このリポジトリの`scrub/patches`にある2つのパッチ
 
 ## パッチを適用する
 
@@ -22,19 +22,22 @@ git clone https://github.com/naominix/xcx-irobot-root.git
 cd Scrub
 ```
 
-適用できることを確認してから、変更内容1だけを適用します。
+適用できることを確認してから、2つのパッチを適用します。
 
 ```sh
 git apply --check ../xcx-irobot-root/scrub/patches/scrub-ble-session.patch
+git apply --check ../xcx-irobot-root/scrub/patches/scrub-root-xcratch-bridge.patch
 git apply ../xcx-irobot-root/scrub/patches/scrub-ble-session.patch
+git apply ../xcx-irobot-root/scrub/patches/scrub-root-xcratch-bridge.patch
 ```
 
-変更対象を確認します。`inject.js`、`ScratchLink.swift`、`URL+Extension.swift`は表示されないことが重要です。
+変更対象を確認します。`ScratchLink.swift`と`URL+Extension.swift`は表示されないことが重要です。
 
 ```sh
 git status --short
 git -C ScratchLinkKit/Sources/ScratchLinkKit/scratch-link diff --check
 git -C ScratchLinkKit/Sources/ScratchLinkKit/scratch-link diff -- macOS/Sources/scratch-link/BLESession.swift
+git diff -- ScratchLinkKit/Sources/ScratchLinkKit/Resources/inject.js
 ```
 
 パッチが変更するのは`BLESession.swift`の次の3点だけです。
@@ -44,6 +47,8 @@ git -C ScratchLinkKit/Sources/ScratchLinkKit/scratch-link diff -- macOS/Sources/
 - 2バイト未満のmanufacturer dataを安全に拒否する
 
 Root拡張自身はサービスUUIDで探索するため、後半2点をRoot固有の探索条件としては使用しません。これらはscratch-linkの仕様適合・安全性修正です。
+
+`scrub-root-xcratch-bridge.patch`は、Scrub標準の`Scratch.ScratchLinkSafariSocket`とその公開条件を変更しません。公式Xcratchエディターでのみ`Scratch.iRobotRootScratchLinkSafariSocket`を追加し、Root拡張だけが参照します。他の拡張機能はこの専用名を参照しないため、Socket factoryや探索条件は変わりません。
 
 ## Xcodeでビルドする
 
@@ -62,13 +67,13 @@ Root拡張自身はサービスUUIDで探索するため、後半2点をRoot固�
 5. 複数台ある場合は名前を確認して選択します。
 6. LED、音、マーカーなど、移動を伴わない命令から確認します。
 
-Root拡張は、Scrubがもともと注入している`ScratchLinkKit.Socket`を拡張内部でのみ利用します。許可処理中に最初の探索要求へ応答がない場合は、ソケットを作り直さず同じ接続上で探索を再試行します。このため、Scrubの公開条件やBluetooth初期化時期を変更しません。
+Root拡張は、Root専用名からScrubの`ScratchLinkKit.Socket`を取得します。許可処理中に最初の探索要求へ応答がない場合は、Socket IDを変えずにネイティブセッションの開始要求と探索を再試行します。このため、CoreBluetoothの早期初期化は追加しません。
 
 ## よくある問題
 
 ### `patch does not apply`
 
-Scrub側の対象ファイルがパッチ作成時と異なるか、既に同じ修正が適用されています。`git status`とサブモジュールのコミットを確認してください。変更内容2の旧パッチは重ねて適用しません。
+Scrub側の対象ファイルがパッチ作成時と異なるか、既に同じ修正が適用されています。`git status`とサブモジュールのコミットを確認してください。以前の`inject.js`公開条件変更パッチやBluetooth早期初期化パッチは重ねて適用しません。
 
 ### パッチファイルが見つからない
 

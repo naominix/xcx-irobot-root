@@ -10,6 +10,7 @@ const ROOT_DISCOVERY_OPTIONS = {
     optionalServices: [UART_SERVICE]
 };
 const SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
+const SCRUB_SESSION_REOPEN_DELAY_MS = 250;
 const SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value)));
@@ -51,63 +52,45 @@ const isScratchLinkSocketClass = candidate => Boolean(candidate &&
     typeof candidate.isSafariHelperCompatible === 'function' &&
     candidate.isSafariHelperCompatible());
 
-const getScrubSocketFromPageRealm = scope => {
-    if (!scope) return null;
-
-    // WKUserScript and an imported ES module can share Window properties while
-    // retaining different lexical environments. Ask the page realm to resolve
-    // ScratchLinkKit before resorting to a short-lived script element.
-    try {
-        if (typeof scope.eval === 'function') {
-            const socket = scope.eval(
-                'typeof ScratchLinkKit === "undefined" ? null : ScratchLinkKit.Socket'
-            );
-            if (isScratchLinkSocketClass(socket)) return socket;
-        }
-    } catch (error) {
-        // Some content-security policies disable eval. Try a script element below.
-    }
-
-    const documentObject = scope.document;
-    if (!documentObject || typeof documentObject.createElement !== 'function') return null;
-    const parent = documentObject.head || documentObject.documentElement;
-    if (!parent || typeof parent.appendChild !== 'function') return null;
-
-    const exportName = `__irobotRootScrubSocket${Date.now()}${Math.random().toString(16).slice(2)}`;
-    try {
-        const script = documentObject.createElement('script');
-        script.textContent = `try { globalThis[${JSON.stringify(exportName)}] = ` +
-            '(typeof ScratchLinkKit === "undefined" ? null : ScratchLinkKit.Socket); } catch (_) {}';
-        parent.appendChild(script);
-        if (typeof script.remove === 'function') script.remove();
-        const socket = scope[exportName];
-        delete scope[exportName];
-        return isScratchLinkSocketClass(socket) ? socket : null;
-    } catch (error) {
-        delete scope[exportName];
-        return null;
-    }
-};
-
 const getScrubSocketClass = (scope = typeof self === 'undefined' ? null : self) => {
+    const rootSocket = scope && scope.Scratch && scope.Scratch.iRobotRootScratchLinkSafariSocket;
+    if (isScratchLinkSocketClass(rootSocket)) return rootSocket;
+
     const publishedSocket = scope && scope.Scratch && scope.Scratch.ScratchLinkSafariSocket;
     if (isScratchLinkSocketClass(publishedSocket)) return publishedSocket;
 
     const globalSocket = scope && scope.ScratchLinkKit && scope.ScratchLinkKit.Socket;
     if (isScratchLinkSocketClass(globalSocket)) return globalSocket;
 
-    // Scrub always injects ScratchLinkKit, but intentionally publishes its Socket
-    // only after the standard Scratch marker is present. Xcratch creates that
-    // marker after Scrub's document-end script can run, so use the already-loaded
-    // class directly without changing Scrub's publication policy.
+    // Keep direct access for compatible environments. WKWebView isolates this
+    // lexical binding from imported modules, so Scrub exposes the Root-only
+    // property above when running the official Xcratch editor.
     try {
         // eslint-disable-next-line no-undef
         const injectedSocket = typeof ScratchLinkKit === 'undefined' ? null : ScratchLinkKit.Socket;
         if (isScratchLinkSocketClass(injectedSocket)) return injectedSocket;
     } catch (error) {
-        // Resolve through the page realm below.
+        return null;
     }
-    return getScrubSocketFromPageRealm(scope);
+    return null;
+};
+
+const createScrubSocket = (SocketClass, type) => {
+    const socket = new SocketClass(type);
+    if (typeof socket._postMessage !== 'function') return socket;
+
+    const postMessage = socket._postMessage.bind(socket);
+    let openMessage = null;
+    socket._postMessage = message => {
+        if (message && message.method === 'open') openMessage = {...message};
+        postMessage(message);
+    };
+    socket.reopenScrubSession = () => {
+        if (!openMessage) return false;
+        postMessage({...openMessage});
+        return true;
+    };
+    return socket;
 };
 
 class RootScratchLinkBLE extends ScratchLinkBLE {
@@ -115,7 +98,7 @@ class RootScratchLinkBLE extends ScratchLinkBLE {
         const isolatedRuntime = {
             constructor: runtime.constructor,
             emit: runtime.emit.bind(runtime),
-            getScratchLinkSocket: type => new SocketClass(type)
+            getScratchLinkSocket: type => createScrubSocket(SocketClass, type)
         };
         super(isolatedRuntime, extensionId, peripheralOptions, connectCallback, resetCallback);
         this._scrubDiscoveryAckTimer = null;
@@ -138,7 +121,21 @@ class RootScratchLinkBLE extends ScratchLinkBLE {
             if (!this._openRequests[requestId]) return;
             delete this._openRequests[requestId];
             if (attempt + 1 < SCRUB_DISCOVERY_ACK_ATTEMPTS) {
-                this._requestPeripheralWhenScrubIsReady();
+                // ScratchLink.swift lazily creates CBCentralManager on the first
+                // open request. If its initial state is still unknown, the native
+                // BLESession is not created and discover messages are discarded.
+                // Reissue open with the same socket ID after CoreBluetooth has had
+                // time to settle, then retry discovery on that same socket.
+                const reopened = typeof this._socket.reopenScrubSession === 'function' &&
+                    this._socket.reopenScrubSession();
+                if (reopened) {
+                    this._scrubDiscoveryAckTimer = window.setTimeout(
+                        this._requestPeripheralWhenScrubIsReady.bind(this),
+                        SCRUB_SESSION_REOPEN_DELAY_MS
+                    );
+                } else {
+                    this._requestPeripheralWhenScrubIsReady();
+                }
             } else {
                 this._handleRequestError(new Error('Scrub BLE session did not become ready'));
                 this._handleDiscoverTimeout();
@@ -326,11 +323,12 @@ export {
     RootTransport,
     SCRUB_DISCOVERY_ACK_ATTEMPTS,
     SCRUB_DISCOVERY_ACK_TIMEOUT_MS,
+    SCRUB_SESSION_REOPEN_DELAY_MS,
     base64ToBytes,
     bytesToBase64,
+    createScrubSocket,
     crc8,
     getScrubSocketClass,
-    getScrubSocketFromPageRealm,
     selectBLEAdapter,
     supportsWebBluetooth
 };

@@ -988,15 +988,6 @@ var translations = {
 
 var img = "data:image/png;base64,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";
 
-function _defineProperty$1(e, r, t) {
-  return (r = toPropertyKey$1(r)) in e ? Object.defineProperty(e, r, {
-    value: t,
-    enumerable: true,
-    configurable: true,
-    writable: true
-  }) : e[r] = t, e;
-}
-
 function _assertThisInitialized$1(e) {
   if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
   return e;
@@ -1046,6 +1037,15 @@ function _inherits$1(t, e) {
   }), Object.defineProperty(t, "prototype", {
     writable: false
   }), e && _setPrototypeOf$1(t, e);
+}
+
+function _defineProperty$1(e, r, t) {
+  return (r = toPropertyKey$1(r)) in e ? Object.defineProperty(e, r, {
+    value: t,
+    enumerable: true,
+    configurable: true,
+    writable: true
+  }) : e[r] = t, e;
 }
 
 function _assertThisInitialized(e) {
@@ -3962,11 +3962,11 @@ var ScratchLinkBLE = /*@__PURE__*/getDefaultExportFromCjs(bleExports);
 var bleWebExports = requireBleWeb();
 var WebBLE = /*@__PURE__*/getDefaultExportFromCjs(bleWebExports);
 
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), true).forEach(function (r) { _defineProperty$1(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), true).forEach(function (r) { _defineProperty$1(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -3981,6 +3981,7 @@ var ROOT_DISCOVERY_OPTIONS = {
   optionalServices: [UART_SERVICE]
 };
 var SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
+var SCRUB_SESSION_REOPEN_DELAY_MS = 250;
 var SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
 var clamp = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value)));
@@ -4044,57 +4045,42 @@ var selectBLEAdapter = function selectBLEAdapter(navigatorObject) {
 var isScratchLinkSocketClass = function isScratchLinkSocketClass(candidate) {
   return Boolean(candidate && typeof candidate === 'function' && typeof candidate.isSafariHelperCompatible === 'function' && candidate.isSafariHelperCompatible());
 };
-var getScrubSocketFromPageRealm = function getScrubSocketFromPageRealm(scope) {
-  if (!scope) return null;
-
-  // WKUserScript and an imported ES module can share Window properties while
-  // retaining different lexical environments. Ask the page realm to resolve
-  // ScratchLinkKit before resorting to a short-lived script element.
-  try {
-    if (typeof scope.eval === 'function') {
-      var socket = scope.eval('typeof ScratchLinkKit === "undefined" ? null : ScratchLinkKit.Socket');
-      if (isScratchLinkSocketClass(socket)) return socket;
-    }
-  } catch (error) {
-    // Some content-security policies disable eval. Try a script element below.
-  }
-  var documentObject = scope.document;
-  if (!documentObject || typeof documentObject.createElement !== 'function') return null;
-  var parent = documentObject.head || documentObject.documentElement;
-  if (!parent || typeof parent.appendChild !== 'function') return null;
-  var exportName = "__irobotRootScrubSocket".concat(Date.now()).concat(Math.random().toString(16).slice(2));
-  try {
-    var script = documentObject.createElement('script');
-    script.textContent = "try { globalThis[".concat(JSON.stringify(exportName), "] = ") + '(typeof ScratchLinkKit === "undefined" ? null : ScratchLinkKit.Socket); } catch (_) {}';
-    parent.appendChild(script);
-    if (typeof script.remove === 'function') script.remove();
-    var _socket = scope[exportName];
-    delete scope[exportName];
-    return isScratchLinkSocketClass(_socket) ? _socket : null;
-  } catch (error) {
-    delete scope[exportName];
-    return null;
-  }
-};
 var getScrubSocketClass = function getScrubSocketClass() {
   var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : typeof self === 'undefined' ? null : self;
+  var rootSocket = scope && scope.Scratch && scope.Scratch.iRobotRootScratchLinkSafariSocket;
+  if (isScratchLinkSocketClass(rootSocket)) return rootSocket;
   var publishedSocket = scope && scope.Scratch && scope.Scratch.ScratchLinkSafariSocket;
   if (isScratchLinkSocketClass(publishedSocket)) return publishedSocket;
   var globalSocket = scope && scope.ScratchLinkKit && scope.ScratchLinkKit.Socket;
   if (isScratchLinkSocketClass(globalSocket)) return globalSocket;
 
-  // Scrub always injects ScratchLinkKit, but intentionally publishes its Socket
-  // only after the standard Scratch marker is present. Xcratch creates that
-  // marker after Scrub's document-end script can run, so use the already-loaded
-  // class directly without changing Scrub's publication policy.
+  // Keep direct access for compatible environments. WKWebView isolates this
+  // lexical binding from imported modules, so Scrub exposes the Root-only
+  // property above when running the official Xcratch editor.
   try {
     // eslint-disable-next-line no-undef
     var injectedSocket = typeof ScratchLinkKit === 'undefined' ? null : ScratchLinkKit.Socket;
     if (isScratchLinkSocketClass(injectedSocket)) return injectedSocket;
   } catch (error) {
-    // Resolve through the page realm below.
+    return null;
   }
-  return getScrubSocketFromPageRealm(scope);
+  return null;
+};
+var createScrubSocket = function createScrubSocket(SocketClass, type) {
+  var socket = new SocketClass(type);
+  if (typeof socket._postMessage !== 'function') return socket;
+  var postMessage = socket._postMessage.bind(socket);
+  var openMessage = null;
+  socket._postMessage = function (message) {
+    if (message && message.method === 'open') openMessage = _objectSpread({}, message);
+    postMessage(message);
+  };
+  socket.reopenScrubSession = function () {
+    if (!openMessage) return false;
+    postMessage(_objectSpread({}, openMessage));
+    return true;
+  };
+  return socket;
 };
 var RootScratchLinkBLE = /*#__PURE__*/function (_ScratchLinkBLE) {
   function RootScratchLinkBLE(runtime, extensionId, peripheralOptions, connectCallback, resetCallback, SocketClass) {
@@ -4104,7 +4090,7 @@ var RootScratchLinkBLE = /*#__PURE__*/function (_ScratchLinkBLE) {
       constructor: runtime.constructor,
       emit: runtime.emit.bind(runtime),
       getScratchLinkSocket: function getScratchLinkSocket(type) {
-        return new SocketClass(type);
+        return createScrubSocket(SocketClass, type);
       }
     };
     _this = _callSuper(this, RootScratchLinkBLE, [isolatedRuntime, extensionId, peripheralOptions, connectCallback, resetCallback]);
@@ -4132,7 +4118,17 @@ var RootScratchLinkBLE = /*#__PURE__*/function (_ScratchLinkBLE) {
         if (!_this2._openRequests[requestId]) return;
         delete _this2._openRequests[requestId];
         if (attempt + 1 < SCRUB_DISCOVERY_ACK_ATTEMPTS) {
-          _this2._requestPeripheralWhenScrubIsReady();
+          // ScratchLink.swift lazily creates CBCentralManager on the first
+          // open request. If its initial state is still unknown, the native
+          // BLESession is not created and discover messages are discarded.
+          // Reissue open with the same socket ID after CoreBluetooth has had
+          // time to settle, then retry discovery on that same socket.
+          var reopened = typeof _this2._socket.reopenScrubSession === 'function' && _this2._socket.reopenScrubSession();
+          if (reopened) {
+            _this2._scrubDiscoveryAckTimer = window.setTimeout(_this2._requestPeripheralWhenScrubIsReady.bind(_this2), SCRUB_SESSION_REOPEN_DELAY_MS);
+          } else {
+            _this2._requestPeripheralWhenScrubIsReady();
+          }
         } else {
           _this2._handleRequestError(new Error('Scrub BLE session did not become ready'));
           _this2._handleDiscoverTimeout();
