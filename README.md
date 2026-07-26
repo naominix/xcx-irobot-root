@@ -42,7 +42,10 @@ https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs
 | macOS / Windows | Scratch Link | Scratch Link 2.xを起動 |
 | iPadOS | Scrub内のCoreBluetoothブリッジ | パッチ適用済みScrub |
 
-iPadOSのSafari単体では接続できません。iPadではパッチ適用済みScrubからXcratchを開きます。詳しくは[Scrub導入手順](docs/SCRUB.md)を参照してください。
+> [!IMPORTANT]
+> **2026年7月26日現在、App Storeで配布されているScrubはこのRoot BLE拡張に対応していません。** iPadOSでは、パッチを適用してXcodeからインストールしたScrubの開発ビルドが必要です。
+
+iPadOSのSafari単体でも接続できません。iPadではパッチ適用済みScrubからXcratchを開きます。詳しくは[Scrub導入手順](docs/SCRUB.md)を参照してください。
 
 Rootは複数の端末へ同時接続できません。接続できない場合は、別のiPad、PC、公式アプリなどでRootを切断してから再試行してください。
 

@@ -2,6 +2,9 @@
 
 iPadOSのSafariはWeb Bluetoothを提供しないため、この拡張機能をiPadで使うにはCoreBluetoothブリッジを追加したScrubの開発ビルドが必要です。
 
+> [!IMPORTANT]
+> **2026年7月26日現在、App Store版ScrubはRoot BLE接続に未対応です。** App StoreからインストールしたScrubだけでは、この拡張機能からRootを検索・接続できません。以下のパッチを適用し、XcodeからiPadへインストールした開発ビルドを使用してください。
+
 ## 必要なもの
 
 - macOSとXcode
