@@ -40,12 +40,12 @@ https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs
 |---|---|---|
 | Windows / macOS / ChromeOS | Web Bluetooth | ChromeまたはEdge |
 | macOS / Windows | Scratch Link | Scratch Link 2.xを起動 |
-| iPadOS | Scrub内のCoreBluetoothブリッジ | Scrub開発ビルド（BLESessionパッチのみ） |
+| iPadOS | App Store版ScrubのCoreBluetoothブリッジ | Scratch Link対応マーカーを持つエディター |
 
 > [!IMPORTANT]
-> **2026年7月26日現在、App Storeで配布されているScrubはこのRoot BLE拡張の対応対象外です。** iPadOSでの検証には、変更内容1（BLESessionの安全性・仕様適合修正）だけを適用してXcodeからインストールしたScrub開発ビルドを使用してください。
+> **App Store版Scrubは無改造で利用できます。** 2026年7月26日、micro:bit More専用エディター上でRootとmicro:bit More v2を同時接続し、micro:bitのボタンからRootのLEDを制御できることを確認しました。
 
-iPadOSのSafari単体では接続できません。Scrub本体とScratchLinkKitの公開・初期化ロジック（変更内容2）は変更せず、Root拡張側で既存ブリッジの利用とBluetooth許可待ちを行います。詳しくは[Scrub導入手順](docs/SCRUB.md)を参照してください。
+iPadOSのSafari単体では接続できません。また、接続先ページにはScrubが認識する`scratch-link-extension-script`マーカーが必要です。現在の公式Xcratchエディターはこの条件を満たさないため、Xcratch側の対応またはマーカー追加版のホスティングが必要です。詳しくは[Scrub導入手順](docs/SCRUB.md)と[Xcratch対応案](docs/XCRATCH_SCRUB.md)を参照してください。
 
 Rootは複数の端末へ同時接続できません。接続できない場合は、別のiPad、PC、公式アプリなどでRootを切断してから再試行してください。
 
@@ -106,7 +106,8 @@ npm run build
 - Nordic UARTサービス: `6e400001-b5a3-f393-e0a9-e50e24dcca9e`
 - 20バイト、big-endian、packet ID、CRC-8
 - PCではWeb Bluetoothを優先し、利用できない場合はScratch Linkへフォールバック
-- iPadOSではScrubが読み込む既存の`ScratchLinkKit.Socket`をRoot拡張内だけで使用
+- iPadOSでは、対応マーカーによってScrubが公開する標準`Scratch.ScratchLinkSafariSocket`を優先
+- 標準Socketが直接参照可能な互換環境では、Root拡張内だけのフォールバックも利用
 - Bluetooth許可で最初の探索要求が失われた場合は、同じソケットで探索を再試行
 
 実装の基礎資料として、[Xcratch公式ドキュメント](https://xcratch.github.io/docs/ja/)、[Root BLE protocol](https://github.com/PoweredBySAM/sam-root-ble-protocol)、[Scratch Link](https://github.com/scratchfoundation/scratch-link)、[Scrub](https://github.com/bricklife/Scrub)を参照しています。
@@ -115,7 +116,8 @@ npm run build
 
 Root rt0実機で、次を確認済みです。
 
-- iPadOS + 従来パッチ適用済みScrubでの接続（変更内容2を戻した構成は再検証中）
+- iPadOS + App Store版ScrubでのRoot接続
+- App Store版Scrub上でのRootとmicro:bit More v2の同時接続・拡張間連携
 - macOSでのWeb Bluetooth接続
 - モーター、LED、音、マーカー／消しゴム命令
 - バンパー／タッチHATイベント

@@ -1,90 +1,60 @@
 # iPadOS / Scrub導入手順
 
-iPadOSのSafariはWeb Bluetoothを提供しないため、Rootとの通信にはScrubのCoreBluetoothブリッジを使用します。
+iPadOSのSafariはWeb Bluetoothを提供しないため、Rootとの通信には[App Store版Scrub](https://apps.apple.com/jp/app/scrub/id1569777095)が内蔵するScratch Link / CoreBluetoothブリッジを使用します。Scrubへのソースコードパッチは不要です。
 
-> [!IMPORTANT]
-> **2026年7月26日現在、App Store版ScrubはこのRoot BLE拡張の対応対象外です。** 以下では、変更内容1（scratch-linkの`BLESession.swift`修正）だけを適用した開発ビルドを使用します。Scrub / ScratchLinkKit側の変更内容2（ブリッジの公開条件とCoreBluetoothの早期初期化）は元のコードのままです。
+## 実機検証
 
-## 必要なもの
+2026年7月26日、App Storeから再インストールしたScrubで次を確認しました。
 
-- macOSとXcode
-- iPad実機
-- [bricklife/Scrub](https://github.com/bricklife/Scrub)のソース
-- このリポジトリの`scrub/patches/scrub-ble-session.patch`
+- micro:bit More v2専用エディターからRootへ接続
+- Rootとmicro:bit More v2を同時接続
+- micro:bitのボタンイベントからRootのLEDを点灯
+- Rootの命令ブロックとセンサーイベントを利用
 
-## パッチを適用する
+検証したRoot拡張はコミット`97262b4`の`irobotRoot.mjs`です。
 
-Scrubリポジトリとこのリポジトリを同じ親ディレクトリへcloneし、Scrubのサブモジュールを取得します。
+## Webエディター側の必要条件
 
-```sh
-git clone --recurse-submodules https://github.com/bricklife/Scrub.git
-git clone https://github.com/naominix/xcx-irobot-root.git
-cd Scrub
+Scrubは、ページの初期HTMLに次の要素がある場合に標準Scratch Link Socketを公開します。
+
+```html
+<script id="scratch-link-extension-script"></script>
 ```
 
-適用できることを確認してから、変更内容1だけを適用します。
+micro:bit More専用エディターはこの条件を満たすため、無改造のApp Store版ScrubでRootとmicro:bit Moreが共存します。
 
-```sh
-git apply --check ../xcx-irobot-root/scrub/patches/scrub-ble-session.patch
-git apply ../xcx-irobot-root/scrub/patches/scrub-ble-session.patch
-```
+2026年7月26日現在、公式Xcratchエディターはこのマーカーを持たないため、App Store版Scrubから標準Scratch Link Socketを利用できません。これはScrubやRoot BLEプロトコルの問題ではなく、Webエディター側の統合条件です。
 
-変更対象を確認します。`inject.js`、`ScratchLink.swift`、`URL+Extension.swift`は表示されないことが重要です。
+## 現在の検証方法
 
-```sh
-git status --short
-git -C ScratchLinkKit/Sources/ScratchLinkKit/scratch-link diff --check
-git -C ScratchLinkKit/Sources/ScratchLinkKit/scratch-link diff -- macOS/Sources/scratch-link/BLESession.swift
-```
-
-パッチが変更するのは`BLESession.swift`の次の3点だけです。
-
-- 接続失敗をWeb側へ返し、接続待ちのままになるのを防ぐ
-- `manufacturerData.dataPrefix`省略を空プレフィックスとして扱う
-- 2バイト未満のmanufacturer dataを安全に拒否する
-
-Root拡張自身はサービスUUIDで探索するため、後半2点をRoot固有の探索条件としては使用しません。これらはscratch-linkの仕様適合・安全性修正です。
-
-## Xcodeでビルドする
-
-1. ScrubのXcodeプロジェクトを開きます。
-2. Signing & Capabilitiesで自分のTeamと一意のBundle Identifierを設定します。
-3. iPadを接続し、実行先に選択します。
-4. Debug構成でビルドしてiPadへインストールします。
-5. 初回接続時にBluetooth利用許可が表示されたら承認します。
-
-## 接続を確認する
-
-1. Scrubから`https://xcratch.github.io/editor/`を開きます。
-2. 最新の`irobotRoot.mjs`を読み込みます。
-3. Rootの電源を入れ、「Rootに接続する」を押します。
-4. 初回のBluetooth許可を承認し、そのままデバイス一覧が更新されるまで待ちます。
+1. App StoreからScrubをインストールします。
+2. ScrubでScratch Link対応マーカーを持つエディターを開きます。
+3. Root拡張の最新MJSを読み込みます。
+4. Rootの電源を入れ、「Rootに接続する」を押します。
 5. 複数台ある場合は名前を確認して選択します。
 6. LED、音、マーカーなど、移動を伴わない命令から確認します。
 
-Root拡張は、Scrubがもともと注入している`ScratchLinkKit.Socket`を拡張内部でのみ利用します。許可処理中に最初の探索要求へ応答がない場合は、ソケットを作り直さず同じ接続上で探索を再試行します。このため、Scrubの公開条件やBluetooth初期化時期を変更しません。
+```text
+https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs?v=97262b4
+```
+
+## 公式Xcratchで利用するには
+
+Xcratchの初期HTMLへ標準マーカーを追加する必要があります。Xcratch本体への提案、またはマーカー追加版XcratchをGitHub Pagesへ配置する方法が考えられます。詳細は[XcratchとScrubの統合案](XCRATCH_SCRUB.md)を参照してください。
 
 ## よくある問題
 
-### `patch does not apply`
+### Scratch Linkのインストール案内が表示される
 
-Scrub側の対象ファイルがパッチ作成時と異なるか、既に同じ修正が適用されています。`git status`とサブモジュールのコミットを確認してください。変更内容2の旧パッチは重ねて適用しません。
-
-### パッチファイルが見つからない
-
-`git -C work/Scrub apply relative/path.patch`では、相対パスがScrub側から解釈されます。この手順のように`cd Scrub`してから指定するか、パッチの絶対パスを使用してください。
+Scrub内でこの案内が表示される場合、開いているWebエディターが`scratch-link-extension-script`マーカーを持たず、Scrub Socketが公開されていません。PC版Scratch LinkをインストールしてもiPadOSでは解決しません。
 
 ### Rootが一覧に出ない
 
 - Rootが別の端末やアプリへ接続されていないか確認します。
 - RootとiPadを近づけます。
-- ScrubのBluetooth許可を確認します。
-- 初回許可後は最大30秒待つか、デバイス一覧を更新します。
+- iPadOSの設定でScrubのBluetooth許可を確認します。
+- Rootの電源を入れ直し、デバイス一覧を更新します。
 
 ### 接続できるが命令が動かない
 
-最新版の`irobotRoot.mjs`を読み込んでいるか確認し、URLへ異なるクエリ文字列を付けてキャッシュを更新します。
-
-```text
-https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs?v=scrub-original-bridge
-```
+最新版の`irobotRoot.mjs`を読み込んでいるか確認し、URLへ異なるコミットIDを付けてキャッシュを更新します。
