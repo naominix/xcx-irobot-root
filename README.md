@@ -40,12 +40,12 @@ https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs
 |---|---|---|
 | Windows / macOS / ChromeOS | Web Bluetooth | ChromeまたはEdge |
 | macOS / Windows | Scratch Link | Scratch Link 2.xを起動 |
-| iPadOS | Scrub内のCoreBluetoothブリッジ | Scrub開発ビルド（BLESession＋Root専用ブリッジ） |
+| iPadOS | Scrub内のCoreBluetoothブリッジ | Scrub開発ビルド（BLESessionパッチのみ） |
 
 > [!IMPORTANT]
-> **2026年7月26日現在、App Storeで配布されているScrubはこのRoot BLE拡張の対応対象外です。** iPadOSでの検証には、BLESession修正とRoot専用ブリッジだけを適用してXcodeからインストールしたScrub開発ビルドを使用してください。
+> **2026年7月26日現在、App Storeで配布されているScrubはこのRoot BLE拡張の対応対象外です。** iPadOSでの検証には、変更内容1（BLESessionの安全性・仕様適合修正）だけを適用してXcodeからインストールしたScrub開発ビルドを使用してください。
 
-iPadOSのSafari単体では接続できません。Scrub標準のSocket公開条件とCoreBluetooth初期化時期は変更せず、公式Xcratch上でRoot拡張だけが読む専用名へSocketを追加公開します。詳しくは[Scrub導入手順](docs/SCRUB.md)を参照してください。
+iPadOSのSafari単体では接続できません。Scrub本体とScratchLinkKitの公開・初期化ロジック（変更内容2）は変更せず、Root拡張側で既存ブリッジの利用とBluetooth許可待ちを行います。詳しくは[Scrub導入手順](docs/SCRUB.md)を参照してください。
 
 Rootは複数の端末へ同時接続できません。接続できない場合は、別のiPad、PC、公式アプリなどでRootを切断してから再試行してください。
 
@@ -107,7 +107,7 @@ npm run build
 - 20バイト、big-endian、packet ID、CRC-8
 - PCではWeb Bluetoothを優先し、利用できない場合はScratch Linkへフォールバック
 - iPadOSではScrubが読み込む既存の`ScratchLinkKit.Socket`をRoot拡張内だけで使用
-- Bluetooth許可で最初のセッション開始が保留された場合は、同じSocket IDで開始要求と探索を再試行
+- Bluetooth許可で最初の探索要求が失われた場合は、同じソケットで探索を再試行
 
 実装の基礎資料として、[Xcratch公式ドキュメント](https://xcratch.github.io/docs/ja/)、[Root BLE protocol](https://github.com/PoweredBySAM/sam-root-ble-protocol)、[Scratch Link](https://github.com/scratchfoundation/scratch-link)、[Scrub](https://github.com/bricklife/Scrub)を参照しています。
 
@@ -115,7 +115,7 @@ npm run build
 
 Root rt0実機で、次を確認済みです。
 
-- iPadOS + 従来パッチ適用済みScrubでの接続（Root専用ブリッジ構成は再検証中）
+- iPadOS + 従来パッチ適用済みScrubでの接続（変更内容2を戻した構成は再検証中）
 - macOSでのWeb Bluetooth接続
 - モーター、LED、音、マーカー／消しゴム命令
 - バンパー／タッチHATイベント

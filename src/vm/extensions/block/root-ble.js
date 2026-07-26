@@ -10,7 +10,6 @@ const ROOT_DISCOVERY_OPTIONS = {
     optionalServices: [UART_SERVICE]
 };
 const SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
-const SCRUB_SESSION_REOPEN_DELAY_MS = 250;
 const SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value)));
@@ -53,44 +52,20 @@ const isScratchLinkSocketClass = candidate => Boolean(candidate &&
     candidate.isSafariHelperCompatible());
 
 const getScrubSocketClass = (scope = typeof self === 'undefined' ? null : self) => {
-    const rootSocket = scope && scope.Scratch && scope.Scratch.iRobotRootScratchLinkSafariSocket;
-    if (isScratchLinkSocketClass(rootSocket)) return rootSocket;
-
     const publishedSocket = scope && scope.Scratch && scope.Scratch.ScratchLinkSafariSocket;
     if (isScratchLinkSocketClass(publishedSocket)) return publishedSocket;
 
-    const globalSocket = scope && scope.ScratchLinkKit && scope.ScratchLinkKit.Socket;
-    if (isScratchLinkSocketClass(globalSocket)) return globalSocket;
-
-    // Keep direct access for compatible environments. WKWebView isolates this
-    // lexical binding from imported modules, so Scrub exposes the Root-only
-    // property above when running the official Xcratch editor.
+    // Scrub always injects ScratchLinkKit, but intentionally publishes its Socket
+    // only after the standard Scratch marker is present. Xcratch creates that
+    // marker after Scrub's document-end script can run, so use the already-loaded
+    // class directly without changing Scrub's publication policy.
     try {
         // eslint-disable-next-line no-undef
         const injectedSocket = typeof ScratchLinkKit === 'undefined' ? null : ScratchLinkKit.Socket;
-        if (isScratchLinkSocketClass(injectedSocket)) return injectedSocket;
+        return isScratchLinkSocketClass(injectedSocket) ? injectedSocket : null;
     } catch (error) {
         return null;
     }
-    return null;
-};
-
-const createScrubSocket = (SocketClass, type) => {
-    const socket = new SocketClass(type);
-    if (typeof socket._postMessage !== 'function') return socket;
-
-    const postMessage = socket._postMessage.bind(socket);
-    let openMessage = null;
-    socket._postMessage = message => {
-        if (message && message.method === 'open') openMessage = {...message};
-        postMessage(message);
-    };
-    socket.reopenScrubSession = () => {
-        if (!openMessage) return false;
-        postMessage({...openMessage});
-        return true;
-    };
-    return socket;
 };
 
 class RootScratchLinkBLE extends ScratchLinkBLE {
@@ -98,7 +73,7 @@ class RootScratchLinkBLE extends ScratchLinkBLE {
         const isolatedRuntime = {
             constructor: runtime.constructor,
             emit: runtime.emit.bind(runtime),
-            getScratchLinkSocket: type => createScrubSocket(SocketClass, type)
+            getScratchLinkSocket: type => new SocketClass(type)
         };
         super(isolatedRuntime, extensionId, peripheralOptions, connectCallback, resetCallback);
         this._scrubDiscoveryAckTimer = null;
@@ -121,21 +96,7 @@ class RootScratchLinkBLE extends ScratchLinkBLE {
             if (!this._openRequests[requestId]) return;
             delete this._openRequests[requestId];
             if (attempt + 1 < SCRUB_DISCOVERY_ACK_ATTEMPTS) {
-                // ScratchLink.swift lazily creates CBCentralManager on the first
-                // open request. If its initial state is still unknown, the native
-                // BLESession is not created and discover messages are discarded.
-                // Reissue open with the same socket ID after CoreBluetooth has had
-                // time to settle, then retry discovery on that same socket.
-                const reopened = typeof this._socket.reopenScrubSession === 'function' &&
-                    this._socket.reopenScrubSession();
-                if (reopened) {
-                    this._scrubDiscoveryAckTimer = window.setTimeout(
-                        this._requestPeripheralWhenScrubIsReady.bind(this),
-                        SCRUB_SESSION_REOPEN_DELAY_MS
-                    );
-                } else {
-                    this._requestPeripheralWhenScrubIsReady();
-                }
+                this._requestPeripheralWhenScrubIsReady();
             } else {
                 this._handleRequestError(new Error('Scrub BLE session did not become ready'));
                 this._handleDiscoverTimeout();
@@ -323,10 +284,8 @@ export {
     RootTransport,
     SCRUB_DISCOVERY_ACK_ATTEMPTS,
     SCRUB_DISCOVERY_ACK_TIMEOUT_MS,
-    SCRUB_SESSION_REOPEN_DELAY_MS,
     base64ToBytes,
     bytesToBase64,
-    createScrubSocket,
     crc8,
     getScrubSocketClass,
     selectBLEAdapter,

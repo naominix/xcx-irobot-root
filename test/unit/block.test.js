@@ -5,10 +5,8 @@ import {
     RootScratchLinkBLE,
     RootTransport,
     SCRUB_DISCOVERY_ACK_TIMEOUT_MS,
-    SCRUB_SESSION_REOPEN_DELAY_MS,
     base64ToBytes,
     bytesToBase64,
-    createScrubSocket,
     crc8,
     getScrubSocketClass,
     selectBLEAdapter,
@@ -110,41 +108,6 @@ describe('iRobot Root extension', () => {
         expect(scope.Scratch.ScratchLinkSafariSocket).toBe(PublishedSocket);
     });
 
-    test('prefers the Root-only Scrub socket without changing the standard factory', () => {
-        class RootSocket {
-            static isSafariHelperCompatible () { return true; }
-        }
-        class StandardSocket {
-            static isSafariHelperCompatible () { return true; }
-        }
-        const scope = {Scratch: {
-            iRobotRootScratchLinkSafariSocket: RootSocket,
-            ScratchLinkSafariSocket: StandardSocket
-        }};
-        expect(getScrubSocketClass(scope)).toBe(RootSocket);
-        expect(scope.Scratch.ScratchLinkSafariSocket).toBe(StandardSocket);
-    });
-
-    test('reopens the native Scrub session with the original socket id', () => {
-        class ScrubSocket {
-            constructor (type) {
-                this.type = type;
-                this.messages = [];
-            }
-            _postMessage (message) { this.messages.push(message); }
-            open () {
-                this._postMessage({method: 'open', socketId: 7, type: this.type});
-            }
-        }
-        const socket = createScrubSocket(ScrubSocket, 'BLE');
-        socket.open();
-        expect(socket.reopenScrubSession()).toBe(true);
-        expect(socket.messages).toEqual([
-            {method: 'open', socketId: 7, type: 'BLE'},
-            {method: 'open', socketId: 7, type: 'BLE'}
-        ]);
-    });
-
     test('retries discovery on the same Scrub socket while Bluetooth permission is pending', async () => {
         jest.useFakeTimers();
         const originalWindow = global.window;
@@ -207,67 +170,6 @@ describe('iRobot Root extension', () => {
             expect(ble._openRequests[1]).toBeUndefined();
 
             ble.disconnect();
-        } finally {
-            global.window = originalWindow;
-            global.CloseEvent = originalCloseEvent;
-            jest.useRealTimers();
-        }
-    });
-
-    test('reopens Scrub before retrying discovery when its BLE session is not ready', () => {
-        jest.useFakeTimers();
-        const originalWindow = global.window;
-        const originalCloseEvent = global.CloseEvent;
-        global.window = global;
-        global.CloseEvent = class CloseEvent {};
-        class FakeSocket {
-            static instances = [];
-            static isSafariHelperCompatible () { return true; }
-            constructor (type) {
-                this.type = type;
-                this.openMessages = [];
-                this.messages = [];
-                FakeSocket.instances.push(this);
-            }
-            setOnOpen (callback) { this.onOpen = callback; }
-            setOnClose (callback) { this.onClose = callback; }
-            setOnError (callback) { this.onError = callback; }
-            setHandleMessage (callback) { this.onMessage = callback; }
-            _postMessage (message) { this.openMessages.push(message); }
-            open () {
-                this.opened = true;
-                this._postMessage({method: 'open', socketId: 11, type: this.type});
-                window.setTimeout(this.onOpen, 100);
-            }
-            close () { this.opened = false; this.onClose(new CloseEvent('close')); }
-            isOpen () { return this.opened; }
-            sendMessage (message) { this.messages.push(message); }
-        }
-        const RuntimeClass = {
-            PERIPHERAL_CONNECTED: 'connected',
-            PERIPHERAL_CONNECTION_LOST_ERROR: 'lost',
-            PERIPHERAL_DISCONNECTED: 'disconnected',
-            PERIPHERAL_LIST_UPDATE: 'list',
-            PERIPHERAL_REQUEST_ERROR: 'requestError',
-            PERIPHERAL_SCAN_TIMEOUT: 'scanTimeout',
-            USER_PICKED_PERIPHERAL: 'picked'
-        };
-        try {
-            new RootScratchLinkBLE(
-                {constructor: RuntimeClass, emit: jest.fn()},
-                'irobotRoot', ROOT_DISCOVERY_OPTIONS, jest.fn(), jest.fn(), FakeSocket
-            );
-            const socket = FakeSocket.instances[0];
-            jest.advanceTimersByTime(100);
-            expect(socket.messages).toHaveLength(1);
-
-            jest.advanceTimersByTime(SCRUB_DISCOVERY_ACK_TIMEOUT_MS);
-            expect(socket.openMessages).toHaveLength(2);
-            expect(socket.openMessages[1]).toEqual({method: 'open', socketId: 11, type: 'BLE'});
-            expect(socket.messages).toHaveLength(1);
-
-            jest.advanceTimersByTime(SCRUB_SESSION_REOPEN_DELAY_MS);
-            expect(socket.messages).toHaveLength(2);
         } finally {
             global.window = originalWindow;
             global.CloseEvent = originalCloseEvent;
