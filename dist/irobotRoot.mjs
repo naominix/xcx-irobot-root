@@ -997,6 +997,57 @@ function _defineProperty$1(e, r, t) {
   }) : e[r] = t, e;
 }
 
+function _assertThisInitialized$1(e) {
+  if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  return e;
+}
+
+function _possibleConstructorReturn$1(t, e) {
+  if (e && ("object" == _typeof$1(e) || "function" == typeof e)) return e;
+  if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined");
+  return _assertThisInitialized$1(t);
+}
+
+function _getPrototypeOf$1(t) {
+  return _getPrototypeOf$1 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) {
+    return t.__proto__ || Object.getPrototypeOf(t);
+  }, _getPrototypeOf$1(t);
+}
+
+function _superPropBase$1(t, o) {
+  for (; !{}.hasOwnProperty.call(t, o) && null !== (t = _getPrototypeOf$1(t)););
+  return t;
+}
+
+function _get$1() {
+  return _get$1 = "undefined" != typeof Reflect && Reflect.get ? Reflect.get.bind() : function (e, t, r) {
+    var p = _superPropBase$1(e, t);
+    if (p) {
+      var n = Object.getOwnPropertyDescriptor(p, t);
+      return n.get ? n.get.call(arguments.length < 3 ? e : r) : n.value;
+    }
+  }, _get$1.apply(null, arguments);
+}
+
+function _setPrototypeOf$1(t, e) {
+  return _setPrototypeOf$1 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) {
+    return t.__proto__ = e, t;
+  }, _setPrototypeOf$1(t, e);
+}
+
+function _inherits$1(t, e) {
+  if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function");
+  t.prototype = Object.create(e && e.prototype, {
+    constructor: {
+      value: t,
+      writable: true,
+      configurable: true
+    }
+  }), Object.defineProperty(t, "prototype", {
+    writable: false
+  }), e && _setPrototypeOf$1(t, e);
+}
+
 function _assertThisInitialized(e) {
   if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
   return e;
@@ -3230,9 +3281,9 @@ function requireBaseLogger() {
 
 function ownKeys$1(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread$1(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$1(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$1(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _callSuper$1(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _isNativeReflectConstruct$1() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1 = function _isNativeReflectConstruct() { return !!t; })(); }
-function _superPropGet(t, o, e, r) { var p = _get(_getPrototypeOf(t.prototype ), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
+function _callSuper$2(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$2() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function _isNativeReflectConstruct$2() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$2 = function _isNativeReflectConstruct() { return !!t; })(); }
+function _superPropGet$1(t, o, e, r) { var p = _get(_getPrototypeOf(t.prototype ), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
 var hasRequiredCjs;
 function requireCjs() {
   if (hasRequiredCjs) return cjs;
@@ -3274,7 +3325,7 @@ function requireCjs() {
           var _settings$stylePretty;
           normalizedSettings.stylePrettyLogs = (_settings$stylePretty = settings === null || settings === void 0 ? void 0 : settings.stylePrettyLogs) !== null && _settings$stylePretty !== void 0 ? _settings$stylePretty : true;
         }
-        return _callSuper$1(this, Logger, [normalizedSettings, logObj, Number.NaN]);
+        return _callSuper$2(this, Logger, [normalizedSettings, logObj, Number.NaN]);
       }
       _inherits(Logger, _BaseLogger_js_1$Base);
       return _createClass(Logger, [{
@@ -3283,7 +3334,7 @@ function requireCjs() {
           for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
             args[_key - 2] = arguments[_key];
           }
-          return _superPropGet(Logger, "log", this, 3)([logLevelId, logLevelName].concat(args));
+          return _superPropGet$1(Logger, "log", this, 3)([logLevelId, logLevelName].concat(args));
         }
       }, {
         key: "silly",
@@ -3291,7 +3342,7 @@ function requireCjs() {
           for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
             args[_key2] = arguments[_key2];
           }
-          return _superPropGet(Logger, "log", this, 3)([0, "SILLY"].concat(args));
+          return _superPropGet$1(Logger, "log", this, 3)([0, "SILLY"].concat(args));
         }
       }, {
         key: "trace",
@@ -3299,7 +3350,7 @@ function requireCjs() {
           for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
             args[_key3] = arguments[_key3];
           }
-          return _superPropGet(Logger, "log", this, 3)([1, "TRACE"].concat(args));
+          return _superPropGet$1(Logger, "log", this, 3)([1, "TRACE"].concat(args));
         }
       }, {
         key: "debug",
@@ -3307,7 +3358,7 @@ function requireCjs() {
           for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
             args[_key4] = arguments[_key4];
           }
-          return _superPropGet(Logger, "log", this, 3)([2, "DEBUG"].concat(args));
+          return _superPropGet$1(Logger, "log", this, 3)([2, "DEBUG"].concat(args));
         }
       }, {
         key: "info",
@@ -3315,7 +3366,7 @@ function requireCjs() {
           for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
             args[_key5] = arguments[_key5];
           }
-          return _superPropGet(Logger, "log", this, 3)([3, "INFO"].concat(args));
+          return _superPropGet$1(Logger, "log", this, 3)([3, "INFO"].concat(args));
         }
       }, {
         key: "warn",
@@ -3323,7 +3374,7 @@ function requireCjs() {
           for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
             args[_key6] = arguments[_key6];
           }
-          return _superPropGet(Logger, "log", this, 3)([4, "WARN"].concat(args));
+          return _superPropGet$1(Logger, "log", this, 3)([4, "WARN"].concat(args));
         }
       }, {
         key: "error",
@@ -3331,7 +3382,7 @@ function requireCjs() {
           for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
             args[_key7] = arguments[_key7];
           }
-          return _superPropGet(Logger, "log", this, 3)([5, "ERROR"].concat(args));
+          return _superPropGet$1(Logger, "log", this, 3)([5, "ERROR"].concat(args));
         }
       }, {
         key: "fatal",
@@ -3339,12 +3390,12 @@ function requireCjs() {
           for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
             args[_key8] = arguments[_key8];
           }
-          return _superPropGet(Logger, "log", this, 3)([6, "FATAL"].concat(args));
+          return _superPropGet$1(Logger, "log", this, 3)([6, "FATAL"].concat(args));
         }
       }, {
         key: "getSubLogger",
         value: function getSubLogger(settings, logObj) {
-          return _superPropGet(Logger, "getSubLogger", this, 3)([settings, logObj]);
+          return _superPropGet$1(Logger, "getSubLogger", this, 3)([settings, logObj]);
         }
       }]);
     }(BaseLogger_js_1.BaseLogger);
@@ -3620,8 +3671,8 @@ function requireBleWeb() {
   return bleWeb;
 }
 
-function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+function _callSuper$1(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$1() ? Reflect.construct(o, [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
+function _isNativeReflectConstruct$1() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$1 = function _isNativeReflectConstruct() { return !!t; })(); }
 var ble;
 var hasRequiredBle;
 function requireBle() {
@@ -3643,7 +3694,7 @@ function requireBle() {
       var _this;
       var resetCallback = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
       _classCallCheck(this, BLE);
-      _this = _callSuper(this, BLE);
+      _this = _callSuper$1(this, BLE);
       _this._socket = runtime.getScratchLinkSocket('BLE');
       _this._socket.setOnOpen(_this.requestPeripheral.bind(_this));
       _this._socket.setOnClose(_this.handleDisconnectError.bind(_this));
@@ -3913,6 +3964,9 @@ var WebBLE = /*@__PURE__*/getDefaultExportFromCjs(bleWebExports);
 
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), true).forEach(function (r) { _defineProperty$1(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
+function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
+function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -3926,6 +3980,8 @@ var ROOT_DISCOVERY_OPTIONS = {
   }],
   optionalServices: [UART_SERVICE]
 };
+var SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
+var SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
 var clamp = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value)));
 };
@@ -3985,6 +4041,89 @@ var supportsWebBluetooth = function supportsWebBluetooth() {
 var selectBLEAdapter = function selectBLEAdapter(navigatorObject) {
   return supportsWebBluetooth(navigatorObject) ? WebBLE : ScratchLinkBLE;
 };
+var isScratchLinkSocketClass = function isScratchLinkSocketClass(candidate) {
+  return Boolean(candidate && typeof candidate === 'function' && typeof candidate.isSafariHelperCompatible === 'function' && candidate.isSafariHelperCompatible());
+};
+var getScrubSocketClass = function getScrubSocketClass() {
+  var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : typeof self === 'undefined' ? null : self;
+  var publishedSocket = scope && scope.Scratch && scope.Scratch.ScratchLinkSafariSocket;
+  if (isScratchLinkSocketClass(publishedSocket)) return publishedSocket;
+
+  // Scrub always injects ScratchLinkKit, but intentionally publishes its Socket
+  // only after the standard Scratch marker is present. Xcratch creates that
+  // marker after Scrub's document-end script can run, so use the already-loaded
+  // class directly without changing Scrub's publication policy.
+  try {
+    // eslint-disable-next-line no-undef
+    var injectedSocket = typeof ScratchLinkKit === 'undefined' ? null : ScratchLinkKit.Socket;
+    return isScratchLinkSocketClass(injectedSocket) ? injectedSocket : null;
+  } catch (error) {
+    return null;
+  }
+};
+var RootScratchLinkBLE = /*#__PURE__*/function (_ScratchLinkBLE) {
+  function RootScratchLinkBLE(runtime, extensionId, peripheralOptions, connectCallback, resetCallback, SocketClass) {
+    var _this;
+    _classCallCheck$1(this, RootScratchLinkBLE);
+    var isolatedRuntime = {
+      constructor: runtime.constructor,
+      emit: runtime.emit.bind(runtime),
+      getScratchLinkSocket: function getScratchLinkSocket(type) {
+        return new SocketClass(type);
+      }
+    };
+    _this = _callSuper(this, RootScratchLinkBLE, [isolatedRuntime, extensionId, peripheralOptions, connectCallback, resetCallback]);
+    _this._scrubDiscoveryAckTimer = null;
+    _this._scrubDiscoveryAttempt = 0;
+    return _this;
+  }
+  _inherits$1(RootScratchLinkBLE, _ScratchLinkBLE);
+  return _createClass$1(RootScratchLinkBLE, [{
+    key: "requestPeripheral",
+    value: function requestPeripheral() {
+      this._availablePeripherals = {};
+      if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+      this._scrubDiscoveryAttempt = 0;
+      this._requestPeripheralWhenScrubIsReady();
+    }
+  }, {
+    key: "_requestPeripheralWhenScrubIsReady",
+    value: function _requestPeripheralWhenScrubIsReady() {
+      var _this2 = this;
+      var requestId = this._requestID;
+      var request = this.sendRemoteRequest('discover', this._peripheralOptions);
+      var attempt = this._scrubDiscoveryAttempt++;
+      this._scrubDiscoveryAckTimer = window.setTimeout(function () {
+        if (!_this2._openRequests[requestId]) return;
+        delete _this2._openRequests[requestId];
+        if (attempt + 1 < SCRUB_DISCOVERY_ACK_ATTEMPTS) {
+          _this2._requestPeripheralWhenScrubIsReady();
+        } else {
+          _this2._handleRequestError(new Error('Scrub BLE session did not become ready'));
+          _this2._handleDiscoverTimeout();
+        }
+      }, SCRUB_DISCOVERY_ACK_TIMEOUT_MS);
+      request.then(function () {
+        window.clearTimeout(_this2._scrubDiscoveryAckTimer);
+        _this2._scrubDiscoveryAckTimer = null;
+        _this2._discoverTimeoutID = window.setTimeout(_this2._handleDiscoverTimeout.bind(_this2), 15000);
+      }).catch(function (error) {
+        window.clearTimeout(_this2._scrubDiscoveryAckTimer);
+        _this2._scrubDiscoveryAckTimer = null;
+        _this2._handleRequestError(error);
+      });
+    }
+  }, {
+    key: "disconnect",
+    value: function disconnect() {
+      if (this._scrubDiscoveryAckTimer) {
+        window.clearTimeout(this._scrubDiscoveryAckTimer);
+        this._scrubDiscoveryAckTimer = null;
+      }
+      _superPropGet(RootScratchLinkBLE, "disconnect", this)([]);
+    }
+  }]);
+}(ScratchLinkBLE);
 var RootProtocol = /*#__PURE__*/function () {
   function RootProtocol() {
     _classCallCheck$1(this, RootProtocol);
@@ -4112,7 +4251,9 @@ var RootTransport = /*#__PURE__*/function () {
       this.lastError = '';
       var BLEAdapter = selectBLEAdapter();
       try {
-        this.ble = new BLEAdapter(this.runtime, this.extensionId, _objectSpread({}, ROOT_DISCOVERY_OPTIONS), this.onConnect, this.reset);
+        var options = _objectSpread({}, ROOT_DISCOVERY_OPTIONS);
+        var ScrubSocket = BLEAdapter === ScratchLinkBLE ? getScrubSocketClass() : null;
+        this.ble = ScrubSocket ? new RootScratchLinkBLE(this.runtime, this.extensionId, options, this.onConnect, this.reset, ScrubSocket) : new BLEAdapter(this.runtime, this.extensionId, options, this.onConnect, this.reset);
       } catch (error) {
         this.setError(error);
         throw error;
@@ -4126,18 +4267,18 @@ var RootTransport = /*#__PURE__*/function () {
   }, {
     key: "onConnect",
     value: function onConnect() {
-      var _this = this;
+      var _this3 = this;
       this.ble.startNotifications(UART_SERVICE, TX, function (message) {
-        _this.onData(base64ToBytes(message));
+        _this3.onData(base64ToBytes(message));
       });
     }
   }, {
     key: "write",
     value: function write(bytes) {
-      var _this2 = this;
+      var _this4 = this;
       if (!this.isConnected()) return Promise.reject(new Error('Rootに接続してください'));
       return this.ble.write(UART_SERVICE, RX, bytesToBase64(bytes), 'base64', false).catch(function (error) {
-        _this2.setError(error);
+        _this4.setError(error);
         throw error;
       });
     }
@@ -4160,23 +4301,23 @@ var RootTransport = /*#__PURE__*/function () {
   }, {
     key: "_registerRuntimeDiagnostics",
     value: function _registerRuntimeDiagnostics() {
-      var _this3 = this;
+      var _this5 = this;
       if (!this.runtime.on) return;
       var RuntimeClass = this.runtime.constructor;
       this.runtime.on(RuntimeClass.PERIPHERAL_CONNECTED, function () {
-        _this3.lastError = '';
+        _this5.lastError = '';
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_REQUEST_ERROR, function (details) {
-        if (!details || !details.extensionId || details.extensionId === _this3.extensionId) {
-          _this3.lastError = "".concat(_this3.mode, ": BLE\u63A5\u7D9A\u8981\u6C42\u306B\u5931\u6557\u3057\u307E\u3057\u305F");
+        if (!details || !details.extensionId || details.extensionId === _this5.extensionId) {
+          _this5.lastError = "".concat(_this5.mode, ": BLE\u63A5\u7D9A\u8981\u6C42\u306B\u5931\u6557\u3057\u307E\u3057\u305F");
         }
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_SCAN_TIMEOUT, function () {
-        _this3.lastError = "".concat(_this3.mode, ": Root\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3067\u3057\u305F");
+        _this5.lastError = "".concat(_this5.mode, ": Root\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3067\u3057\u305F");
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_CONNECTION_LOST_ERROR, function (details) {
-        if (!details || !details.extensionId || details.extensionId === _this3.extensionId) {
-          _this3.lastError = "".concat(_this3.mode, ": Root\u3068\u306E\u63A5\u7D9A\u304C\u5931\u308F\u308C\u307E\u3057\u305F");
+        if (!details || !details.extensionId || details.extensionId === _this5.extensionId) {
+          _this5.lastError = "".concat(_this5.mode, ": Root\u3068\u306E\u63A5\u7D9A\u304C\u5931\u308F\u308C\u307E\u3057\u305F");
         }
       });
     }

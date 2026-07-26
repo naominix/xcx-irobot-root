@@ -9,6 +9,8 @@ const ROOT_DISCOVERY_OPTIONS = {
     filters: [{services: [ROOT_SERVICE]}],
     optionalServices: [UART_SERVICE]
 };
+const SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
+const SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value)));
 
@@ -43,6 +45,83 @@ const supportsWebBluetooth = (navigatorObject = typeof navigator === 'undefined'
         typeof navigatorObject.bluetooth.requestDevice === 'function');
 
 const selectBLEAdapter = navigatorObject => supportsWebBluetooth(navigatorObject) ? WebBLE : ScratchLinkBLE;
+
+const isScratchLinkSocketClass = candidate => Boolean(candidate &&
+    typeof candidate === 'function' &&
+    typeof candidate.isSafariHelperCompatible === 'function' &&
+    candidate.isSafariHelperCompatible());
+
+const getScrubSocketClass = (scope = typeof self === 'undefined' ? null : self) => {
+    const publishedSocket = scope && scope.Scratch && scope.Scratch.ScratchLinkSafariSocket;
+    if (isScratchLinkSocketClass(publishedSocket)) return publishedSocket;
+
+    // Scrub always injects ScratchLinkKit, but intentionally publishes its Socket
+    // only after the standard Scratch marker is present. Xcratch creates that
+    // marker after Scrub's document-end script can run, so use the already-loaded
+    // class directly without changing Scrub's publication policy.
+    try {
+        // eslint-disable-next-line no-undef
+        const injectedSocket = typeof ScratchLinkKit === 'undefined' ? null : ScratchLinkKit.Socket;
+        return isScratchLinkSocketClass(injectedSocket) ? injectedSocket : null;
+    } catch (error) {
+        return null;
+    }
+};
+
+class RootScratchLinkBLE extends ScratchLinkBLE {
+    constructor (runtime, extensionId, peripheralOptions, connectCallback, resetCallback, SocketClass) {
+        const isolatedRuntime = {
+            constructor: runtime.constructor,
+            emit: runtime.emit.bind(runtime),
+            getScratchLinkSocket: type => new SocketClass(type)
+        };
+        super(isolatedRuntime, extensionId, peripheralOptions, connectCallback, resetCallback);
+        this._scrubDiscoveryAckTimer = null;
+        this._scrubDiscoveryAttempt = 0;
+    }
+
+    requestPeripheral () {
+        this._availablePeripherals = {};
+        if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+        this._scrubDiscoveryAttempt = 0;
+        this._requestPeripheralWhenScrubIsReady();
+    }
+
+    _requestPeripheralWhenScrubIsReady () {
+        const requestId = this._requestID;
+        const request = this.sendRemoteRequest('discover', this._peripheralOptions);
+        const attempt = this._scrubDiscoveryAttempt++;
+
+        this._scrubDiscoveryAckTimer = window.setTimeout(() => {
+            if (!this._openRequests[requestId]) return;
+            delete this._openRequests[requestId];
+            if (attempt + 1 < SCRUB_DISCOVERY_ACK_ATTEMPTS) {
+                this._requestPeripheralWhenScrubIsReady();
+            } else {
+                this._handleRequestError(new Error('Scrub BLE session did not become ready'));
+                this._handleDiscoverTimeout();
+            }
+        }, SCRUB_DISCOVERY_ACK_TIMEOUT_MS);
+
+        request.then(() => {
+            window.clearTimeout(this._scrubDiscoveryAckTimer);
+            this._scrubDiscoveryAckTimer = null;
+            this._discoverTimeoutID = window.setTimeout(this._handleDiscoverTimeout.bind(this), 15000);
+        }).catch(error => {
+            window.clearTimeout(this._scrubDiscoveryAckTimer);
+            this._scrubDiscoveryAckTimer = null;
+            this._handleRequestError(error);
+        });
+    }
+
+    disconnect () {
+        if (this._scrubDiscoveryAckTimer) {
+            window.clearTimeout(this._scrubDiscoveryAckTimer);
+            this._scrubDiscoveryAckTimer = null;
+        }
+        super.disconnect();
+    }
+}
 
 class RootProtocol {
     constructor () { this.packetId = 0; }
@@ -128,13 +207,19 @@ class RootTransport {
         this.lastError = '';
         const BLEAdapter = selectBLEAdapter();
         try {
-            this.ble = new BLEAdapter(this.runtime, this.extensionId, {
+            const options = {
                 // Standard Scratch Link 2.x does not support Web Bluetooth's
                 // manufacturerData filter shape. Root advertises this service,
                 // so one service filter works in Web Bluetooth, Scratch Link,
                 // and the Scrub bridge.
                 ...ROOT_DISCOVERY_OPTIONS
-            }, this.onConnect, this.reset);
+            };
+            const ScrubSocket = BLEAdapter === ScratchLinkBLE ? getScrubSocketClass() : null;
+            this.ble = ScrubSocket ?
+                new RootScratchLinkBLE(
+                    this.runtime, this.extensionId, options, this.onConnect, this.reset, ScrubSocket
+                ) :
+                new BLEAdapter(this.runtime, this.extensionId, options, this.onConnect, this.reset);
         } catch (error) {
             this.setError(error);
             throw error;
@@ -195,10 +280,14 @@ class RootTransport {
 export {
     ROOT_DISCOVERY_OPTIONS,
     RootProtocol,
+    RootScratchLinkBLE,
     RootTransport,
+    SCRUB_DISCOVERY_ACK_ATTEMPTS,
+    SCRUB_DISCOVERY_ACK_TIMEOUT_MS,
     base64ToBytes,
     bytesToBase64,
     crc8,
+    getScrubSocketClass,
     selectBLEAdapter,
     supportsWebBluetooth
 };

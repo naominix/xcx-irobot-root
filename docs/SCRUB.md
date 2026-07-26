@@ -1,49 +1,49 @@
 # iPadOS / Scrub導入手順
 
-iPadOSのSafariはWeb Bluetoothを提供しないため、この拡張機能をiPadで使うにはCoreBluetoothブリッジを追加したScrubの開発ビルドが必要です。
+iPadOSのSafariはWeb Bluetoothを提供しないため、Rootとの通信にはScrubのCoreBluetoothブリッジを使用します。
 
 > [!IMPORTANT]
-> **2026年7月26日現在、App Store版ScrubはRoot BLE接続に未対応です。** App StoreからインストールしたScrubだけでは、この拡張機能からRootを検索・接続できません。以下のパッチを適用し、XcodeからiPadへインストールした開発ビルドを使用してください。
+> **2026年7月26日現在、App Store版ScrubはこのRoot BLE拡張の対応対象外です。** 以下では、変更内容1（scratch-linkの`BLESession.swift`修正）だけを適用した開発ビルドを使用します。Scrub / ScratchLinkKit側の変更内容2（ブリッジの公開条件とCoreBluetoothの早期初期化）は元のコードのままです。
 
 ## 必要なもの
 
 - macOSとXcode
 - iPad実機
 - [bricklife/Scrub](https://github.com/bricklife/Scrub)のソース
-- このリポジトリの`scrub/patches`にある3つのパッチ
+- このリポジトリの`scrub/patches/scrub-ble-session.patch`
 
 ## パッチを適用する
 
-Scrubリポジトリとこのリポジトリを任意の場所へcloneします。パスの解釈違いを避けるため、最初にScrubのディレクトリへ移動してください。
+Scrubリポジトリとこのリポジトリを同じ親ディレクトリへcloneし、Scrubのサブモジュールを取得します。
 
 ```sh
-git clone https://github.com/bricklife/Scrub.git
+git clone --recurse-submodules https://github.com/bricklife/Scrub.git
 git clone https://github.com/naominix/xcx-irobot-root.git
 cd Scrub
 ```
 
-適用できることを確認します。
+適用できることを確認してから、変更内容1だけを適用します。
 
 ```sh
-git apply --check ../xcx-irobot-root/scrub/patches/scrub-root-support.patch
-git apply --check ../xcx-irobot-root/scrub/patches/scrub-bluetooth-permission.patch
-git apply --check ../xcx-irobot-root/scrub/patches/scrub-root-discovery.patch
+git apply --check ../xcx-irobot-root/scrub/patches/scrub-ble-session.patch
+git apply ../xcx-irobot-root/scrub/patches/scrub-ble-session.patch
 ```
 
-エラーがなければ同じ順序で適用します。
+変更対象を確認します。`inject.js`、`ScratchLink.swift`、`URL+Extension.swift`は表示されないことが重要です。
 
 ```sh
-git apply ../xcx-irobot-root/scrub/patches/scrub-root-support.patch
-git apply ../xcx-irobot-root/scrub/patches/scrub-bluetooth-permission.patch
-git apply ../xcx-irobot-root/scrub/patches/scrub-root-discovery.patch
+git status --short
+git -C ScratchLinkKit/Sources/ScratchLinkKit/scratch-link diff --check
+git -C ScratchLinkKit/Sources/ScratchLinkKit/scratch-link diff -- macOS/Sources/scratch-link/BLESession.swift
 ```
 
-パッチが適用済みか確認するには次を実行します。
+パッチが変更するのは`BLESession.swift`の次の3点だけです。
 
-```sh
-git diff --check
-git diff --stat
-```
+- 接続失敗をWeb側へ返し、接続待ちのままになるのを防ぐ
+- `manufacturerData.dataPrefix`省略を空プレフィックスとして扱う
+- 2バイト未満のmanufacturer dataを安全に拒否する
+
+Root拡張自身はサービスUUIDで探索するため、後半2点をRoot固有の探索条件としては使用しません。これらはscratch-linkの仕様適合・安全性修正です。
 
 ## Xcodeでビルドする
 
@@ -51,45 +51,40 @@ git diff --stat
 2. Signing & Capabilitiesで自分のTeamと一意のBundle Identifierを設定します。
 3. iPadを接続し、実行先に選択します。
 4. Debug構成でビルドしてiPadへインストールします。
-5. 初回起動時のBluetooth利用許可を承認します。
+5. 初回接続時にBluetooth利用許可が表示されたら承認します。
 
 ## 接続を確認する
 
 1. Scrubから`https://xcratch.github.io/editor/`を開きます。
-2. この拡張機能を読み込みます。
+2. 最新の`irobotRoot.mjs`を読み込みます。
 3. Rootの電源を入れ、「Rootに接続する」を押します。
-4. 複数台ある場合は名前を確認して選択します。
-5. LED、音、マーカーなど、移動を伴わない命令から確認します。
+4. 初回のBluetooth許可を承認し、そのままデバイス一覧が更新されるまで待ちます。
+5. 複数台ある場合は名前を確認して選択します。
+6. LED、音、マーカーなど、移動を伴わない命令から確認します。
 
-## パッチの役割
-
-| パッチ | 内容 |
-|---|---|
-| `scrub-root-support.patch` | XcratchでもScratch Link互換ソケットを公開 |
-| `scrub-bluetooth-permission.patch` | Web拡張が接続する前にCoreBluetoothの許可状態を初期化 |
-| `scrub-root-discovery.patch` | Rootを探索できるようBLE受信強度の許容範囲を調整 |
+Root拡張は、Scrubがもともと注入している`ScratchLinkKit.Socket`を拡張内部でのみ利用します。許可処理中に最初の探索要求へ応答がない場合は、ソケットを作り直さず同じ接続上で探索を再試行します。このため、Scrubの公開条件やBluetooth初期化時期を変更しません。
 
 ## よくある問題
 
 ### `patch does not apply`
 
-Scrub側の対象ファイルが、パッチ作成時と異なる可能性があります。`git status`で未コミット変更がないことを確認し、対象行を比較してください。既に同じ変更が入っている場合、そのパッチは重ねて適用しません。
+Scrub側の対象ファイルがパッチ作成時と異なるか、既に同じ修正が適用されています。`git status`とサブモジュールのコミットを確認してください。変更内容2の旧パッチは重ねて適用しません。
 
 ### パッチファイルが見つからない
 
-`git -C work/Scrub apply relative/path.patch`の相対パスは、現在のシェルではなくScrub側から解釈される場合があります。この手順のように`cd Scrub`してから`../xcx-irobot-root/...`を指定するか、絶対パスを使用してください。
+`git -C work/Scrub apply relative/path.patch`では、相対パスがScrub側から解釈されます。この手順のように`cd Scrub`してから指定するか、パッチの絶対パスを使用してください。
 
 ### Rootが一覧に出ない
 
 - Rootが別の端末やアプリへ接続されていないか確認します。
 - RootとiPadを近づけます。
 - ScrubのBluetooth許可を確認します。
-- Xcodeコンソールで`[Scrub BLE] Scan started`とRootの広告名が出るか確認します。
+- 初回許可後は最大30秒待つか、デバイス一覧を更新します。
 
 ### 接続できるが命令が動かない
 
-最新版の`irobotRoot.mjs`を読み込んでいるか確認し、URLへバージョン用クエリを付けてキャッシュを更新します。
+最新版の`irobotRoot.mjs`を読み込んでいるか確認し、URLへ異なるクエリ文字列を付けてキャッシュを更新します。
 
 ```text
-https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs?v=1.0.0
+https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs?v=scrub-original-bridge
 ```

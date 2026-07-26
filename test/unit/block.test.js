@@ -2,10 +2,13 @@ import {blockClass} from '../../src/vm/extensions/block/index.js';
 import {
     ROOT_DISCOVERY_OPTIONS,
     RootProtocol,
+    RootScratchLinkBLE,
     RootTransport,
+    SCRUB_DISCOVERY_ACK_TIMEOUT_MS,
     base64ToBytes,
     bytesToBase64,
     crc8,
+    getScrubSocketClass,
     selectBLEAdapter,
     supportsWebBluetooth
 } from '../../src/vm/extensions/block/root-ble.js';
@@ -81,6 +84,97 @@ describe('iRobot Root extension', () => {
         expect(selectBLEAdapter(webNavigator).name).toBe('WebBLE');
         expect(supportsWebBluetooth({})).toBe(false);
         expect(selectBLEAdapter({}).name).toBe('BLE');
+    });
+
+    test('uses Scrub internal socket without requiring Scrub to publish it for Xcratch', () => {
+        class FakeSocket {
+            static isSafariHelperCompatible () { return true; }
+        }
+        const originalScratchLinkKit = global.ScratchLinkKit;
+        try {
+            global.ScratchLinkKit = {Socket: FakeSocket};
+            expect(getScrubSocketClass({})).toBe(FakeSocket);
+        } finally {
+            global.ScratchLinkKit = originalScratchLinkKit;
+        }
+    });
+
+    test('prefers an officially published Scrub socket and leaves it unchanged', () => {
+        class PublishedSocket {
+            static isSafariHelperCompatible () { return true; }
+        }
+        const scope = {Scratch: {ScratchLinkSafariSocket: PublishedSocket}};
+        expect(getScrubSocketClass(scope)).toBe(PublishedSocket);
+        expect(scope.Scratch.ScratchLinkSafariSocket).toBe(PublishedSocket);
+    });
+
+    test('retries discovery on the same Scrub socket while Bluetooth permission is pending', async () => {
+        jest.useFakeTimers();
+        const originalWindow = global.window;
+        const originalCloseEvent = global.CloseEvent;
+        global.window = global;
+        global.CloseEvent = class CloseEvent {};
+        class FakeSocket {
+            static instances = [];
+            static isSafariHelperCompatible () { return true; }
+            constructor () {
+                this.opened = false;
+                this.messages = [];
+                FakeSocket.instances.push(this);
+            }
+            setOnOpen (callback) { this.onOpen = callback; }
+            setOnClose (callback) { this.onClose = callback; }
+            setOnError (callback) { this.onError = callback; }
+            setHandleMessage (callback) { this.onMessage = callback; }
+            open () {
+                this.opened = true;
+                window.setTimeout(this.onOpen, 100);
+            }
+            close () {
+                this.opened = false;
+                this.onClose(new CloseEvent('close'));
+            }
+            isOpen () { return this.opened; }
+            sendMessage (message) { this.messages.push(message); }
+            respond (message) { this.onMessage(message); }
+        }
+        const RuntimeClass = {
+            PERIPHERAL_CONNECTED: 'connected',
+            PERIPHERAL_CONNECTION_LOST_ERROR: 'lost',
+            PERIPHERAL_DISCONNECTED: 'disconnected',
+            PERIPHERAL_LIST_UPDATE: 'list',
+            PERIPHERAL_REQUEST_ERROR: 'requestError',
+            PERIPHERAL_SCAN_TIMEOUT: 'scanTimeout',
+            USER_PICKED_PERIPHERAL: 'picked'
+        };
+        const isolatedRuntime = {constructor: RuntimeClass, emit: jest.fn()};
+        try {
+            const ble = new RootScratchLinkBLE(
+                isolatedRuntime, 'irobotRoot', ROOT_DISCOVERY_OPTIONS, jest.fn(), jest.fn(), FakeSocket
+            );
+            const socket = FakeSocket.instances[0];
+
+            jest.advanceTimersByTime(100);
+            expect(socket.messages).toHaveLength(1);
+            expect(socket.messages[0].method).toBe('discover');
+
+            jest.advanceTimersByTime(SCRUB_DISCOVERY_ACK_TIMEOUT_MS);
+            expect(socket.messages).toHaveLength(2);
+            expect(socket.isOpen()).toBe(true);
+
+            socket.respond({jsonrpc: '2.0', id: socket.messages[1].id, result: null});
+            await Promise.resolve();
+            jest.advanceTimersByTime(SCRUB_DISCOVERY_ACK_TIMEOUT_MS * 2);
+            expect(socket.messages).toHaveLength(2);
+            expect(ble._openRequests[0]).toBeUndefined();
+            expect(ble._openRequests[1]).toBeUndefined();
+
+            ble.disconnect();
+        } finally {
+            global.window = originalWindow;
+            global.CloseEvent = originalCloseEvent;
+            jest.useRealTimers();
+        }
     });
 
     test('uses discovery options accepted by Web Bluetooth and Scratch Link 2.x', () => {
