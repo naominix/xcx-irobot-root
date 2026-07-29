@@ -71,7 +71,7 @@ Rootは複数の端末へ同時接続できません。接続できない場合�
 
 ### 移動
 
-左右のモーター速度を個別に指定するほか、距離、角度、半径を使った移動ブロックを利用できます。速度や距離は小さい値から試してください。
+左右のモーター速度を個別に指定するほか、距離、角度、半径を使った移動ブロックを利用できます。直進・回転・円弧ブロックは、Rootから同じpacket IDの完了応答を受信してから次のブロックへ進みます。速度や距離は小さい値から試してください。
 
 ### LED・音・描画
 
@@ -84,6 +84,8 @@ RGB値による点灯に加え、点滅と回転アニメーションを指定�
 ## サンプルプロジェクト
 
 [example.sb3](projects/example.sb3)をダウンロードし、拡張機能を読み込んだXcratchで開いてください。
+
+[root-unicorn-drawing.sb3](projects/root-unicorn-drawing.sb3)は、直進・回転・円弧とマーカー操作を順番に実行してユニコーンを描くサンプルです。変換内容は[サンプルの説明](projects/root-unicorn-drawing.md)を参照してください。
 
 ## 開発
 
@@ -109,6 +111,8 @@ npm run build
 - iPadOSでは、対応マーカーによってScrubが公開する標準`Scratch.ScratchLinkSafariSocket`を優先
 - 標準Socketが直接参照可能な互換環境では、Root拡張内だけのフォールバックも利用
 - Bluetooth許可で最初の探索要求が失われた場合は、同じソケットで探索を再試行
+- 直進（Command 8）、回転（Command 12）、円弧（Command 27）はpacket IDが一致する完了応答を待機
+- Scrub互換性のためBLE書き込みのJSON-RPC応答自体は待機せず、Rootからの通知だけを待機
 
 実装の基礎資料として、[Xcratch公式ドキュメント](https://xcratch.github.io/docs/ja/)、[Root BLE protocol](https://github.com/PoweredBySAM/sam-root-ble-protocol)、[Scratch Link](https://github.com/scratchfoundation/scratch-link)、[Scrub](https://github.com/bricklife/Scrub)を参照しています。
 
@@ -122,7 +126,7 @@ Root rt0実機で、次を確認済みです。
 - モーター、LED、音、マーカー／消しゴム命令
 - バンパー／タッチHATイベント
 
-自動テストでは、拡張メタデータ、日英切り替え、CRC、モーターパケット、packet ID循環、センサーイベント判定、Scratch VMでのHATスレッド開始を検証します。
+自動テストでは、拡張メタデータ、日英切り替え、CRC、モーターパケット、packet ID循環、移動完了応答とタイムアウト、センサーイベント判定、Scratch VMでのHATスレッド開始を検証します。
 
 ## ライセンス
 

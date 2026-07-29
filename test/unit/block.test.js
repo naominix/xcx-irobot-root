@@ -1,4 +1,4 @@
-import {blockClass} from '../../src/vm/extensions/block/index.js';
+import {COMMAND_FINISH_TIMEOUT_MS, blockClass} from '../../src/vm/extensions/block/index.js';
 import {
     ROOT_DISCOVERY_OPTIONS,
     RootProtocol,
@@ -196,6 +196,65 @@ describe('iRobot Root extension', () => {
         expect(block.transport.write).toHaveBeenCalledTimes(1);
         resolveWrite();
         await Promise.resolve();
+    });
+
+    test.each([
+        ['drive', {MM: 100}, 8],
+        ['turn', {DEGREES: 90}, 12],
+        ['arc', {RADIUS: 100, DEGREES: 90}, 27]
+    ])('%s waits for Root finished response with the matching packet ID', async (method, args, command) => {
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+        const completion = block[method](args);
+        const packet = block.transport.write.mock.calls[0][0];
+        let completed = false;
+        completion.then(() => {
+            completed = true;
+        });
+
+        await Promise.resolve();
+        expect(completed).toBe(false);
+        expect(packet[0]).toBe(1);
+        expect(packet[1]).toBe(command);
+
+        const wrongId = new RootProtocol().packet(1, command);
+        wrongId[2] = (packet[2] + 1) & 0xFF;
+        wrongId[19] = crc8(wrongId.slice(0, 19));
+        block._receive(wrongId);
+        await Promise.resolve();
+        expect(completed).toBe(false);
+
+        const finished = new RootProtocol().packet(1, command);
+        finished[2] = packet[2];
+        finished[19] = crc8(finished.slice(0, 19));
+        block._receive(finished);
+        await expect(completion).resolves.toBeUndefined();
+        expect(completed).toBe(true);
+    });
+
+    test('reports a timeout when Root never sends a finished response', async () => {
+        jest.useFakeTimers();
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+        const completion = block.drive({MM: 100});
+        const rejected = expect(completion).rejects.toThrow('Root command timed out');
+
+        jest.advanceTimersByTime(COMMAND_FINISH_TIMEOUT_MS);
+        await rejected;
+        expect(block.lastConnectionError()).toContain('command 8');
+        expect(block.pendingCommands.size).toBe(0);
+        jest.useRealTimers();
+    });
+
+    test('cancels a pending movement when the connection resets', async () => {
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+        const completion = block.turn({DEGREES: 90});
+        const rejected = expect(completion).rejects.toThrow('Root connection was reset');
+
+        block.transport.reset();
+        await rejected;
+        expect(block.pendingCommands.size).toBe(0);
     });
 
     test('writes Root UART packets without requesting a BLE response', async () => {

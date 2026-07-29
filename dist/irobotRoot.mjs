@@ -68,25 +68,25 @@ var entry = {
   translationMap: translations$1
 };
 
-function _arrayLikeToArray$4(r, a) {
+function _arrayLikeToArray$5(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles$1(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$4(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$5(r);
 }
 
 function _iterableToArray$1(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$4(r, a) {
+function _unsupportedIterableToArray$5(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$4(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$5(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0;
   }
 }
 
@@ -95,7 +95,7 @@ function _nonIterableSpread$1() {
 }
 
 function _toConsumableArray$1(r) {
-  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$4(r) || _nonIterableSpread$1();
+  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$5(r) || _nonIterableSpread$1();
 }
 
 function _classCallCheck$1(a, n) {
@@ -177,7 +177,7 @@ function _nonIterableRest$1() {
 }
 
 function _slicedToArray$1(r, e) {
-  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$4(r, e) || _nonIterableRest$1();
+  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$5(r, e) || _nonIterableRest$1();
 }
 
 function getDefaultExportFromCjs (x) {
@@ -1222,25 +1222,25 @@ function requireJsonrpc() {
   return jsonrpc;
 }
 
-function _arrayLikeToArray$3(r, a) {
+function _arrayLikeToArray$4(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$3(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$4(r);
 }
 
 function _iterableToArray(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$3(r, a) {
+function _unsupportedIterableToArray$4(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$3(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$4(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0;
   }
 }
 
@@ -1249,7 +1249,7 @@ function _nonIterableSpread() {
 }
 
 function _toConsumableArray(r) {
-  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$3(r) || _nonIterableSpread();
+  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$4(r) || _nonIterableSpread();
 }
 
 function _defineProperty(e, r, t) {
@@ -1314,7 +1314,7 @@ function _nonIterableRest() {
 }
 
 function _slicedToArray(r, e) {
-  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$3(r, e) || _nonIterableRest();
+  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$4(r, e) || _nonIterableRest();
 }
 
 var urlToObj = {};
@@ -1551,9 +1551,9 @@ var errorUtils = {};
 
 var stackTrace = {};
 
-function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
-function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
+function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var hasRequiredStackTrace;
 function requireStackTrace() {
   if (hasRequiredStackTrace) return stackTrace;
@@ -1589,7 +1589,7 @@ function requireStackTrace() {
   }
   function toStackFrames(lines, parseLine) {
     var frames = [];
-    var _iterator = _createForOfIteratorHelper$2(lines),
+    var _iterator = _createForOfIteratorHelper$3(lines),
       _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2247,9 +2247,9 @@ function requireInterfaces() {
   return interfaces;
 }
 
-function _createForOfIteratorHelper$1(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$1(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$1(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
-function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
+function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys$2(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$2(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$2(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var hasRequiredBaseLogger;
@@ -2577,7 +2577,7 @@ function requireBaseLogger() {
       function tokensToCss(tokens) {
         var seen = new Set();
         var cssParts = [];
-        var _iterator = _createForOfIteratorHelper$1(tokens),
+        var _iterator = _createForOfIteratorHelper$2(tokens),
           _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2687,7 +2687,7 @@ function requireBaseLogger() {
         var withoutDrive = drivePrefix ? replaced.slice(drivePrefix.length) : replaced;
         var segments = withoutDrive.split("/");
         var normalizedSegments = [];
-        var _iterator2 = _createForOfIteratorHelper$1(segments),
+        var _iterator2 = _createForOfIteratorHelper$2(segments),
           _step2;
         try {
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -3119,7 +3119,7 @@ function requireBaseLogger() {
             if (typeof source === "string") {
               var _this$settings4;
               var modifiedSource = source;
-              var _iterator3 = _createForOfIteratorHelper$1(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
+              var _iterator3 = _createForOfIteratorHelper$2(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
                 _step3;
               try {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -3967,9 +3967,9 @@ function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t =
 function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$1(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$1(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$1(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
+function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var ROOT_SERVICE = '48c5d828-ac2a-442d-97a3-0c9822b04979';
 var UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 var RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -3987,7 +3987,7 @@ var clamp = function clamp(value, min, max) {
 };
 var crc8 = function crc8(bytes) {
   var crc = 0;
-  var _iterator = _createForOfIteratorHelper(bytes),
+  var _iterator = _createForOfIteratorHelper$1(bytes),
     _step;
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -4014,7 +4014,7 @@ var bytesToHex = function bytesToHex(bytes) {
 // in both Web Bluetooth and Scrub.
 var bytesToBase64 = function bytesToBase64(bytes) {
   var binary = '';
-  var _iterator2 = _createForOfIteratorHelper(bytes),
+  var _iterator2 = _createForOfIteratorHelper$1(bytes),
     _step2;
   try {
     for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -4232,10 +4232,12 @@ var RootProtocol = /*#__PURE__*/function () {
 }();
 var RootTransport = /*#__PURE__*/function () {
   function RootTransport(runtime, extensionId, onData) {
+    var onReset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
     _classCallCheck$1(this, RootTransport);
     this.runtime = runtime;
     this.extensionId = extensionId;
     this.onData = onData;
+    this.onReset = onReset;
     this.ble = null;
     this.mode = supportsWebBluetooth() ? 'Web Bluetooth' : 'Scratch Link / Scrub';
     this.lastError = '';
@@ -4292,6 +4294,7 @@ var RootTransport = /*#__PURE__*/function () {
     key: "reset",
     value: function reset() {
       this.lastError = '';
+      if (this.onReset) this.onReset();
     }
   }, {
     key: "setError",
@@ -4329,6 +4332,9 @@ var RootTransport = /*#__PURE__*/function () {
   }]);
 }();
 
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var formatMessage = function formatMessage(message) {
   return message.default;
 };
@@ -4350,6 +4356,7 @@ var translate = function translate(id, defaultText, description) {
   });
 };
 var EXTENSION_ID = 'irobotRoot';
+var COMMAND_FINISH_TIMEOUT_MS = 120000;
 var extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 var FIXED_EVENT_HAT_MESSAGES = [['whenLeftBumperPush', 'hat.leftBumperPush', 'when left bumper is pushed'], ['whenLeftBumperRelease', 'hat.leftBumperRelease', 'when left bumper is released'], ['whenRightBumperPush', 'hat.rightBumperPush', 'when right bumper is pushed'], ['whenRightBumperRelease', 'hat.rightBumperRelease', 'when right bumper is released'], ['whenBothBumpersPush', 'hat.bothBumpersPush', 'when both bumpers are pushed simultaneously'], ['whenBothBumpersRelease', 'hat.bothBumpersRelease', 'when both bumpers are released simultaneously'], ['whenFLTouch', 'hat.flTouch', 'when FL touch sensor is touched'], ['whenFLRelease', 'hat.flRelease', 'when FL touch sensor is released'], ['whenFRTouch', 'hat.frTouch', 'when FR touch sensor is touched'], ['whenFRRelease', 'hat.frRelease', 'when FR touch sensor is released'], ['whenRLTouch', 'hat.rlTouch', 'when RL touch sensor is touched'], ['whenRLRelease', 'hat.rlRelease', 'when RL touch sensor is released'], ['whenRRTouch', 'hat.rrTouch', 'when RR touch sensor is touched'], ['whenRRRelease', 'hat.rrRelease', 'when RR touch sensor is released']];
 var fixedEventHats = function fixedEventHats() {
@@ -4390,8 +4397,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     this.runtime = runtime;
     if (runtime.formatMessage) formatMessage = runtime.formatMessage;
     this.protocol = new RootProtocol();
+    this.pendingCommands = new Map();
     this.transport = new RootTransport(runtime, EXTENSION_ID, function (packet) {
       return _this._receive(packet);
+    }, function () {
+      return _this._cancelPendingCommands(new Error('Root connection was reset'));
     });
     this.last = {};
     this.lastDetailedEvent = '';
@@ -4808,17 +4818,17 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "drive",
     value: function drive(args) {
-      return this._send(this.protocol.driveDistance(Cast.toNumber(args.MM)));
+      return this._sendAndWait(this.protocol.driveDistance(Cast.toNumber(args.MM)));
     }
   }, {
     key: "turn",
     value: function turn(args) {
-      return this._send(this.protocol.rotate(Cast.toNumber(args.DEGREES) * 10));
+      return this._sendAndWait(this.protocol.rotate(Cast.toNumber(args.DEGREES) * 10));
     }
   }, {
     key: "arc",
     value: function arc(args) {
-      return this._send(this.protocol.driveArc(Cast.toNumber(args.DEGREES) * 10, Cast.toNumber(args.RADIUS)));
+      return this._sendAndWait(this.protocol.driveArc(Cast.toNumber(args.DEGREES) * 10, Cast.toNumber(args.RADIUS)));
     }
   }, {
     key: "stop",
@@ -4919,6 +4929,89 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "_commandKey",
+    value: function _commandKey(device, command, packetId) {
+      return "".concat(device, ":").concat(command, ":").concat(packetId);
+    }
+  }, {
+    key: "_sendAndWait",
+    value: function _sendAndWait(packet) {
+      var _this3 = this;
+      var key = this._commandKey(packet[0], packet[1], packet[2]);
+      var completion = new Promise(function (resolve, reject) {
+        var timeout = setTimeout(function () {
+          var pending = _this3.pendingCommands.get(key);
+          if (!pending) return;
+          _this3.pendingCommands.delete(key);
+          var error = new Error("Root command timed out (command ".concat(packet[1], ", packet ").concat(packet[2], ")"));
+          _this3.transport.setError(error);
+          reject(error);
+        }, COMMAND_FINISH_TIMEOUT_MS);
+        _this3.pendingCommands.set(key, {
+          resolve: resolve,
+          reject: reject,
+          timeout: timeout
+        });
+      });
+
+      // Do not await Scratch Link/Scrub's JSON-RPC write promise. Some Scrub
+      // versions leave it pending after CoreBluetooth has accepted the bytes.
+      // The Scratch block waits only for Root's own matching Finished packet.
+      try {
+        var pendingWrite = this.transport.write(packet);
+        if (pendingWrite && typeof pendingWrite.catch === 'function') {
+          pendingWrite.catch(function (error) {
+            return _this3._rejectPendingCommand(key, error);
+          });
+        }
+      } catch (error) {
+        this._rejectPendingCommand(key, error);
+      }
+      return completion;
+    }
+  }, {
+    key: "_resolvePendingCommand",
+    value: function _resolvePendingCommand(decoded) {
+      var key = this._commandKey(decoded.device, decoded.command, decoded.packetId);
+      var pending = this.pendingCommands.get(key);
+      if (!pending) return false;
+      clearTimeout(pending.timeout);
+      this.pendingCommands.delete(key);
+      pending.resolve();
+      return true;
+    }
+  }, {
+    key: "_rejectPendingCommand",
+    value: function _rejectPendingCommand(key, error) {
+      var pending = this.pendingCommands.get(key);
+      if (!pending) return false;
+      clearTimeout(pending.timeout);
+      this.pendingCommands.delete(key);
+      this.transport.setError(error);
+      pending.reject(error);
+      return true;
+    }
+  }, {
+    key: "_cancelPendingCommands",
+    value: function _cancelPendingCommands(error) {
+      var _iterator = _createForOfIteratorHelper(this.pendingCommands),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var _step$value = _slicedToArray$1(_step.value, 2),
+            key = _step$value[0],
+            pending = _step$value[1];
+          clearTimeout(pending.timeout);
+          this.pendingCommands.delete(key);
+          pending.reject(error);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+  }, {
     key: "_startEventHat",
     value: function _startEventHat(opcode, property, event) {
       this[property] = event;
@@ -5015,6 +5108,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var decoded = this.protocol.decode(packet);
       if (!decoded) return;
       this.last = Object.assign({}, this.last, decoded);
+      this._resolvePendingCommand(decoded);
       if (decoded.command !== 0) return;
       if (decoded.device === 12) this._receiveBumperEvent(decoded);
       if (decoded.device === 17) this._receiveTouchEvent(decoded);
@@ -5058,5 +5152,5 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }]);
 }();
 
-export { IrobotRootBlocks as blockClass, entry };
+export { COMMAND_FINISH_TIMEOUT_MS, IrobotRootBlocks as blockClass, entry };
 //# sourceMappingURL=irobotRoot.mjs.map

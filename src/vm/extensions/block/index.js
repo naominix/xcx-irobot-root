@@ -24,6 +24,7 @@ const translate = (id, defaultText, description) => formatMessage({
 });
 
 const EXTENSION_ID = 'irobotRoot';
+const COMMAND_FINISH_TIMEOUT_MS = 120000;
 let extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 
 const FIXED_EVENT_HAT_MESSAGES = [
@@ -86,7 +87,13 @@ class IrobotRootBlocks {
         this.runtime = runtime;
         if (runtime.formatMessage) formatMessage = runtime.formatMessage;
         this.protocol = new RootProtocol();
-        this.transport = new RootTransport(runtime, EXTENSION_ID, packet => this._receive(packet));
+        this.pendingCommands = new Map();
+        this.transport = new RootTransport(
+            runtime,
+            EXTENSION_ID,
+            packet => this._receive(packet),
+            () => this._cancelPendingCommands(new Error('Root connection was reset'))
+        );
         this.last = {};
         this.lastDetailedEvent = '';
         this.currentEvent = null;
@@ -250,9 +257,13 @@ class IrobotRootBlocks {
     lastConnectionError () { return this.transport.lastError; }
 
     motors (args) { return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT))); }
-    drive (args) { return this._send(this.protocol.driveDistance(Cast.toNumber(args.MM))); }
-    turn (args) { return this._send(this.protocol.rotate(Cast.toNumber(args.DEGREES) * 10)); }
-    arc (args) { return this._send(this.protocol.driveArc(Cast.toNumber(args.DEGREES) * 10, Cast.toNumber(args.RADIUS))); }
+    drive (args) { return this._sendAndWait(this.protocol.driveDistance(Cast.toNumber(args.MM))); }
+    turn (args) { return this._sendAndWait(this.protocol.rotate(Cast.toNumber(args.DEGREES) * 10)); }
+    arc (args) {
+        return this._sendAndWait(
+            this.protocol.driveArc(Cast.toNumber(args.DEGREES) * 10, Cast.toNumber(args.RADIUS))
+        );
+    }
     stop () { return this._send(this.protocol.packet(0, 3)); }
     marker (args) { return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)])); }
     led (args) { return this._send(this.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE))); }
@@ -299,6 +310,68 @@ class IrobotRootBlocks {
             }
         } catch (error) {
             this.transport.setError(error);
+        }
+    }
+
+    _commandKey (device, command, packetId) {
+        return `${device}:${command}:${packetId}`;
+    }
+
+    _sendAndWait (packet) {
+        const key = this._commandKey(packet[0], packet[1], packet[2]);
+        const completion = new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                const pending = this.pendingCommands.get(key);
+                if (!pending) return;
+                this.pendingCommands.delete(key);
+                const error = new Error(
+                    `Root command timed out (command ${packet[1]}, packet ${packet[2]})`
+                );
+                this.transport.setError(error);
+                reject(error);
+            }, COMMAND_FINISH_TIMEOUT_MS);
+            this.pendingCommands.set(key, {resolve, reject, timeout});
+        });
+
+        // Do not await Scratch Link/Scrub's JSON-RPC write promise. Some Scrub
+        // versions leave it pending after CoreBluetooth has accepted the bytes.
+        // The Scratch block waits only for Root's own matching Finished packet.
+        try {
+            const pendingWrite = this.transport.write(packet);
+            if (pendingWrite && typeof pendingWrite.catch === 'function') {
+                pendingWrite.catch(error => this._rejectPendingCommand(key, error));
+            }
+        } catch (error) {
+            this._rejectPendingCommand(key, error);
+        }
+        return completion;
+    }
+
+    _resolvePendingCommand (decoded) {
+        const key = this._commandKey(decoded.device, decoded.command, decoded.packetId);
+        const pending = this.pendingCommands.get(key);
+        if (!pending) return false;
+        clearTimeout(pending.timeout);
+        this.pendingCommands.delete(key);
+        pending.resolve();
+        return true;
+    }
+
+    _rejectPendingCommand (key, error) {
+        const pending = this.pendingCommands.get(key);
+        if (!pending) return false;
+        clearTimeout(pending.timeout);
+        this.pendingCommands.delete(key);
+        this.transport.setError(error);
+        pending.reject(error);
+        return true;
+    }
+
+    _cancelPendingCommands (error) {
+        for (const [key, pending] of this.pendingCommands) {
+            clearTimeout(pending.timeout);
+            this.pendingCommands.delete(key);
+            pending.reject(error);
         }
     }
 
@@ -377,6 +450,7 @@ class IrobotRootBlocks {
         const decoded = this.protocol.decode(packet);
         if (!decoded) return;
         this.last = Object.assign({}, this.last, decoded);
+        this._resolvePendingCommand(decoded);
         if (decoded.command !== 0) return;
         if (decoded.device === 12) this._receiveBumperEvent(decoded);
         if (decoded.device === 17) this._receiveTouchEvent(decoded);
@@ -386,4 +460,8 @@ class IrobotRootBlocks {
     }
 }
 
-export {IrobotRootBlocks as default, IrobotRootBlocks as blockClass};
+export {
+    COMMAND_FINISH_TIMEOUT_MS,
+    IrobotRootBlocks as default,
+    IrobotRootBlocks as blockClass
+};

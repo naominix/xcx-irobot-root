@@ -189,10 +189,11 @@ class RootProtocol {
 }
 
 class RootTransport {
-    constructor (runtime, extensionId, onData) {
+    constructor (runtime, extensionId, onData, onReset = null) {
         this.runtime = runtime;
         this.extensionId = extensionId;
         this.onData = onData;
+        this.onReset = onReset;
         this.ble = null;
         this.mode = supportsWebBluetooth() ? 'Web Bluetooth' : 'Scratch Link / Scrub';
         this.lastError = '';
@@ -250,7 +251,10 @@ class RootTransport {
         this.reset();
     }
 
-    reset () { this.lastError = ''; }
+    reset () {
+        this.lastError = '';
+        if (this.onReset) this.onReset();
+    }
     setError (error) {
         this.lastError = error && error.message ? error.message : String(error || 'BLE通信エラー');
     }
