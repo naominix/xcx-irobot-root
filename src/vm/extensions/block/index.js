@@ -25,7 +25,28 @@ const translate = (id, defaultText, description) => formatMessage({
 
 const EXTENSION_ID = 'irobotRoot';
 const COMMAND_FINISH_TIMEOUT_MS = 120000;
+const MOTION_WATCHDOG_BASE_MS = 2000;
+const MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
+const MOTION_WATCHDOG_SETTLE_MS = 300;
+const ROOT_HALF_TRACK_MM = 43;
 let extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
+
+const clampMotionWatchdog = duration => Math.min(
+    COMMAND_FINISH_TIMEOUT_MS - 1000,
+    Math.max(MOTION_WATCHDOG_BASE_MS, Math.ceil(duration))
+);
+
+const linearMotionWatchdogMs = distanceMm => clampMotionWatchdog(
+    MOTION_WATCHDOG_BASE_MS + ((Math.abs(distanceMm) / MOTION_WATCHDOG_MIN_SPEED_MM_S) * 1000)
+);
+
+const turnMotionWatchdogMs = degrees => linearMotionWatchdogMs(
+    Math.abs(degrees) * Math.PI / 180 * ROOT_HALF_TRACK_MM
+);
+
+const arcMotionWatchdogMs = (degrees, radiusMm) => linearMotionWatchdogMs(
+    Math.abs(degrees) * Math.PI / 180 * (Math.abs(radiusMm) + ROOT_HALF_TRACK_MM)
+);
 
 const FIXED_EVENT_HAT_MESSAGES = [
     ['whenLeftBumperPush', 'hat.leftBumperPush', 'when left bumper is pushed'],
@@ -257,11 +278,20 @@ class IrobotRootBlocks {
     lastConnectionError () { return this.transport.lastError; }
 
     motors (args) { return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT))); }
-    drive (args) { return this._sendAndWait(this.protocol.driveDistance(Cast.toNumber(args.MM))); }
-    turn (args) { return this._sendAndWait(this.protocol.rotate(Cast.toNumber(args.DEGREES) * 10)); }
+    drive (args) {
+        const distance = Cast.toNumber(args.MM);
+        return this._sendAndWait(this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
+    }
+    turn (args) {
+        const degrees = Cast.toNumber(args.DEGREES);
+        return this._sendAndWait(this.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees));
+    }
     arc (args) {
+        const degrees = Cast.toNumber(args.DEGREES);
+        const radius = Cast.toNumber(args.RADIUS);
         return this._sendAndWait(
-            this.protocol.driveArc(Cast.toNumber(args.DEGREES) * 10, Cast.toNumber(args.RADIUS))
+            this.protocol.driveArc(degrees * 10, radius),
+            arcMotionWatchdogMs(degrees, radius)
         );
     }
     stop () { return this._send(this.protocol.packet(0, 3)); }
@@ -317,20 +347,42 @@ class IrobotRootBlocks {
         return `${device}:${command}:${packetId}`;
     }
 
-    _sendAndWait (packet) {
+    _sendAndWait (packet, motionWatchdogMs) {
         const key = this._commandKey(packet[0], packet[1], packet[2]);
         const completion = new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
                 const pending = this.pendingCommands.get(key);
                 if (!pending) return;
-                this.pendingCommands.delete(key);
+                this._clearPendingCommand(key, pending);
                 const error = new Error(
                     `Root command timed out (command ${packet[1]}, packet ${packet[2]})`
                 );
                 this.transport.setError(error);
                 reject(error);
             }, COMMAND_FINISH_TIMEOUT_MS);
-            this.pendingCommands.set(key, {resolve, reject, timeout});
+            const watchdog = setTimeout(() => {
+                const pending = this.pendingCommands.get(key);
+                if (!pending || pending.settling) return;
+                pending.settling = true;
+
+                // A finite Root movement can keep making tiny closed-loop
+                // corrections indefinitely on a slippery/uneven surface and
+                // never emit its Finished response. A zero-speed motor command
+                // safely interrupts that action; the protocol specifies that an
+                // interrupted movement also produces its matching Finished
+                // response. Resolve after a short BLE settling interval even if
+                // old firmware omits that response.
+                this._sendMotionStop(key);
+                pending.settle = setTimeout(() => {
+                    if (this.pendingCommands.get(key) !== pending) return;
+                    this._clearPendingCommand(key, pending);
+                    this.transport.setError(new Error(
+                        `Root motion completion watchdog stopped residual movement (command ${packet[1]})`
+                    ));
+                    resolve();
+                }, MOTION_WATCHDOG_SETTLE_MS);
+            }, motionWatchdogMs);
+            this.pendingCommands.set(key, {resolve, reject, timeout, watchdog, settle: null, settling: false});
         });
 
         // Do not await Scratch Link/Scrub's JSON-RPC write promise. Some Scrub
@@ -351,17 +403,37 @@ class IrobotRootBlocks {
         const key = this._commandKey(decoded.device, decoded.command, decoded.packetId);
         const pending = this.pendingCommands.get(key);
         if (!pending) return false;
-        clearTimeout(pending.timeout);
-        this.pendingCommands.delete(key);
+        // Explicitly zero the wheel speeds even after Root reports completion.
+        // This prevents a residual velocity/controller correction from leaking
+        // into the following Scratch command.
+        if (!pending.settling) this._sendMotionStop(key);
+        this._clearPendingCommand(key, pending);
         pending.resolve();
         return true;
+    }
+
+    _sendMotionStop (pendingKey) {
+        try {
+            const pendingWrite = this.transport.write(this.protocol.motors(0, 0));
+            if (pendingWrite && typeof pendingWrite.catch === 'function') {
+                pendingWrite.catch(error => this._rejectPendingCommand(pendingKey, error));
+            }
+        } catch (error) {
+            this._rejectPendingCommand(pendingKey, error);
+        }
+    }
+
+    _clearPendingCommand (key, pending) {
+        clearTimeout(pending.timeout);
+        clearTimeout(pending.watchdog);
+        if (pending.settle) clearTimeout(pending.settle);
+        this.pendingCommands.delete(key);
     }
 
     _rejectPendingCommand (key, error) {
         const pending = this.pendingCommands.get(key);
         if (!pending) return false;
-        clearTimeout(pending.timeout);
-        this.pendingCommands.delete(key);
+        this._clearPendingCommand(key, pending);
         this.transport.setError(error);
         pending.reject(error);
         return true;
@@ -369,8 +441,7 @@ class IrobotRootBlocks {
 
     _cancelPendingCommands (error) {
         for (const [key, pending] of this.pendingCommands) {
-            clearTimeout(pending.timeout);
-            this.pendingCommands.delete(key);
+            this._clearPendingCommand(key, pending);
             pending.reject(error);
         }
     }
@@ -461,7 +532,11 @@ class IrobotRootBlocks {
 }
 
 export {
+    arcMotionWatchdogMs,
     COMMAND_FINISH_TIMEOUT_MS,
     IrobotRootBlocks as default,
-    IrobotRootBlocks as blockClass
+    IrobotRootBlocks as blockClass,
+    linearMotionWatchdogMs,
+    MOTION_WATCHDOG_SETTLE_MS,
+    turnMotionWatchdogMs
 };

@@ -1,4 +1,9 @@
-import {COMMAND_FINISH_TIMEOUT_MS, blockClass} from '../../src/vm/extensions/block/index.js';
+import {
+    COMMAND_FINISH_TIMEOUT_MS,
+    MOTION_WATCHDOG_SETTLE_MS,
+    blockClass,
+    linearMotionWatchdogMs
+} from '../../src/vm/extensions/block/index.js';
 import {
     ROOT_DISCOVERY_OPTIONS,
     RootProtocol,
@@ -230,13 +235,45 @@ describe('iRobot Root extension', () => {
         block._receive(finished);
         await expect(completion).resolves.toBeUndefined();
         expect(completed).toBe(true);
+        const stopPacket = block.transport.write.mock.calls[1][0];
+        expect(stopPacket[0]).toBe(1);
+        expect(stopPacket[1]).toBe(4);
+        expect(Array.from(stopPacket.slice(3, 11))).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+    });
+
+    test('stops residual motion and advances when Root never reaches its finished response', async () => {
+        jest.useFakeTimers();
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+        const completion = block.drive({MM: 100});
+        let completed = false;
+        completion.then(() => {
+            completed = true;
+        });
+
+        jest.advanceTimersByTime(linearMotionWatchdogMs(100));
+        const stopPacket = block.transport.write.mock.calls[1][0];
+        expect(stopPacket[0]).toBe(1);
+        expect(stopPacket[1]).toBe(4);
+        expect(Array.from(stopPacket.slice(3, 11))).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+        expect(completed).toBe(false);
+
+        jest.advanceTimersByTime(MOTION_WATCHDOG_SETTLE_MS);
+        await expect(completion).resolves.toBeUndefined();
+        expect(completed).toBe(true);
+        expect(block.lastConnectionError()).toContain('watchdog stopped residual movement');
+        expect(block.pendingCommands.size).toBe(0);
+        jest.useRealTimers();
     });
 
     test('reports a timeout when Root never sends a finished response', async () => {
         jest.useFakeTimers();
         const block = new blockClass(runtime);
         block.transport.write = jest.fn(() => new Promise(() => {}));
-        const completion = block.drive({MM: 100});
+        const completion = block._sendAndWait(
+            block.protocol.driveDistance(100),
+            COMMAND_FINISH_TIMEOUT_MS + 1000
+        );
         const rejected = expect(completion).rejects.toThrow('Root command timed out');
 
         jest.advanceTimersByTime(COMMAND_FINISH_TIMEOUT_MS);
