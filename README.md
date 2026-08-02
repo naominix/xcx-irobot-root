@@ -18,7 +18,7 @@
 
 ChromeまたはEdgeで、次のリンクを開きます。
 
-**[XcratchでiRobot Root拡張を開く](https://xcratch.github.io/editor/?extension=https%3A%2F%2Fnaominix.github.io%2Fxcx-irobot-root%2FirobotRoot.mjs%3Fv%3D1.0.0)**
+**[XcratchでiRobot Root拡張を開く](https://naominix.github.io/xcratch-scrub-test/editor/)**
 
 拡張機能URLを手動で指定する場合は、XcratchのExtension Loaderへ次を入力します。
 
