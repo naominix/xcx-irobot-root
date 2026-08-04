@@ -203,6 +203,35 @@ describe('iRobot Root extension', () => {
         await Promise.resolve();
     });
 
+    test('note waits for the duration sent to Root without waiting for the BLE write response', async () => {
+        jest.useFakeTimers();
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+
+        try {
+            const completion = block.note({HZ: 440, MS: 250});
+            const packet = block.transport.write.mock.calls[0][0];
+            let completed = false;
+            completion.then(() => {
+                completed = true;
+            });
+
+            expect(packet[0]).toBe(5);
+            expect(packet[1]).toBe(0);
+            expect(new DataView(packet.buffer, packet.byteOffset, packet.byteLength).getUint16(7, false)).toBe(250);
+
+            jest.advanceTimersByTime(249);
+            await Promise.resolve();
+            expect(completed).toBe(false);
+
+            jest.advanceTimersByTime(1);
+            await expect(completion).resolves.toBeUndefined();
+            expect(completed).toBe(true);
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
     test.each([
         ['drive', {MM: 100}, 8],
         ['turn', {DEGREES: 90}, 12],

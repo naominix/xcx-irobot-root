@@ -302,7 +302,15 @@ class IrobotRootBlocks {
             Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
         ));
     }
-    note (args) { return this._send(this.protocol.note(Cast.toNumber(args.HZ), Cast.toNumber(args.MS))); }
+    note (args) {
+        const frequency = Cast.toNumber(args.HZ);
+        // Root's sound command stores the duration in an unsigned 16-bit
+        // field. Use the exact value sent to Root as Scratch's wait time too,
+        // so consecutive note blocks cannot immediately overwrite each other.
+        const durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(args.MS))));
+        this._send(this.protocol.note(frequency, durationMs));
+        return new Promise(resolve => setTimeout(resolve, durationMs));
+    }
 
     refreshSensor (args) {
         const commands = {battery: [14, 1], light: [13, 1], accel: [16, 1]};
