@@ -25,6 +25,7 @@ const translate = (id, defaultText, description) => formatMessage({
 
 const EXTENSION_ID = 'irobotRoot';
 const COMMAND_FINISH_TIMEOUT_MS = 120000;
+const SOUND_FINISH_GRACE_MS = 1000;
 const MOTION_WATCHDOG_BASE_MS = 2000;
 const MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 const MOTION_WATCHDOG_SETTLE_MS = 300;
@@ -47,6 +48,8 @@ const turnMotionWatchdogMs = degrees => linearMotionWatchdogMs(
 const arcMotionWatchdogMs = (degrees, radiusMm) => linearMotionWatchdogMs(
     Math.abs(degrees) * Math.PI / 180 * (Math.abs(radiusMm) + ROOT_HALF_TRACK_MM)
 );
+
+const midiNoteToFrequency = midiNote => Math.round(440 * Math.pow(2, (midiNote - 69) / 12));
 
 const FIXED_EVENT_HAT_MESSAGES = [
     ['whenLeftBumperPush', 'hat.leftBumperPush', 'when left bumper is pushed'],
@@ -120,6 +123,8 @@ class IrobotRootBlocks {
         this.currentEvent = null;
         this.bumperState = 0;
         this.touchState = 0;
+        this._playNoteForPicker = this._playNoteForPicker.bind(this);
+        if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
     }
 
     getInfo () {
@@ -171,8 +176,13 @@ class IrobotRootBlocks {
                     EFFECT: {type: ArgumentType.STRING, menu: 'ledEffectMenu'},
                     RED: {type: ArgumentType.NUMBER, defaultValue: 0}, GREEN: {type: ArgumentType.NUMBER, defaultValue: 128}, BLUE: {type: ArgumentType.NUMBER, defaultValue: 255}
                 }},
+                {opcode: 'playNote', blockType: BlockType.COMMAND,
+                    text: translate('block.playNote', 'play note [NOTE] for [MS] ms'), arguments: {
+                    NOTE: {type: ArgumentType.NOTE, defaultValue: 60},
+                    MS: {type: ArgumentType.NUMBER, defaultValue: 500}
+                }},
                 {opcode: 'note', blockType: BlockType.COMMAND,
-                    text: translate('block.note', 'play [HZ] Hz for [MS] ms'), arguments: {
+                    text: translate('block.note', 'play frequency [HZ] Hz for [MS] ms'), arguments: {
                     HZ: {type: ArgumentType.NUMBER, defaultValue: 440}, MS: {type: ArgumentType.NUMBER, defaultValue: 500}
                 }},
                 '---',
@@ -302,14 +312,30 @@ class IrobotRootBlocks {
             Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
         ));
     }
-    note (args) {
-        const frequency = Cast.toNumber(args.HZ);
+    playNote (args) {
+        const midiNote = Math.min(127, Math.max(0, Math.round(Cast.toNumber(args.NOTE))));
+        return this._playFrequency(midiNoteToFrequency(midiNote), args.MS);
+    }
+
+    note (args) { return this._playFrequency(Cast.toNumber(args.HZ), args.MS); }
+
+    _playFrequency (frequency, milliseconds) {
         // Root's sound command stores the duration in an unsigned 16-bit
-        // field. Use the exact value sent to Root as Scratch's wait time too,
-        // so consecutive note blocks cannot immediately overwrite each other.
-        const durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(args.MS))));
-        this._send(this.protocol.note(frequency, durationMs));
-        return new Promise(resolve => setTimeout(resolve, durationMs));
+        // field. Wait for Root's matching Play Note Finished packet rather
+        // than a browser timer, so BLE latency cannot make the next note
+        // interrupt this one just before it actually finishes.
+        const durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
+        const packet = this.protocol.note(frequency, durationMs);
+        if (durationMs === 0) {
+            this._send(packet);
+            return Promise.resolve();
+        }
+        return this._sendSoundAndWait(packet, durationMs);
+    }
+
+    _playNoteForPicker (midiNote, category) {
+        if (category !== this.getInfo().name || !this.transport.isConnected()) return;
+        this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
     }
 
     refreshSensor (args) {
@@ -390,12 +416,44 @@ class IrobotRootBlocks {
                     resolve();
                 }, MOTION_WATCHDOG_SETTLE_MS);
             }, motionWatchdogMs);
-            this.pendingCommands.set(key, {resolve, reject, timeout, watchdog, settle: null, settling: false});
+            this.pendingCommands.set(key, {
+                resolve, reject, timeout, watchdog, settle: null, settling: false, stopMotion: true
+            });
         });
 
         // Do not await Scratch Link/Scrub's JSON-RPC write promise. Some Scrub
         // versions leave it pending after CoreBluetooth has accepted the bytes.
         // The Scratch block waits only for Root's own matching Finished packet.
+        try {
+            const pendingWrite = this.transport.write(packet);
+            if (pendingWrite && typeof pendingWrite.catch === 'function') {
+                pendingWrite.catch(error => this._rejectPendingCommand(key, error));
+            }
+        } catch (error) {
+            this._rejectPendingCommand(key, error);
+        }
+        return completion;
+    }
+
+    _sendSoundAndWait (packet, durationMs) {
+        const key = this._commandKey(packet[0], packet[1], packet[2]);
+        const completion = new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                const pending = this.pendingCommands.get(key);
+                if (!pending) return;
+                this._clearPendingCommand(key, pending);
+                this.transport.setError(new Error(
+                    `Root sound completion response timed out (packet ${packet[2]})`
+                ));
+                // Do not leave a Scratch stack stuck if a single notification
+                // was lost after Root had enough time to finish the sound.
+                resolve();
+            }, durationMs + SOUND_FINISH_GRACE_MS);
+            this.pendingCommands.set(key, {
+                resolve, reject, timeout, watchdog: null, settle: null, settling: false, stopMotion: false
+            });
+        });
+
         try {
             const pendingWrite = this.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
@@ -414,7 +472,7 @@ class IrobotRootBlocks {
         // Explicitly zero the wheel speeds even after Root reports completion.
         // This prevents a residual velocity/controller correction from leaking
         // into the following Scratch command.
-        if (!pending.settling) this._sendMotionStop(key);
+        if (pending.stopMotion && !pending.settling) this._sendMotionStop(key);
         this._clearPendingCommand(key, pending);
         pending.resolve();
         return true;
@@ -433,7 +491,7 @@ class IrobotRootBlocks {
 
     _clearPendingCommand (key, pending) {
         clearTimeout(pending.timeout);
-        clearTimeout(pending.watchdog);
+        if (pending.watchdog) clearTimeout(pending.watchdog);
         if (pending.settle) clearTimeout(pending.settle);
         this.pendingCommands.delete(key);
     }

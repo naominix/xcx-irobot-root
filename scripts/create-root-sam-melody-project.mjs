@@ -9,20 +9,20 @@ const outputProject = join(repositoryRoot, 'projects', 'root-sam-melody.sb3');
 const workDirectory = mkdtempSync(join(tmpdir(), 'root-sam-melody-'));
 
 const melody = [
-    {name: 'G3', hz: 196, milliseconds: 250},
-    {name: 'G3', hz: 196, milliseconds: 250},
-    {name: 'D4', hz: 294, milliseconds: 250},
-    {name: 'D4', hz: 294, milliseconds: 250},
-    {name: 'E4', hz: 330, milliseconds: 250},
-    {name: 'E4', hz: 330, milliseconds: 250},
-    {name: 'D4', hz: 294, milliseconds: 500},
-    {name: 'C4', hz: 262, milliseconds: 250},
-    {name: 'C4', hz: 262, milliseconds: 250},
-    {name: 'B3', hz: 247, milliseconds: 250},
-    {name: 'B3', hz: 247, milliseconds: 250},
-    {name: 'A3', hz: 220, milliseconds: 250},
-    {name: 'A3', hz: 220, milliseconds: 250},
-    {name: 'G3', hz: 196, milliseconds: 500}
+    {name: 'G3', midi: 55, milliseconds: 250},
+    {name: 'G3', midi: 55, milliseconds: 250},
+    {name: 'D4', midi: 62, milliseconds: 250},
+    {name: 'D4', midi: 62, milliseconds: 250},
+    {name: 'E4', midi: 64, milliseconds: 250},
+    {name: 'E4', midi: 64, milliseconds: 250},
+    {name: 'D4', midi: 62, milliseconds: 500},
+    {name: 'C4', midi: 60, milliseconds: 250},
+    {name: 'C4', midi: 60, milliseconds: 250},
+    {name: 'B3', midi: 59, milliseconds: 250},
+    {name: 'B3', midi: 59, milliseconds: 250},
+    {name: 'A3', midi: 57, milliseconds: 250},
+    {name: 'A3', midi: 57, milliseconds: 250},
+    {name: 'G3', midi: 55, milliseconds: 500}
 ];
 
 execFileSync('unzip', ['-q', sourceProject, '-d', workDirectory]);
@@ -51,19 +51,30 @@ melody.forEach((tone, index) => {
     const number = String(index + 1).padStart(2, '0');
     const nextNumber = String(index + 2).padStart(2, '0');
     const noteId = `root-melody-note-${number}`;
+    const noteShadowId = `root-melody-note-shadow-${number}`;
     const previousId = index === 0 ? 'root-melody-when-flag' :
         `root-melody-note-${String(index).padStart(2, '0')}`;
 
     blocks[noteId] = {
-        opcode: 'irobotRoot_note',
+        opcode: 'irobotRoot_playNote',
         next: index === melody.length - 1 ? null : `root-melody-note-${nextNumber}`,
         parent: previousId,
         inputs: {
-            HZ: [1, [4, String(tone.hz)]],
+            NOTE: [1, noteShadowId],
             MS: [1, [4, String(tone.milliseconds)]]
         },
         fields: {},
         shadow: false,
+        topLevel: false
+    };
+
+    blocks[noteShadowId] = {
+        opcode: 'note',
+        next: null,
+        parent: noteId,
+        inputs: {},
+        fields: {NOTE: [String(tone.midi), null]},
+        shadow: true,
         topLevel: false
     };
 });

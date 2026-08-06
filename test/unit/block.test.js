@@ -34,6 +34,7 @@ describe('iRobot Root extension', () => {
         expect(block.getInfo().id).toBe('irobotRoot');
         expect(block.getInfo().blocks.some(item => item.opcode === 'connect')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'ledAnimation')).toBe(true);
+        expect(block.getInfo().blocks.find(item => item.opcode === 'playNote').arguments.NOTE.type).toBe('note');
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenBumper')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenTouchSensor')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenFLTouch')).toBe(true);
@@ -56,6 +57,7 @@ describe('iRobot Root extension', () => {
         const japaneseInfo = block.getInfo();
         expect(findBlock(japaneseInfo, 'connect').text).toBe('Rootに接続する');
         expect(findBlock(japaneseInfo, 'motors').text).toBe('左モーター [LEFT] 右モーター [RIGHT]');
+        expect(findBlock(japaneseInfo, 'playNote').text).toBe('音階 [NOTE] を [MS] ミリ秒鳴らす');
         expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
         expect(japaneseInfo.menus.markerMenu.items[0]).toEqual({text: '上げる', value: '0'});
 
@@ -63,6 +65,7 @@ describe('iRobot Root extension', () => {
         const englishInfo = block.getInfo();
         expect(findBlock(englishInfo, 'connect').text).toBe('connect to Root');
         expect(findBlock(englishInfo, 'motors').text).toBe('set left motor [LEFT] right motor [RIGHT]');
+        expect(findBlock(englishInfo, 'playNote').text).toBe('play note [NOTE] for [MS] ms');
         expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
         expect(englishInfo.menus.markerMenu.items[0]).toEqual({text: 'up', value: '0'});
     });
@@ -75,6 +78,17 @@ describe('iRobot Root extension', () => {
             0, 0, 0, 0, 0, 0, 0, 0, 0xD1
         ]);
         expect(crc8(packet.slice(0, 19))).toBe(0xD1);
+    });
+
+    test('encodes the documented Sound device Play Note packet', () => {
+        const packet = new RootProtocol().note(440, 500);
+        const view = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
+
+        expect(packet[0]).toBe(5);
+        expect(packet[1]).toBe(0);
+        expect(view.getUint32(3, false)).toBe(440);
+        expect(view.getUint16(7, false)).toBe(500);
+        expect(crc8(packet.slice(0, 19))).toBe(packet[19]);
     });
 
     test('packet IDs wrap after 255', () => {
@@ -203,33 +217,72 @@ describe('iRobot Root extension', () => {
         await Promise.resolve();
     });
 
-    test('note waits for the duration sent to Root without waiting for the BLE write response', async () => {
+    test.each([
+        ['note', {HZ: 440, MS: 250}, 440],
+        ['playNote', {NOTE: 69, MS: 250}, 440],
+        ['playNote', {NOTE: 60, MS: 500}, 262]
+    ])('%s waits for Root Play Note Finished response and sends the expected frequency', async (
+        method, args, expectedFrequency
+    ) => {
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+        const completion = block[method](args);
+        const packet = block.transport.write.mock.calls[0][0];
+        let completed = false;
+        completion.then(() => {
+            completed = true;
+        });
+
+        expect(packet[0]).toBe(5);
+        expect(packet[1]).toBe(0);
+        const packetView = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
+        expect(packetView.getUint32(3, false)).toBe(expectedFrequency);
+        expect(packetView.getUint16(7, false)).toBe(args.MS);
+        await Promise.resolve();
+        expect(completed).toBe(false);
+
+        const finished = new RootProtocol().packet(5, 0);
+        finished[2] = packet[2];
+        finished[19] = crc8(finished.slice(0, 19));
+        block._receive(finished);
+        await expect(completion).resolves.toBeUndefined();
+        expect(completed).toBe(true);
+        expect(block.transport.write).toHaveBeenCalledTimes(1);
+    });
+
+    test('sound completion timeout releases the Scratch stack if a notification is lost', async () => {
         jest.useFakeTimers();
         const block = new blockClass(runtime);
         block.transport.write = jest.fn(() => new Promise(() => {}));
-
         try {
             const completion = block.note({HZ: 440, MS: 250});
-            const packet = block.transport.write.mock.calls[0][0];
+            jest.advanceTimersByTime(1249);
             let completed = false;
             completion.then(() => {
                 completed = true;
             });
-
-            expect(packet[0]).toBe(5);
-            expect(packet[1]).toBe(0);
-            expect(new DataView(packet.buffer, packet.byteOffset, packet.byteLength).getUint16(7, false)).toBe(250);
-
-            jest.advanceTimersByTime(249);
             await Promise.resolve();
             expect(completed).toBe(false);
 
             jest.advanceTimersByTime(1);
             await expect(completion).resolves.toBeUndefined();
-            expect(completed).toBe(true);
+            expect(block.transport.lastError).toContain('sound completion response timed out');
         } finally {
             jest.useRealTimers();
         }
+    });
+
+    test('piano picker previews the selected MIDI note on a connected Root', () => {
+        const block = new blockClass(runtime);
+        block.transport.isConnected = jest.fn(() => true);
+        block.transport.write = jest.fn();
+
+        block._playNoteForPicker(69, block.getInfo().name);
+
+        const packet = block.transport.write.mock.calls[0][0];
+        const packetView = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
+        expect(packetView.getUint32(3, false)).toBe(440);
+        expect(packetView.getUint16(7, false)).toBe(250);
     });
 
     test.each([

@@ -856,7 +856,8 @@ var en = {
 	"irobotRoot.block.marker": "set marker [POSITION]",
 	"irobotRoot.block.led": "set LED red [RED] green [GREEN] blue [BLUE]",
 	"irobotRoot.block.ledAnimation": "set LED [EFFECT] red [RED] green [GREEN] blue [BLUE]",
-	"irobotRoot.block.note": "play [HZ] Hz for [MS] ms",
+	"irobotRoot.block.playNote": "play note [NOTE] for [MS] ms",
+	"irobotRoot.block.note": "play frequency [HZ] Hz for [MS] ms",
 	"irobotRoot.block.refreshSensor": "read [SENSOR]",
 	"irobotRoot.block.sensor": "[VALUE] value",
 	"irobotRoot.block.whenEvent": "when [EVENT] changes",
@@ -926,7 +927,8 @@ var ja = {
 	"irobotRoot.block.marker": "マーカーを [POSITION]",
 	"irobotRoot.block.led": "LEDを 赤 [RED] 緑 [GREEN] 青 [BLUE]",
 	"irobotRoot.block.ledAnimation": "LEDを [EFFECT] 赤 [RED] 緑 [GREEN] 青 [BLUE]",
-	"irobotRoot.block.note": "[HZ] Hzを [MS] ミリ秒鳴らす",
+	"irobotRoot.block.playNote": "音階 [NOTE] を [MS] ミリ秒鳴らす",
+	"irobotRoot.block.note": "周波数 [HZ] Hzを [MS] ミリ秒鳴らす",
 	"irobotRoot.block.refreshSensor": "[SENSOR] を読み取る",
 	"irobotRoot.block.sensor": "[VALUE] の値",
 	"irobotRoot.block.whenEvent": "[EVENT] が変化したとき",
@@ -4357,6 +4359,7 @@ var translate = function translate(id, defaultText, description) {
 };
 var EXTENSION_ID = 'irobotRoot';
 var COMMAND_FINISH_TIMEOUT_MS = 120000;
+var SOUND_FINISH_GRACE_MS = 1000;
 var MOTION_WATCHDOG_BASE_MS = 2000;
 var MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 var MOTION_WATCHDOG_SETTLE_MS = 300;
@@ -4373,6 +4376,9 @@ var turnMotionWatchdogMs = function turnMotionWatchdogMs(degrees) {
 };
 var arcMotionWatchdogMs = function arcMotionWatchdogMs(degrees, radiusMm) {
   return linearMotionWatchdogMs(Math.abs(degrees) * Math.PI / 180 * (Math.abs(radiusMm) + ROOT_HALF_TRACK_MM));
+};
+var midiNoteToFrequency = function midiNoteToFrequency(midiNote) {
+  return Math.round(440 * Math.pow(2, (midiNote - 69) / 12));
 };
 var FIXED_EVENT_HAT_MESSAGES = [['whenLeftBumperPush', 'hat.leftBumperPush', 'when left bumper is pushed'], ['whenLeftBumperRelease', 'hat.leftBumperRelease', 'when left bumper is released'], ['whenRightBumperPush', 'hat.rightBumperPush', 'when right bumper is pushed'], ['whenRightBumperRelease', 'hat.rightBumperRelease', 'when right bumper is released'], ['whenBothBumpersPush', 'hat.bothBumpersPush', 'when both bumpers are pushed simultaneously'], ['whenBothBumpersRelease', 'hat.bothBumpersRelease', 'when both bumpers are released simultaneously'], ['whenFLTouch', 'hat.flTouch', 'when FL touch sensor is touched'], ['whenFLRelease', 'hat.flRelease', 'when FL touch sensor is released'], ['whenFRTouch', 'hat.frTouch', 'when FR touch sensor is touched'], ['whenFRRelease', 'hat.frRelease', 'when FR touch sensor is released'], ['whenRLTouch', 'hat.rlTouch', 'when RL touch sensor is touched'], ['whenRLRelease', 'hat.rlRelease', 'when RL touch sensor is released'], ['whenRRTouch', 'hat.rrTouch', 'when RR touch sensor is touched'], ['whenRRRelease', 'hat.rrRelease', 'when RR touch sensor is released']];
 var fixedEventHats = function fixedEventHats() {
@@ -4424,6 +4430,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     this.currentEvent = null;
     this.bumperState = 0;
     this.touchState = 0;
+    this._playNoteForPicker = this._playNoteForPicker.bind(this);
+    if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
   }
   return _createClass$1(IrobotRootBlocks, [{
     key: "getInfo",
@@ -4558,9 +4566,23 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
             }
           }
         }, {
+          opcode: 'playNote',
+          blockType: BlockType.COMMAND,
+          text: translate('block.playNote', 'play note [NOTE] for [MS] ms'),
+          arguments: {
+            NOTE: {
+              type: ArgumentType.NOTE,
+              defaultValue: 60
+            },
+            MS: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 500
+            }
+          }
+        }, {
           opcode: 'note',
           blockType: BlockType.COMMAND,
-          text: translate('block.note', 'play [HZ] Hz for [MS] ms'),
+          text: translate('block.note', 'play frequency [HZ] Hz for [MS] ms'),
           arguments: {
             HZ: {
               type: ArgumentType.NUMBER,
@@ -4871,17 +4893,36 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
     }
   }, {
+    key: "playNote",
+    value: function playNote(args) {
+      var midiNote = Math.min(127, Math.max(0, Math.round(Cast.toNumber(args.NOTE))));
+      return this._playFrequency(midiNoteToFrequency(midiNote), args.MS);
+    }
+  }, {
     key: "note",
     value: function note(args) {
-      var frequency = Cast.toNumber(args.HZ);
+      return this._playFrequency(Cast.toNumber(args.HZ), args.MS);
+    }
+  }, {
+    key: "_playFrequency",
+    value: function _playFrequency(frequency, milliseconds) {
       // Root's sound command stores the duration in an unsigned 16-bit
-      // field. Use the exact value sent to Root as Scratch's wait time too,
-      // so consecutive note blocks cannot immediately overwrite each other.
-      var durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(args.MS))));
-      this._send(this.protocol.note(frequency, durationMs));
-      return new Promise(function (resolve) {
-        return setTimeout(resolve, durationMs);
-      });
+      // field. Wait for Root's matching Play Note Finished packet rather
+      // than a browser timer, so BLE latency cannot make the next note
+      // interrupt this one just before it actually finishes.
+      var durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
+      var packet = this.protocol.note(frequency, durationMs);
+      if (durationMs === 0) {
+        this._send(packet);
+        return Promise.resolve();
+      }
+      return this._sendSoundAndWait(packet, durationMs);
+    }
+  }, {
+    key: "_playNoteForPicker",
+    value: function _playNoteForPicker(midiNote, category) {
+      if (category !== this.getInfo().name || !this.transport.isConnected()) return;
+      this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
     }
   }, {
     key: "refreshSensor",
@@ -5001,7 +5042,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           timeout: timeout,
           watchdog: watchdog,
           settle: null,
-          settling: false
+          settling: false,
+          stopMotion: true
         });
       });
 
@@ -5021,6 +5063,43 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       return completion;
     }
   }, {
+    key: "_sendSoundAndWait",
+    value: function _sendSoundAndWait(packet, durationMs) {
+      var _this4 = this;
+      var key = this._commandKey(packet[0], packet[1], packet[2]);
+      var completion = new Promise(function (resolve, reject) {
+        var timeout = setTimeout(function () {
+          var pending = _this4.pendingCommands.get(key);
+          if (!pending) return;
+          _this4._clearPendingCommand(key, pending);
+          _this4.transport.setError(new Error("Root sound completion response timed out (packet ".concat(packet[2], ")")));
+          // Do not leave a Scratch stack stuck if a single notification
+          // was lost after Root had enough time to finish the sound.
+          resolve();
+        }, durationMs + SOUND_FINISH_GRACE_MS);
+        _this4.pendingCommands.set(key, {
+          resolve: resolve,
+          reject: reject,
+          timeout: timeout,
+          watchdog: null,
+          settle: null,
+          settling: false,
+          stopMotion: false
+        });
+      });
+      try {
+        var pendingWrite = this.transport.write(packet);
+        if (pendingWrite && typeof pendingWrite.catch === 'function') {
+          pendingWrite.catch(function (error) {
+            return _this4._rejectPendingCommand(key, error);
+          });
+        }
+      } catch (error) {
+        this._rejectPendingCommand(key, error);
+      }
+      return completion;
+    }
+  }, {
     key: "_resolvePendingCommand",
     value: function _resolvePendingCommand(decoded) {
       var key = this._commandKey(decoded.device, decoded.command, decoded.packetId);
@@ -5029,7 +5108,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // Explicitly zero the wheel speeds even after Root reports completion.
       // This prevents a residual velocity/controller correction from leaking
       // into the following Scratch command.
-      if (!pending.settling) this._sendMotionStop(key);
+      if (pending.stopMotion && !pending.settling) this._sendMotionStop(key);
       this._clearPendingCommand(key, pending);
       pending.resolve();
       return true;
@@ -5037,12 +5116,12 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendMotionStop",
     value: function _sendMotionStop(pendingKey) {
-      var _this4 = this;
+      var _this5 = this;
       try {
         var pendingWrite = this.transport.write(this.protocol.motors(0, 0));
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this4._rejectPendingCommand(pendingKey, error);
+            return _this5._rejectPendingCommand(pendingKey, error);
           });
         }
       } catch (error) {
@@ -5053,7 +5132,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     key: "_clearPendingCommand",
     value: function _clearPendingCommand(key, pending) {
       clearTimeout(pending.timeout);
-      clearTimeout(pending.watchdog);
+      if (pending.watchdog) clearTimeout(pending.watchdog);
       if (pending.settle) clearTimeout(pending.settle);
       this.pendingCommands.delete(key);
     }
