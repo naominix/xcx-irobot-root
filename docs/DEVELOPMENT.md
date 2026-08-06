@@ -79,7 +79,7 @@ UART RX/write:           6e400002-b5a3-f393-e0a9-e50e24dcca9e
 UART TX/notify:          6e400003-b5a3-f393-e0a9-e50e24dcca9e
 ```
 
-命令送信はWrite Without Responseを使用します。BLE書き込みPromiseそのものは待たず、移動命令と発音命令はRootが通知する同一packet IDの完了応答を待ちます。通知パケットは命令完了、イベント、センサーレポーターへ反映します。
+命令送信はWrite Without Responseを使用します。BLE書き込みPromiseそのものは待たず、移動命令、発音命令、Say Phrase命令はRootが通知する同一packet IDの完了応答を待ちます。通知パケットは命令完了、イベント、センサーレポーターへ反映します。
 
 ## 参考資料
 

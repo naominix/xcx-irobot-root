@@ -858,6 +858,7 @@ var en = {
 	"irobotRoot.block.ledAnimation": "set LED [EFFECT] red [RED] green [GREEN] blue [BLUE]",
 	"irobotRoot.block.playNote": "play note [NOTE] for [MS] ms",
 	"irobotRoot.block.note": "play frequency [HZ] Hz for [MS] ms",
+	"irobotRoot.block.sayPhrase": "say [PHRASE]",
 	"irobotRoot.block.refreshSensor": "read [SENSOR]",
 	"irobotRoot.block.sensor": "[VALUE] value",
 	"irobotRoot.block.whenEvent": "when [EVENT] changes",
@@ -929,6 +930,7 @@ var ja = {
 	"irobotRoot.block.ledAnimation": "LEDを [EFFECT] 赤 [RED] 緑 [GREEN] 青 [BLUE]",
 	"irobotRoot.block.playNote": "音階 [NOTE] を [MS] ミリ秒鳴らす",
 	"irobotRoot.block.note": "周波数 [HZ] Hzを [MS] ミリ秒鳴らす",
+	"irobotRoot.block.sayPhrase": "[PHRASE] と言う",
 	"irobotRoot.block.refreshSensor": "[SENSOR] を読み取る",
 	"irobotRoot.block.sensor": "[VALUE] の値",
 	"irobotRoot.block.whenEvent": "[EVENT] が変化したとき",
@@ -4189,6 +4191,32 @@ var RootProtocol = /*#__PURE__*/function () {
       return this.packet(5, 0, payload);
     }
   }, {
+    key: "sayPhrase",
+    value: function sayPhrase(phrase) {
+      var payload = new Uint8Array(16);
+      var encoder = new TextEncoder();
+      var offset = 0;
+      // Protocol payloads are limited to 16 UTF-8 bytes. Add complete
+      // Unicode code points only, so truncation never leaves malformed
+      // Japanese text or half of an emoji in the packet.
+      var _iterator3 = _createForOfIteratorHelper$1(String(phrase)),
+        _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var character = _step3.value;
+          var encoded = encoder.encode(character);
+          if (offset + encoded.length > payload.length) break;
+          payload.set(encoded, offset);
+          offset += encoded.length;
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+      return this.packet(5, 4, payload);
+    }
+  }, {
     key: "decode",
     value: function decode(packet) {
       var bytes = Uint8Array.from(packet);
@@ -4360,6 +4388,7 @@ var translate = function translate(id, defaultText, description) {
 var EXTENSION_ID = 'irobotRoot';
 var COMMAND_FINISH_TIMEOUT_MS = 120000;
 var SOUND_FINISH_GRACE_MS = 1000;
+var SAY_PHRASE_TIMEOUT_MS = 30000;
 var MOTION_WATCHDOG_BASE_MS = 2000;
 var MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 var MOTION_WATCHDOG_SETTLE_MS = 300;
@@ -4591,6 +4620,16 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
             MS: {
               type: ArgumentType.NUMBER,
               defaultValue: 500
+            }
+          }
+        }, {
+          opcode: 'sayPhrase',
+          blockType: BlockType.COMMAND,
+          text: translate('block.sayPhrase', 'say [PHRASE]'),
+          arguments: {
+            PHRASE: {
+              type: ArgumentType.STRING,
+              defaultValue: 'hello'
             }
           }
         }, '---', {
@@ -4925,6 +4964,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
     }
   }, {
+    key: "sayPhrase",
+    value: function sayPhrase(args) {
+      return this._sendSoundCommandAndWait(this.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase');
+    }
+  }, {
     key: "refreshSensor",
     value: function refreshSensor(args) {
       var commands = {
@@ -5065,6 +5109,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendSoundAndWait",
     value: function _sendSoundAndWait(packet, durationMs) {
+      return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound');
+    }
+  }, {
+    key: "_sendSoundCommandAndWait",
+    value: function _sendSoundCommandAndWait(packet, timeoutMs, description) {
       var _this4 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
@@ -5072,11 +5121,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           var pending = _this4.pendingCommands.get(key);
           if (!pending) return;
           _this4._clearPendingCommand(key, pending);
-          _this4.transport.setError(new Error("Root sound completion response timed out (packet ".concat(packet[2], ")")));
+          _this4.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
           // Do not leave a Scratch stack stuck if a single notification
           // was lost after Root had enough time to finish the sound.
           resolve();
-        }, durationMs + SOUND_FINISH_GRACE_MS);
+        }, timeoutMs);
         _this4.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,

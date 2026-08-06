@@ -35,6 +35,7 @@ describe('iRobot Root extension', () => {
         expect(block.getInfo().blocks.some(item => item.opcode === 'connect')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'ledAnimation')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'playNote').arguments.NOTE.type).toBe('note');
+        expect(block.getInfo().blocks.some(item => item.opcode === 'sayPhrase')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenBumper')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenTouchSensor')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenFLTouch')).toBe(true);
@@ -58,6 +59,7 @@ describe('iRobot Root extension', () => {
         expect(findBlock(japaneseInfo, 'connect').text).toBe('Rootに接続する');
         expect(findBlock(japaneseInfo, 'motors').text).toBe('左モーター [LEFT] 右モーター [RIGHT]');
         expect(findBlock(japaneseInfo, 'playNote').text).toBe('音階 [NOTE] を [MS] ミリ秒鳴らす');
+        expect(findBlock(japaneseInfo, 'sayPhrase').text).toBe('[PHRASE] と言う');
         expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
         expect(japaneseInfo.menus.markerMenu.items[0]).toEqual({text: '上げる', value: '0'});
 
@@ -66,6 +68,7 @@ describe('iRobot Root extension', () => {
         expect(findBlock(englishInfo, 'connect').text).toBe('connect to Root');
         expect(findBlock(englishInfo, 'motors').text).toBe('set left motor [LEFT] right motor [RIGHT]');
         expect(findBlock(englishInfo, 'playNote').text).toBe('play note [NOTE] for [MS] ms');
+        expect(findBlock(englishInfo, 'sayPhrase').text).toBe('say [PHRASE]');
         expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
         expect(englishInfo.menus.markerMenu.items[0]).toEqual({text: 'up', value: '0'});
     });
@@ -88,6 +91,19 @@ describe('iRobot Root extension', () => {
         expect(packet[1]).toBe(0);
         expect(view.getUint32(3, false)).toBe(440);
         expect(view.getUint16(7, false)).toBe(500);
+        expect(crc8(packet.slice(0, 19))).toBe(packet[19]);
+    });
+
+    test.each([
+        ['hello', [104, 101, 108, 108, 111, 0]],
+        ['こんにちは', [227, 129, 147, 227, 130, 147, 227, 129, 171, 227, 129, 161, 227, 129, 175, 0]],
+        ['1234567890123456extra', [49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54]],
+        ['123456789012345🙂', [49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 0]]
+    ])('encodes Say Phrase as valid UTF-8 within the 16-byte payload: %s', (phrase, expectedPrefix) => {
+        const packet = new RootProtocol().sayPhrase(phrase);
+        expect(packet[0]).toBe(5);
+        expect(packet[1]).toBe(4);
+        expect(Array.from(packet.slice(3, 3 + expectedPrefix.length))).toEqual(expectedPrefix);
         expect(crc8(packet.slice(0, 19))).toBe(packet[19]);
     });
 
@@ -283,6 +299,30 @@ describe('iRobot Root extension', () => {
         const packetView = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
         expect(packetView.getUint32(3, false)).toBe(440);
         expect(packetView.getUint16(7, false)).toBe(250);
+    });
+
+    test('say phrase waits for Root Say Phrase Finished response with the matching packet ID', async () => {
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+        const completion = block.sayPhrase({PHRASE: 'こんにちは'});
+        const packet = block.transport.write.mock.calls[0][0];
+        let completed = false;
+        completion.then(() => {
+            completed = true;
+        });
+
+        expect(packet[0]).toBe(5);
+        expect(packet[1]).toBe(4);
+        await Promise.resolve();
+        expect(completed).toBe(false);
+
+        const finished = new RootProtocol().packet(5, 4);
+        finished[2] = packet[2];
+        finished[19] = crc8(finished.slice(0, 19));
+        block._receive(finished);
+        await expect(completion).resolves.toBeUndefined();
+        expect(completed).toBe(true);
+        expect(block.transport.write).toHaveBeenCalledTimes(1);
     });
 
     test.each([

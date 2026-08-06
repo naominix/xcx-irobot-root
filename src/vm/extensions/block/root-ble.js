@@ -166,6 +166,22 @@ class RootProtocol {
         return this.packet(5, 0, payload);
     }
 
+    sayPhrase (phrase) {
+        const payload = new Uint8Array(16);
+        const encoder = new TextEncoder();
+        let offset = 0;
+        // Protocol payloads are limited to 16 UTF-8 bytes. Add complete
+        // Unicode code points only, so truncation never leaves malformed
+        // Japanese text or half of an emoji in the packet.
+        for (const character of String(phrase)) {
+            const encoded = encoder.encode(character);
+            if (offset + encoded.length > payload.length) break;
+            payload.set(encoded, offset);
+            offset += encoded.length;
+        }
+        return this.packet(5, 4, payload);
+    }
+
     decode (packet) {
         const bytes = Uint8Array.from(packet);
         if (bytes.length !== 20 || crc8(bytes.slice(0, 19)) !== bytes[19]) return null;

@@ -26,6 +26,7 @@ const translate = (id, defaultText, description) => formatMessage({
 const EXTENSION_ID = 'irobotRoot';
 const COMMAND_FINISH_TIMEOUT_MS = 120000;
 const SOUND_FINISH_GRACE_MS = 1000;
+const SAY_PHRASE_TIMEOUT_MS = 30000;
 const MOTION_WATCHDOG_BASE_MS = 2000;
 const MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 const MOTION_WATCHDOG_SETTLE_MS = 300;
@@ -185,6 +186,10 @@ class IrobotRootBlocks {
                     text: translate('block.note', 'play frequency [HZ] Hz for [MS] ms'), arguments: {
                     HZ: {type: ArgumentType.NUMBER, defaultValue: 440}, MS: {type: ArgumentType.NUMBER, defaultValue: 500}
                 }},
+                {opcode: 'sayPhrase', blockType: BlockType.COMMAND,
+                    text: translate('block.sayPhrase', 'say [PHRASE]'), arguments: {
+                    PHRASE: {type: ArgumentType.STRING, defaultValue: 'hello'}
+                }},
                 '---',
                 {opcode: 'refreshSensor', blockType: BlockType.COMMAND,
                     text: translate('block.refreshSensor', 'read [SENSOR]'), arguments: {
@@ -338,6 +343,14 @@ class IrobotRootBlocks {
         this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
     }
 
+    sayPhrase (args) {
+        return this._sendSoundCommandAndWait(
+            this.protocol.sayPhrase(Cast.toString(args.PHRASE)),
+            SAY_PHRASE_TIMEOUT_MS,
+            'phrase'
+        );
+    }
+
     refreshSensor (args) {
         const commands = {battery: [14, 1], light: [13, 1], accel: [16, 1]};
         const command = commands[args.SENSOR];
@@ -436,6 +449,10 @@ class IrobotRootBlocks {
     }
 
     _sendSoundAndWait (packet, durationMs) {
+        return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound');
+    }
+
+    _sendSoundCommandAndWait (packet, timeoutMs, description) {
         const key = this._commandKey(packet[0], packet[1], packet[2]);
         const completion = new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
@@ -443,12 +460,12 @@ class IrobotRootBlocks {
                 if (!pending) return;
                 this._clearPendingCommand(key, pending);
                 this.transport.setError(new Error(
-                    `Root sound completion response timed out (packet ${packet[2]})`
+                    `Root ${description} completion response timed out (packet ${packet[2]})`
                 ));
                 // Do not leave a Scratch stack stuck if a single notification
                 // was lost after Root had enough time to finish the sound.
                 resolve();
-            }, durationMs + SOUND_FINISH_GRACE_MS);
+            }, timeoutMs);
             this.pendingCommands.set(key, {
                 resolve, reject, timeout, watchdog: null, settle: null, settling: false, stopMotion: false
             });
