@@ -23,7 +23,7 @@ Scrubは、ページの初期HTMLに次の要素がある場合に標準Scratch 
 
 micro:bit More専用エディターはこの条件を満たすため、無改造のApp Store版ScrubでRootとmicro:bit Moreが共存します。
 
-2026年7月26日現在、公式Xcratchエディターはこのマーカーを持たないため、App Store版Scrubから標準Scratch Link Socketを利用できません。これはScrubやRoot BLEプロトコルの問題ではなく、Webエディター側の統合条件です。
+公式Xcratchエディターは2026年8月7日現在、このマーカーに対応済みです。App Store版Scrubから公式Xcratchを開き、標準Scratch Link Socketを利用できます。
 
 ## 現在の検証方法
 
@@ -38,9 +38,9 @@ micro:bit More専用エディターはこの条件を満たすため、無改造
 https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs?v=97262b4
 ```
 
-## 公式Xcratchで利用するには
+## 公式Xcratchで利用する
 
-Xcratchの初期HTMLへ標準マーカーを追加する必要があります。Xcratch本体への提案、またはマーカー追加版XcratchをGitHub Pagesへ配置する方法が考えられます。詳細は[XcratchとScrubの統合案](XCRATCH_SCRUB.md)を参照してください。
+公式Xcratchは標準マーカーへ対応済みのため、利用者によるXcratchやScrubへのパッチは不要です。公式XcratchをScrubで開き、Root拡張を読み込んでください。統合の技術的な背景は[XcratchとScrubの統合案](XCRATCH_SCRUB.md)を参照してください。
 
 ## よくある問題
 

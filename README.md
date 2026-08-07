@@ -45,7 +45,7 @@ https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs
 > [!IMPORTANT]
 > **App Store版Scrubは無改造で利用できます。** 2026年7月26日、micro:bit More専用エディター上でRootとmicro:bit More v2を同時接続し、micro:bitのボタンからRootのLEDを制御できることを確認しました。
 
-iPadOSのSafari単体では接続できません。また、接続先ページにはScrubが認識する`scratch-link-extension-script`マーカーが必要です。現在の公式Xcratchエディターはこの条件を満たさないため、Xcratch側の対応またはマーカー追加版のホスティングが必要です。詳しくは[Scrub導入手順](docs/SCRUB.md)と[Xcratch対応案](docs/XCRATCH_SCRUB.md)を参照してください。
+iPadOSのSafari単体では接続できません。また、接続先ページにはScrubが認識する`scratch-link-extension-script`マーカーが必要です。公式Xcratchエディターは2026年8月7日現在、この条件に対応済みのため、App Store版Scrubから無改造で利用できます。詳しくは[Scrub導入手順](docs/SCRUB.md)と[Xcratch対応案](docs/XCRATCH_SCRUB.md)を参照してください。
 
 Rootは複数の端末へ同時接続できません。接続できない場合は、別のiPad、PC、公式アプリなどでRootを切断してから再試行してください。
 

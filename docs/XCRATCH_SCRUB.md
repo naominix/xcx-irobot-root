@@ -4,6 +4,8 @@
 
 Root拡張をiPadOSで利用するためにScrubを変更する必要はありません。Webエディター側がScrubの標準Scratch Link公開条件を満たす必要があります。
 
+公式Xcratchは2026年8月7日現在、この条件に対応済みです。以下は対応に必要だった技術条件と、独自ホスト版で検証する場合の参考情報です。
+
 ## Xcratch側の最小変更
 
 初期HTMLへ次のマーカーを追加します。
@@ -20,9 +22,9 @@ self.Scratch.ScratchLinkSafariSocket = ScratchLinkKit.Socket;
 
 XcratchのScratch VMはこの標準プロパティを既に参照します。Scrub以外のブラウザーではSocketが注入されないため、従来どおりWeb BluetoothまたはPC版Scratch Linkへフォールバックします。
 
-## GitHub Pagesで検証版をホストする案
+## GitHub Pagesで独自版を検証する場合
 
-公式Xcratchへの変更が反映される前に検証する場合は、Xcratchをフォークして次の手順で公開できます。
+独自の機能を追加したXcratchで検証する場合は、Xcratchをフォークして次の手順で公開できます。
 
 1. Xcratchの初期HTMLへマーカーを追加します。
 2. Xcratchの既存テストとproduction buildを実行します。
