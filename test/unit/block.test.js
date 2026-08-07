@@ -19,6 +19,7 @@ import {
     selectBLEAdapter,
     supportsWebBluetooth
 } from '../../src/vm/extensions/block/root-ble.js';
+import translations from '../../src/vm/extensions/block/translations.json';
 
 describe('iRobot Root extension', () => {
     const formatMessage = msg => msg.default;
@@ -67,8 +68,8 @@ describe('iRobot Root extension', () => {
         expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot', block.transport);
     });
 
-    test('updates block and menu labels when Scratch changes between Japanese and English', () => {
-        const localeSetup = {locale: 'ja', translations: {ja: {}, en: {}}};
+    test('updates block and menu labels between Japanese, hiragana Japanese, and English', () => {
+        const localeSetup = {locale: 'ja', translations: {ja: {}, 'ja-Hira': {}, en: {}}};
         const localizedFormatMessage = message =>
             localeSetup.translations[localeSetup.locale][message.id] || message.default;
         localizedFormatMessage.setup = () => localeSetup;
@@ -88,6 +89,22 @@ describe('iRobot Root extension', () => {
         expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
         expect(japaneseInfo.menus.markerMenu.items[0]).toEqual({text: '上げる', value: '0'});
 
+        localeSetup.locale = 'ja-Hira';
+        const hiraganaInfo = block.getInfo();
+        expect(findBlock(hiraganaInfo, 'connect').text).toBe('るーとにつなぐ');
+        expect(findBlock(hiraganaInfo, 'motors').text).toBe('ひだりもーたー [LEFT] みぎもーたー [RIGHT]');
+        expect(findBlock(hiraganaInfo, 'ledColor').text).toBe('えるいーでぃーを [COLOR] にする');
+        expect(findBlock(hiraganaInfo, 'playNote').text).toBe('おんかい [NOTE] を [MS] みりびょうならす');
+        expect(findBlock(hiraganaInfo, 'resetNavigation').text).toBe('なびのいちをりせっとする');
+        expect(findBlock(hiraganaInfo, 'navigateTo').text).toBe('なびで x [X] y [Y] cmへうごく');
+        expect(findBlock(hiraganaInfo, 'sayPhrase').text).toBe('[PHRASE] という');
+        expect(findBlock(hiraganaInfo, 'whenBumper').text).toBe('[BUMPER] ばんぱーが [ACTION] とき');
+        expect(findBlock(hiraganaInfo, 'whenFLTouch').text).toBe('FLたっちせんさーにふれたとき');
+        expect(hiraganaInfo.menus.markerMenu.items[0]).toEqual({text: 'あげる', value: '0'});
+        expect(hiraganaInfo.menus.bumperActionMenu.items[0]).toEqual({text: 'おされた', value: 'PUSH'});
+        expect(hiraganaInfo.customFieldTypes['root-motor-left'].implementation.labels['ja-Hira'])
+            .toBe('ひだりもーたーのしゅつりょく');
+
         localeSetup.locale = 'en-US';
         const englishInfo = block.getInfo();
         expect(findBlock(englishInfo, 'connect').text).toBe('connect to Root');
@@ -100,6 +117,13 @@ describe('iRobot Root extension', () => {
         expect(findBlock(englishInfo, 'sayPhrase').text).toBe('say [PHRASE]');
         expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
         expect(englishInfo.menus.markerMenu.items[0]).toEqual({text: 'up', value: '0'});
+    });
+
+    test('keeps the hiragana locale complete and free of kanji and katakana letters', () => {
+        expect(Object.keys(translations['ja-Hira']).sort()).toEqual(Object.keys(translations.en).sort());
+        Object.values(translations['ja-Hira']).forEach(message => {
+            expect(message).not.toMatch(/[\u3400-\u9fff\u30a1-\u30fa\u30fd-\u30ff]/);
+        });
     });
 
     test('matches the documented motor packet and CRC', () => {

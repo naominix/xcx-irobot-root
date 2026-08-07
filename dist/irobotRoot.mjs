@@ -15,7 +15,7 @@ var translations$1 = {
 	ja: ja$1,
 	"ja-Hira": {
 	"irobotRoot.entry.name": "iRobot Root",
-	"irobotRoot.entry.description": "iRobot RootロボットをBluetoothでせいぎょします"
+	"irobotRoot.entry.description": "iRobot Rootをぶるーとぅーすでうごかします"
 }
 };
 
@@ -995,7 +995,83 @@ var ja = {
 };
 var translations = {
 	en: en,
-	ja: ja
+	ja: ja,
+	"ja-Hira": {
+	"irobotRoot.name": "iRobot Root",
+	"irobotRoot.block.connect": "るーとにつなぐ",
+	"irobotRoot.block.disconnect": "るーとをきりはなす",
+	"irobotRoot.block.isConnected": "るーとはつながっている",
+	"irobotRoot.block.transportMode": "るーとのつなぎかた",
+	"irobotRoot.block.lastConnectionError": "さいごのせつぞくのもんだい",
+	"irobotRoot.block.motors": "ひだりもーたー [LEFT] みぎもーたー [RIGHT]",
+	"irobotRoot.block.drive": "[MM] mmすすむ",
+	"irobotRoot.block.turn": "[DEGREES] どまわる",
+	"irobotRoot.block.arc": "はんけい [RADIUS] mmで [DEGREES] どえんこをすすむ",
+	"irobotRoot.block.resetNavigation": "なびのいちをりせっとする",
+	"irobotRoot.block.navigateTo": "なびで x [X] y [Y] cmへうごく",
+	"irobotRoot.block.stop": "るーとをとめる",
+	"irobotRoot.block.marker": "まーかーを [POSITION]",
+	"irobotRoot.block.ledColor": "えるいーでぃーを [COLOR] にする",
+	"irobotRoot.block.ledAnimationColor": "えるいーでぃーを [EFFECT] で [COLOR] にする",
+	"irobotRoot.block.led": "えるいーでぃーを あか [RED] みどり [GREEN] あお [BLUE]",
+	"irobotRoot.block.ledAnimation": "えるいーでぃーを [EFFECT] あか [RED] みどり [GREEN] あお [BLUE]",
+	"irobotRoot.block.playNote": "おんかい [NOTE] を [MS] みりびょうならす",
+	"irobotRoot.block.note": "しゅうはすう [HZ] Hzを [MS] みりびょうならす",
+	"irobotRoot.block.sayPhrase": "[PHRASE] という",
+	"irobotRoot.block.refreshSensor": "[SENSOR] をよみとる",
+	"irobotRoot.block.sensor": "[VALUE] のあたい",
+	"irobotRoot.block.whenEvent": "[EVENT] がかわったとき",
+	"irobotRoot.block.whenBumper": "[BUMPER] ばんぱーが [ACTION] とき",
+	"irobotRoot.block.whenTouchSensor": "[SENSOR] たっちせんさーが [ACTION] とき",
+	"irobotRoot.block.raw": "でばいす [DEVICE] こまんど [COMMAND] ぺいろーど [PAYLOAD]",
+	"irobotRoot.block.lastPacket": "さいごにうけとったぱけっと",
+	"irobotRoot.block.detailedEvent": "さいごのくわしいいべんと",
+	"irobotRoot.hat.leftBumperPush": "ひだりばんぱーがおされたとき",
+	"irobotRoot.hat.leftBumperRelease": "ひだりばんぱーがはなされたとき",
+	"irobotRoot.hat.rightBumperPush": "みぎばんぱーがおされたとき",
+	"irobotRoot.hat.rightBumperRelease": "みぎばんぱーがはなされたとき",
+	"irobotRoot.hat.bothBumpersPush": "さゆうのばんぱーがどうじにおされたとき",
+	"irobotRoot.hat.bothBumpersRelease": "さゆうのばんぱーがどうじにはなされたとき",
+	"irobotRoot.hat.flTouch": "FLたっちせんさーにふれたとき",
+	"irobotRoot.hat.flRelease": "FLたっちせんさーをはなしたとき",
+	"irobotRoot.hat.frTouch": "FRたっちせんさーにふれたとき",
+	"irobotRoot.hat.frRelease": "FRたっちせんさーをはなしたとき",
+	"irobotRoot.hat.rlTouch": "RLたっちせんさーにふれたとき",
+	"irobotRoot.hat.rlRelease": "RLたっちせんさーをはなしたとき",
+	"irobotRoot.hat.rrTouch": "RRたっちせんさーにふれたとき",
+	"irobotRoot.hat.rrRelease": "RRたっちせんさーをはなしたとき",
+	"irobotRoot.menu.marker.up": "あげる",
+	"irobotRoot.menu.marker.down": "さげる",
+	"irobotRoot.menu.marker.eraser": "けしごむ",
+	"irobotRoot.menu.sensor.battery": "ばってりー",
+	"irobotRoot.menu.sensor.light": "あかるさ",
+	"irobotRoot.menu.sensor.accel": "かそくど",
+	"irobotRoot.menu.led.off": "けす",
+	"irobotRoot.menu.led.on": "つける",
+	"irobotRoot.menu.led.blink": "てんめつ",
+	"irobotRoot.menu.led.spin": "かいてん",
+	"irobotRoot.menu.value.batteryPercent": "ばってりーのこり (%)",
+	"irobotRoot.menu.value.batteryMv": "ばってりーでんあつ (mV)",
+	"irobotRoot.menu.value.lightLeft": "ひだりのあかるさ",
+	"irobotRoot.menu.value.lightRight": "みぎのあかるさ",
+	"irobotRoot.menu.value.accelX": "かそくど X",
+	"irobotRoot.menu.value.accelY": "かそくど Y",
+	"irobotRoot.menu.value.accelZ": "かそくど Z",
+	"irobotRoot.menu.value.leftBumper": "ひだりばんぱー",
+	"irobotRoot.menu.value.rightBumper": "みぎばんぱー",
+	"irobotRoot.menu.value.touchMask": "たっちせんさーますく",
+	"irobotRoot.menu.value.cliff": "らっかぼうしせんさー",
+	"irobotRoot.menu.event.bumper": "ばんぱー",
+	"irobotRoot.menu.event.touch": "たっち",
+	"irobotRoot.menu.event.cliff": "らっかぼうしせんさー",
+	"irobotRoot.menu.event.battery": "ばってりー",
+	"irobotRoot.menu.bumper.left": "ひだり",
+	"irobotRoot.menu.bumper.right": "みぎ",
+	"irobotRoot.menu.bumper.both": "さゆうどうじ",
+	"irobotRoot.menu.action.push": "おされた",
+	"irobotRoot.menu.action.release": "はなされた",
+	"irobotRoot.menu.action.touch": "ふれられた"
+}
 };
 
 var img = "data:image/png;base64,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";
@@ -4445,7 +4521,8 @@ var ROOT_MOTION_FIELD_TYPES = {
     unit: '%',
     labels: {
       en: 'Left motor power',
-      ja: '左モーターの出力'
+      ja: '左モーターの出力',
+      'ja-Hira': 'ひだりもーたーのしゅつりょく'
     }
   }),
   'root-motor-right': rootMotionField('motor', {
@@ -4456,7 +4533,8 @@ var ROOT_MOTION_FIELD_TYPES = {
     unit: '%',
     labels: {
       en: 'Right motor power',
-      ja: '右モーターの出力'
+      ja: '右モーターの出力',
+      'ja-Hira': 'みぎもーたーのしゅつりょく'
     }
   }),
   'root-distance': rootMotionField('distance', {
@@ -4466,7 +4544,8 @@ var ROOT_MOTION_FIELD_TYPES = {
     unit: 'mm',
     labels: {
       en: 'Travel distance',
-      ja: '移動する距離'
+      ja: '移動する距離',
+      'ja-Hira': 'すすむきょり'
     }
   }),
   'root-turn-angle': rootMotionField('turn', {
@@ -4476,7 +4555,8 @@ var ROOT_MOTION_FIELD_TYPES = {
     unit: '°',
     labels: {
       en: 'Turn angle',
-      ja: '回転する角度'
+      ja: '回転する角度',
+      'ja-Hira': 'まわるかくど'
     }
   }),
   'root-arc-radius': rootMotionField('radius', {
@@ -4486,7 +4566,8 @@ var ROOT_MOTION_FIELD_TYPES = {
     unit: 'mm',
     labels: {
       en: 'Arc radius',
-      ja: '円弧の半径'
+      ja: '円弧の半径',
+      'ja-Hira': 'えんこのはんけい'
     }
   }),
   'root-arc-angle': rootMotionField('arc', {
@@ -4496,7 +4577,8 @@ var ROOT_MOTION_FIELD_TYPES = {
     unit: '°',
     labels: {
       en: 'Arc angle',
-      ja: '円弧の角度'
+      ja: '円弧の角度',
+      'ja-Hira': 'えんこのかくど'
     }
   })
 };

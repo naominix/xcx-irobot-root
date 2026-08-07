@@ -49,27 +49,27 @@ const rootMotionField = (mode, options = {}) => ({
 const ROOT_MOTION_FIELD_TYPES = {
     'root-motor-left': rootMotionField('motor', {
         side: 'left', min: -100, max: 100, step: 1, unit: '%',
-        labels: {en: 'Left motor power', ja: '左モーターの出力'}
+        labels: {en: 'Left motor power', ja: '左モーターの出力', 'ja-Hira': 'ひだりもーたーのしゅつりょく'}
     }),
     'root-motor-right': rootMotionField('motor', {
         side: 'right', min: -100, max: 100, step: 1, unit: '%',
-        labels: {en: 'Right motor power', ja: '右モーターの出力'}
+        labels: {en: 'Right motor power', ja: '右モーターの出力', 'ja-Hira': 'みぎもーたーのしゅつりょく'}
     }),
     'root-distance': rootMotionField('distance', {
         min: -500, max: 500, step: 10, unit: 'mm',
-        labels: {en: 'Travel distance', ja: '移動する距離'}
+        labels: {en: 'Travel distance', ja: '移動する距離', 'ja-Hira': 'すすむきょり'}
     }),
     'root-turn-angle': rootMotionField('turn', {
         min: -180, max: 180, step: 5, unit: '°',
-        labels: {en: 'Turn angle', ja: '回転する角度'}
+        labels: {en: 'Turn angle', ja: '回転する角度', 'ja-Hira': 'まわるかくど'}
     }),
     'root-arc-radius': rootMotionField('radius', {
         min: -500, max: 500, step: 10, unit: 'mm',
-        labels: {en: 'Arc radius', ja: '円弧の半径'}
+        labels: {en: 'Arc radius', ja: '円弧の半径', 'ja-Hira': 'えんこのはんけい'}
     }),
     'root-arc-angle': rootMotionField('arc', {
         min: -360, max: 360, step: 5, unit: '°',
-        labels: {en: 'Arc angle', ja: '円弧の角度'}
+        labels: {en: 'Arc angle', ja: '円弧の角度', 'ja-Hira': 'えんこのかくど'}
     })
 };
 

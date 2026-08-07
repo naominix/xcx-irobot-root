@@ -63,6 +63,7 @@ jobs:
         run: |
           mkdir -p _site
           cp site/index.html _site/index.html
+          cp -R site/screenshots _site/screenshots
           cp assets/root-icon-selected.png _site/root-icon.png
           cp dist/irobotRoot.mjs _site/irobotRoot.mjs
           cp dist/irobotRoot.mjs.map _site/irobotRoot.mjs.map
