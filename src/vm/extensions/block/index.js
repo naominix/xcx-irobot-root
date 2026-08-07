@@ -93,6 +93,12 @@ const navigationMotionWatchdogMs = (deltaXmm, deltaYmm) => linearMotionWatchdogM
     Math.hypot(deltaXmm, deltaYmm) + (Math.PI * ROOT_HALF_TRACK_MM)
 );
 
+const normalizeHeading = degrees => ((degrees % 360) + 360) % 360;
+const normalizeTurn = degrees => {
+    const normalized = normalizeHeading(degrees + 180) - 180;
+    return normalized === -180 ? 180 : normalized;
+};
+
 const midiNoteToFrequency = midiNote => Math.round(440 * Math.pow(2, (midiNote - 69) / 12));
 
 const FIXED_EVENT_HAT_MESSAGES = [
@@ -167,10 +173,10 @@ class IrobotRootBlocks {
         this.currentEvent = null;
         this.bumperState = 0;
         this.touchState = 0;
-        // Root resets its odometry to (0, 0) whenever a new BLE connection is
-        // established. Keep only the last planned navigation target so the
-        // residual-motion watchdog can use a realistic point-to-point distance.
-        this.navigationPosition = {x: 0, y: 0};
+        // Root rt0/rt1 navigation is implemented in the client, as in the
+        // official Python SDK. Heading uses the conventional xy plane: 90° is
+        // forward (+y), and a positive Root rotation turns clockwise.
+        this.navigationPosition = {x: 0, y: 0, heading: 90};
         this._playNoteForPicker = this._playNoteForPicker.bind(this);
         if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
     }
@@ -352,7 +358,7 @@ class IrobotRootBlocks {
     }
 
     connect () {
-        this.navigationPosition = {x: 0, y: 0};
+        this.navigationPosition = {x: 0, y: 0, heading: 90};
         this.transport.scan();
     }
 
@@ -384,20 +390,34 @@ class IrobotRootBlocks {
         );
     }
     resetNavigation () {
-        this.navigationPosition = {x: 0, y: 0};
-        return this._send(this.protocol.resetPosition());
+        // The official SDK keeps Root rt0/rt1 pose on the client. Native
+        // Reset Position / Navigate to Position packets are not accepted by
+        // every Root firmware even though they exist in the shared protocol.
+        this.navigationPosition = {x: 0, y: 0, heading: 90};
     }
     navigateTo (args) {
         const target = {
             x: Math.round(Cast.toNumber(args.X) * 10),
             y: Math.round(Cast.toNumber(args.Y) * 10)
         };
-        const origin = this.navigationPosition || {x: 0, y: 0};
-        const watchdog = navigationMotionWatchdogMs(target.x - origin.x, target.y - origin.y);
-        const completion = this._sendAndWait(this.protocol.navigateTo(target.x, target.y), watchdog);
-        return completion.then(() => {
-            this.navigationPosition = target;
-        }, error => {
+        const origin = this.navigationPosition || {x: 0, y: 0, heading: 90};
+        const deltaX = target.x - origin.x;
+        const deltaY = target.y - origin.y;
+        const distance = Math.round(Math.hypot(deltaX, deltaY));
+        if (distance === 0) return;
+
+        const targetHeading = normalizeHeading(Math.atan2(deltaY, deltaX) * 180 / Math.PI);
+        // Root's finite rotate command is positive clockwise, while standard
+        // xy headings increase counter-clockwise.
+        const turn = normalizeTurn(origin.heading - targetHeading);
+        const rotation = Math.abs(turn) >= 0.05 ?
+            this._sendAndWait(this.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn)) :
+            Promise.resolve();
+        return rotation.then(() => this._sendAndWait(
+            this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance)
+        )).then(() => {
+            this.navigationPosition = {x: target.x, y: target.y, heading: targetHeading};
+        }).catch(error => {
             this.navigationPosition = null;
             throw error;
         });

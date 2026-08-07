@@ -371,8 +371,7 @@ describe('iRobot Root extension', () => {
     test.each([
         ['drive', {MM: 100}, 8],
         ['turn', {DEGREES: 90}, 12],
-        ['arc', {RADIUS: 100, DEGREES: 90}, 27],
-        ['navigateTo', {X: -16, Y: 8}, 17]
+        ['arc', {RADIUS: 100, DEGREES: 90}, 27]
     ])('%s waits for Root finished response with the matching packet ID', async (method, args, command) => {
         const block = new blockClass(runtime);
         block.transport.write = jest.fn(() => new Promise(() => {}));
@@ -407,28 +406,61 @@ describe('iRobot Root extension', () => {
         expect(Array.from(stopPacket.slice(3, 11))).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
     });
 
-    test('navigation reset uses centimeters and point-to-point watchdog distances', async () => {
+    test('navigation reset uses client pose and converts coordinates to turn then drive', async () => {
         const block = new blockClass(runtime);
         block.transport.write = jest.fn(() => new Promise(() => {}));
 
         block.resetNavigation();
-        expect(Array.from(block.transport.write.mock.calls[0][0].slice(0, 3))).toEqual([1, 15, 0]);
-        expect(block.navigationPosition).toEqual({x: 0, y: 0});
+        expect(block.transport.write).not.toHaveBeenCalled();
+        expect(block.navigationPosition).toEqual({x: 0, y: 0, heading: 90});
 
         const completion = block.navigateTo({X: 16, Y: 8});
-        const packet = block.transport.write.mock.calls[1][0];
-        const packetView = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
-        expect(packetView.getInt32(3, false)).toBe(160);
-        expect(packetView.getInt32(7, false)).toBe(80);
-        expect(packetView.getInt16(11, false)).toBe(-1);
+        const turnPacket = block.transport.write.mock.calls[0][0];
+        const turnView = new DataView(turnPacket.buffer, turnPacket.byteOffset, turnPacket.byteLength);
+        expect(Array.from(turnPacket.slice(0, 2))).toEqual([1, 12]);
+        expect(turnView.getInt32(3, false)).toBe(634);
         expect(navigationMotionWatchdogMs(160, 80)).toBeGreaterThan(linearMotionWatchdogMs(160));
 
-        const finished = new RootProtocol().packet(1, 17);
-        finished[2] = packet[2];
+        const turnFinished = new RootProtocol().packet(1, 12);
+        turnFinished[2] = turnPacket[2];
+        turnFinished[19] = crc8(turnFinished.slice(0, 19));
+        block._receive(turnFinished);
+        await Promise.resolve();
+
+        // Completing a finite movement emits a zero-speed packet before the
+        // next navigation leg is sent.
+        const drivePacket = block.transport.write.mock.calls[2][0];
+        const driveView = new DataView(drivePacket.buffer, drivePacket.byteOffset, drivePacket.byteLength);
+        expect(Array.from(drivePacket.slice(0, 2))).toEqual([1, 8]);
+        expect(driveView.getInt32(3, false)).toBe(179);
+
+        const driveFinished = new RootProtocol().packet(1, 8);
+        driveFinished[2] = drivePacket[2];
+        driveFinished[19] = crc8(driveFinished.slice(0, 19));
+        block._receive(driveFinished);
+        await expect(completion).resolves.toBeUndefined();
+        expect(block.navigationPosition.x).toBe(160);
+        expect(block.navigationPosition.y).toBe(80);
+        expect(block.navigationPosition.heading).toBeCloseTo(26.565, 3);
+    });
+
+    test('navigation skips the turn when the target is straight ahead', async () => {
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+
+        const completion = block.navigateTo({X: 0, Y: 16});
+        await Promise.resolve();
+        const drivePacket = block.transport.write.mock.calls[0][0];
+        const view = new DataView(drivePacket.buffer, drivePacket.byteOffset, drivePacket.byteLength);
+        expect(Array.from(drivePacket.slice(0, 2))).toEqual([1, 8]);
+        expect(view.getInt32(3, false)).toBe(160);
+
+        const finished = new RootProtocol().packet(1, 8);
+        finished[2] = drivePacket[2];
         finished[19] = crc8(finished.slice(0, 19));
         block._receive(finished);
         await expect(completion).resolves.toBeUndefined();
-        expect(block.navigationPosition).toEqual({x: 160, y: 80});
+        expect(block.navigationPosition).toEqual({x: 0, y: 160, heading: 90});
     });
 
     test('stops residual motion and advances when Root never reaches its finished response', async () => {

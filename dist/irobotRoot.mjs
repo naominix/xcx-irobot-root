@@ -4514,6 +4514,13 @@ var arcMotionWatchdogMs = function arcMotionWatchdogMs(degrees, radiusMm) {
 var navigationMotionWatchdogMs = function navigationMotionWatchdogMs(deltaXmm, deltaYmm) {
   return linearMotionWatchdogMs(Math.hypot(deltaXmm, deltaYmm) + Math.PI * ROOT_HALF_TRACK_MM);
 };
+var normalizeHeading = function normalizeHeading(degrees) {
+  return (degrees % 360 + 360) % 360;
+};
+var normalizeTurn = function normalizeTurn(degrees) {
+  var normalized = normalizeHeading(degrees + 180) - 180;
+  return normalized === -180 ? 180 : normalized;
+};
 var midiNoteToFrequency = function midiNoteToFrequency(midiNote) {
   return Math.round(440 * Math.pow(2, (midiNote - 69) / 12));
 };
@@ -4567,12 +4574,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     this.currentEvent = null;
     this.bumperState = 0;
     this.touchState = 0;
-    // Root resets its odometry to (0, 0) whenever a new BLE connection is
-    // established. Keep only the last planned navigation target so the
-    // residual-motion watchdog can use a realistic point-to-point distance.
+    // Root rt0/rt1 navigation is implemented in the client, as in the
+    // official Python SDK. Heading uses the conventional xy plane: 90° is
+    // forward (+y), and a positive Root rotation turns clockwise.
     this.navigationPosition = {
       x: 0,
-      y: 0
+      y: 0,
+      heading: 90
     };
     this._playNoteForPicker = this._playNoteForPicker.bind(this);
     if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
@@ -5025,7 +5033,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function connect() {
       this.navigationPosition = {
         x: 0,
-        y: 0
+        y: 0,
+        heading: 90
       };
       this.transport.scan();
     }
@@ -5079,11 +5088,14 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "resetNavigation",
     value: function resetNavigation() {
+      // The official SDK keeps Root rt0/rt1 pose on the client. Native
+      // Reset Position / Navigate to Position packets are not accepted by
+      // every Root firmware even though they exist in the shared protocol.
       this.navigationPosition = {
         x: 0,
-        y: 0
+        y: 0,
+        heading: 90
       };
-      return this._send(this.protocol.resetPosition());
     }
   }, {
     key: "navigateTo",
@@ -5095,13 +5107,27 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       };
       var origin = this.navigationPosition || {
         x: 0,
-        y: 0
+        y: 0,
+        heading: 90
       };
-      var watchdog = navigationMotionWatchdogMs(target.x - origin.x, target.y - origin.y);
-      var completion = this._sendAndWait(this.protocol.navigateTo(target.x, target.y), watchdog);
-      return completion.then(function () {
-        _this2.navigationPosition = target;
-      }, function (error) {
+      var deltaX = target.x - origin.x;
+      var deltaY = target.y - origin.y;
+      var distance = Math.round(Math.hypot(deltaX, deltaY));
+      if (distance === 0) return;
+      var targetHeading = normalizeHeading(Math.atan2(deltaY, deltaX) * 180 / Math.PI);
+      // Root's finite rotate command is positive clockwise, while standard
+      // xy headings increase counter-clockwise.
+      var turn = normalizeTurn(origin.heading - targetHeading);
+      var rotation = Math.abs(turn) >= 0.05 ? this._sendAndWait(this.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn)) : Promise.resolve();
+      return rotation.then(function () {
+        return _this2._sendAndWait(_this2.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
+      }).then(function () {
+        _this2.navigationPosition = {
+          x: target.x,
+          y: target.y,
+          heading: targetHeading
+        };
+      }).catch(function (error) {
         _this2.navigationPosition = null;
         throw error;
       });
