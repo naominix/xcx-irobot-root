@@ -40,7 +40,8 @@ describe('iRobot Root extension', () => {
         expect(block.getInfo().blocks.find(item => item.opcode === 'arc').arguments.RADIUS.type)
             .toBe('root-arc-radius');
         expect(block.getInfo().customFieldTypes['root-motor-left'].implementation).toMatchObject({
-            type: 'root-motion-picker', mode: 'motor', side: 'left', min: -100, max: 100
+            type: 'root-motion-picker', mode: 'motor', side: 'left', min: -100, max: 100,
+            directInput: true, keypad: true
         });
         expect(block.getInfo().customFieldTypes['root-arc-angle'].implementation).toMatchObject({
             type: 'root-motion-picker', mode: 'arc', min: -360, max: 360

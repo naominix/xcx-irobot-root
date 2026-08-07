@@ -39,6 +39,8 @@ const rootMotionField = (mode, options = {}) => ({
     implementation: Object.assign({
         type: 'root-motion-picker',
         mode,
+        directInput: true,
+        keypad: true,
         fromJson: () => null
     }, options)
 });

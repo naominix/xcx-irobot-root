@@ -4406,6 +4406,8 @@ var rootMotionField = function rootMotionField(mode) {
     implementation: Object.assign({
       type: 'root-motion-picker',
       mode: mode,
+      directInput: true,
+      keypad: true,
       fromJson: function fromJson() {
         return null;
       }
