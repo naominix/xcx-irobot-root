@@ -854,6 +854,8 @@ var en = {
 	"irobotRoot.block.arc": "drive an arc of [DEGREES] degrees with radius [RADIUS] mm",
 	"irobotRoot.block.stop": "stop Root",
 	"irobotRoot.block.marker": "set marker [POSITION]",
+	"irobotRoot.block.ledColor": "set LED to [COLOR]",
+	"irobotRoot.block.ledAnimationColor": "set LED [EFFECT] to [COLOR]",
 	"irobotRoot.block.led": "set LED red [RED] green [GREEN] blue [BLUE]",
 	"irobotRoot.block.ledAnimation": "set LED [EFFECT] red [RED] green [GREEN] blue [BLUE]",
 	"irobotRoot.block.playNote": "play note [NOTE] for [MS] ms",
@@ -926,6 +928,8 @@ var ja = {
 	"irobotRoot.block.arc": "半径 [RADIUS] mmで [DEGREES] 度弧を進む",
 	"irobotRoot.block.stop": "Rootを停止する",
 	"irobotRoot.block.marker": "マーカーを [POSITION]",
+	"irobotRoot.block.ledColor": "LEDを [COLOR] にする",
+	"irobotRoot.block.ledAnimationColor": "LEDを [EFFECT] で [COLOR] にする",
 	"irobotRoot.block.led": "LEDを 赤 [RED] 緑 [GREEN] 青 [BLUE]",
 	"irobotRoot.block.ledAnimation": "LEDを [EFFECT] 赤 [RED] 緑 [GREEN] 青 [BLUE]",
 	"irobotRoot.block.playNote": "音階 [NOTE] を [MS] ミリ秒鳴らす",
@@ -4555,6 +4559,30 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
             }
           }
         }, {
+          opcode: 'ledColor',
+          blockType: BlockType.COMMAND,
+          text: translate('block.ledColor', 'set LED to [COLOR]'),
+          arguments: {
+            COLOR: {
+              type: ArgumentType.COLOR,
+              defaultValue: '#ff0000'
+            }
+          }
+        }, {
+          opcode: 'ledAnimationColor',
+          blockType: BlockType.COMMAND,
+          text: translate('block.ledAnimationColor', 'set LED [EFFECT] to [COLOR]'),
+          arguments: {
+            EFFECT: {
+              type: ArgumentType.STRING,
+              menu: 'ledEffectMenu'
+            },
+            COLOR: {
+              type: ArgumentType.COLOR,
+              defaultValue: '#0080ff'
+            }
+          }
+        }, {
           opcode: 'led',
           blockType: BlockType.COMMAND,
           text: translate('block.led', 'set LED red [RED] green [GREEN] blue [BLUE]'),
@@ -4920,6 +4948,26 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     key: "marker",
     value: function marker(args) {
       return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]));
+    }
+  }, {
+    key: "ledColor",
+    value: function ledColor(args) {
+      var _Cast$toRgbColorList = Cast.toRgbColorList(args.COLOR),
+        _Cast$toRgbColorList2 = _slicedToArray$1(_Cast$toRgbColorList, 3),
+        red = _Cast$toRgbColorList2[0],
+        green = _Cast$toRgbColorList2[1],
+        blue = _Cast$toRgbColorList2[2];
+      return this._send(this.protocol.led(1, red, green, blue));
+    }
+  }, {
+    key: "ledAnimationColor",
+    value: function ledAnimationColor(args) {
+      var _Cast$toRgbColorList3 = Cast.toRgbColorList(args.COLOR),
+        _Cast$toRgbColorList4 = _slicedToArray$1(_Cast$toRgbColorList3, 3),
+        red = _Cast$toRgbColorList4[0],
+        green = _Cast$toRgbColorList4[1],
+        blue = _Cast$toRgbColorList4[2];
+      return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue));
     }
   }, {
     key: "led",

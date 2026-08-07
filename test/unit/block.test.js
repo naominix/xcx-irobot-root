@@ -33,6 +33,9 @@ describe('iRobot Root extension', () => {
         expect(block).toBeInstanceOf(blockClass);
         expect(block.getInfo().id).toBe('irobotRoot');
         expect(block.getInfo().blocks.some(item => item.opcode === 'connect')).toBe(true);
+        expect(block.getInfo().blocks.find(item => item.opcode === 'ledColor').arguments.COLOR.type).toBe('color');
+        expect(block.getInfo().blocks.find(item => item.opcode === 'ledAnimationColor').arguments.COLOR.type)
+            .toBe('color');
         expect(block.getInfo().blocks.some(item => item.opcode === 'ledAnimation')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'playNote').arguments.NOTE.type).toBe('note');
         expect(block.getInfo().blocks.some(item => item.opcode === 'sayPhrase')).toBe(true);
@@ -58,6 +61,8 @@ describe('iRobot Root extension', () => {
         const japaneseInfo = block.getInfo();
         expect(findBlock(japaneseInfo, 'connect').text).toBe('Rootに接続する');
         expect(findBlock(japaneseInfo, 'motors').text).toBe('左モーター [LEFT] 右モーター [RIGHT]');
+        expect(findBlock(japaneseInfo, 'ledColor').text).toBe('LEDを [COLOR] にする');
+        expect(findBlock(japaneseInfo, 'ledAnimationColor').text).toBe('LEDを [EFFECT] で [COLOR] にする');
         expect(findBlock(japaneseInfo, 'playNote').text).toBe('音階 [NOTE] を [MS] ミリ秒鳴らす');
         expect(findBlock(japaneseInfo, 'sayPhrase').text).toBe('[PHRASE] と言う');
         expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
@@ -67,6 +72,8 @@ describe('iRobot Root extension', () => {
         const englishInfo = block.getInfo();
         expect(findBlock(englishInfo, 'connect').text).toBe('connect to Root');
         expect(findBlock(englishInfo, 'motors').text).toBe('set left motor [LEFT] right motor [RIGHT]');
+        expect(findBlock(englishInfo, 'ledColor').text).toBe('set LED to [COLOR]');
+        expect(findBlock(englishInfo, 'ledAnimationColor').text).toBe('set LED [EFFECT] to [COLOR]');
         expect(findBlock(englishInfo, 'playNote').text).toBe('play note [NOTE] for [MS] ms');
         expect(findBlock(englishInfo, 'sayPhrase').text).toBe('say [PHRASE]');
         expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
@@ -452,6 +459,19 @@ describe('iRobot Root extension', () => {
         const spin = protocol.led(3, 40, 50, 60);
         expect(Array.from(blink.slice(0, 7))).toEqual([3, 2, 0, 2, 10, 20, 30]);
         expect(Array.from(spin.slice(0, 7))).toEqual([3, 2, 1, 3, 40, 50, 60]);
+    });
+
+    test('converts Scratch color picker values to Root RGB LED packets', () => {
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn();
+
+        block.ledColor({COLOR: '#12abf0'});
+        block.ledAnimationColor({EFFECT: '3', COLOR: '#285078'});
+
+        expect(Array.from(block.transport.write.mock.calls[0][0].slice(0, 7)))
+            .toEqual([3, 2, 0, 1, 18, 171, 240]);
+        expect(Array.from(block.transport.write.mock.calls[1][0].slice(0, 7)))
+            .toEqual([3, 2, 1, 3, 40, 80, 120]);
     });
 
     test.each([

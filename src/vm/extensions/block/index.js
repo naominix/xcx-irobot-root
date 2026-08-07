@@ -168,6 +168,15 @@ class IrobotRootBlocks {
                     text: translate('block.marker', 'set marker [POSITION]'), arguments: {
                     POSITION: {type: ArgumentType.STRING, menu: 'markerMenu'}
                 }},
+                {opcode: 'ledColor', blockType: BlockType.COMMAND,
+                    text: translate('block.ledColor', 'set LED to [COLOR]'), arguments: {
+                    COLOR: {type: ArgumentType.COLOR, defaultValue: '#ff0000'}
+                }},
+                {opcode: 'ledAnimationColor', blockType: BlockType.COMMAND,
+                    text: translate('block.ledAnimationColor', 'set LED [EFFECT] to [COLOR]'), arguments: {
+                    EFFECT: {type: ArgumentType.STRING, menu: 'ledEffectMenu'},
+                    COLOR: {type: ArgumentType.COLOR, defaultValue: '#0080ff'}
+                }},
                 {opcode: 'led', blockType: BlockType.COMMAND,
                     text: translate('block.led', 'set LED red [RED] green [GREEN] blue [BLUE]'), arguments: {
                     RED: {type: ArgumentType.NUMBER, defaultValue: 255}, GREEN: {type: ArgumentType.NUMBER, defaultValue: 0}, BLUE: {type: ArgumentType.NUMBER, defaultValue: 0}
@@ -311,6 +320,14 @@ class IrobotRootBlocks {
     }
     stop () { return this._send(this.protocol.packet(0, 3)); }
     marker (args) { return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)])); }
+    ledColor (args) {
+        const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
+        return this._send(this.protocol.led(1, red, green, blue));
+    }
+    ledAnimationColor (args) {
+        const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
+        return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue));
+    }
     led (args) { return this._send(this.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE))); }
     ledAnimation (args) {
         return this._send(this.protocol.led(
