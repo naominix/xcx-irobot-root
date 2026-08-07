@@ -53,13 +53,17 @@
   <main>
     <section>
       <h2>見て、触って、すぐ分かる</h2>
-      <p class="lead">数値だけでは想像しにくいロボットの動きを、図と操作パネルで分かりやすくしました。マウスでも指でも操作でき、必要なときは正確な数値も入力できます。</p>
+      <p class="lead">数値だけでは想像しにくいロボットの動きを、図と操作パネルで分かりやすくしました。マウスでも指でも操作でき、必要なときは正確な数値や目的地の座標も入力できます。</p>
       <div class="feature-row">
         <div class="feature-pill">図をドラッグして動きを指定</div>
         <div class="feature-pill">小数・負数を直接入力</div>
         <div class="feature-pill">iPad用の画面内テンキー</div>
       </div>
       <div class="showcase">
+        <figure class="shot">
+          <img src="screenshots/navigation.jpg" alt="実際のXcratchでナビをリセットし、複数のX・Y座標へRootを移動するブロックを並べた画面">
+          <figcaption><strong>X・Y座標で目的地を指定するナビ機能</strong>これは自前Xcratch上で動作している実画面です。最初に「ナビをリセットする」で現在地を原点（x: 0、y: 0）として登録し、その後は開始地点からのX・Y座標をcm単位で指定します。例では（16, 16）→（-16, 8）→（0, 0）の順に移動し、最後に出発地点へ戻ります。Rootは目的地の方向へ回転し、回転完了後に直進します。</figcaption>
+        </figure>
         <figure class="shot">
           <img src="screenshots/motion-picker.png" alt="実際のXcratchで左モーターの出力を指定している画面">
           <figcaption><strong>実際のモーター出力ピッカー</strong>これはXcratch上で動作している実画面です。Rootの図とスライダーを見ながら左右モーターの出力を調整でき、数値欄への直接入力にも対応します。移動距離、回転角、円弧の半径と角度にも、それぞれ動きに合った操作パネルを用意しています。</figcaption>
@@ -88,6 +92,7 @@
         <li>「Rootに接続する」を実行し、一覧からRootを選びます。</li>
         <li>LEDや音を試してから、低速のモーター命令へ進みます。</li>
       </ol>
+      <p class="note"><strong>ナビを使うとき：</strong>Rootをスタート地点へ置いてから「ナビをリセットする」を一度実行してください。ナビの途中でロボットを手で移動した場合、拡張機能が管理している現在地と実際の位置がずれるため、スタート地点を決め直してもう一度リセットします。</p>
       <p class="note"><strong>App Store版Scrubは無改造で利用できます。</strong> Rootとmicro:bit More v2の同時接続も実機確認済みです。接続先のWebエディターには標準Scratch Linkマーカーが必要ですが、公式Xcratchは2026年8月7日現在、この条件に対応済みです。詳しくはGitHubのREADMEを確認してください。</p>
     </section>
     <section>
