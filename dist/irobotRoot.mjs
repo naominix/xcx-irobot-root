@@ -852,6 +852,8 @@ var en = {
 	"irobotRoot.block.drive": "move [MM] mm",
 	"irobotRoot.block.turn": "turn [DEGREES] degrees",
 	"irobotRoot.block.arc": "drive an arc of [DEGREES] degrees with radius [RADIUS] mm",
+	"irobotRoot.block.resetNavigation": "reset navigation position",
+	"irobotRoot.block.navigateTo": "navigate to x [X] y [Y] cm",
 	"irobotRoot.block.stop": "stop Root",
 	"irobotRoot.block.marker": "set marker [POSITION]",
 	"irobotRoot.block.ledColor": "set LED to [COLOR]",
@@ -926,6 +928,8 @@ var ja = {
 	"irobotRoot.block.drive": "[MM] mm進む",
 	"irobotRoot.block.turn": "[DEGREES] 度回る",
 	"irobotRoot.block.arc": "半径 [RADIUS] mmで [DEGREES] 度弧を進む",
+	"irobotRoot.block.resetNavigation": "ナビをリセットする",
+	"irobotRoot.block.navigateTo": "ナビで x [X] y [Y] cmへ移動する",
 	"irobotRoot.block.stop": "Rootを停止する",
 	"irobotRoot.block.marker": "マーカーを [POSITION]",
 	"irobotRoot.block.ledColor": "LEDを [COLOR] にする",
@@ -4176,6 +4180,23 @@ var RootProtocol = /*#__PURE__*/function () {
       return this.packet(1, 12, this.int32Payload([angleDeciDegrees]));
     }
   }, {
+    key: "resetPosition",
+    value: function resetPosition() {
+      return this.packet(1, 15);
+    }
+  }, {
+    key: "navigateTo",
+    value: function navigateTo(xMm, yMm) {
+      var headingDeciDegrees = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
+      var payload = new Uint8Array(10);
+      var view = new DataView(payload.buffer);
+      view.setInt32(0, Math.round(clamp(xMm, -2147483648, 0x7FFFFFFF)), false);
+      view.setInt32(4, Math.round(clamp(yMm, -2147483648, 0x7FFFFFFF)), false);
+      var heading = Number(headingDeciDegrees) === -1 ? -1 : Math.round(clamp(headingDeciDegrees, 0, 3599));
+      view.setInt16(8, heading, false);
+      return this.packet(1, 17, payload);
+    }
+  }, {
     key: "driveArc",
     value: function driveArc(angleDeciDegrees, radiusMm) {
       return this.packet(1, 27, this.int32Payload([angleDeciDegrees, radiusMm]));
@@ -4490,6 +4511,9 @@ var turnMotionWatchdogMs = function turnMotionWatchdogMs(degrees) {
 var arcMotionWatchdogMs = function arcMotionWatchdogMs(degrees, radiusMm) {
   return linearMotionWatchdogMs(Math.abs(degrees) * Math.PI / 180 * (Math.abs(radiusMm) + ROOT_HALF_TRACK_MM));
 };
+var navigationMotionWatchdogMs = function navigationMotionWatchdogMs(deltaXmm, deltaYmm) {
+  return linearMotionWatchdogMs(Math.hypot(deltaXmm, deltaYmm) + Math.PI * ROOT_HALF_TRACK_MM);
+};
 var midiNoteToFrequency = function midiNoteToFrequency(midiNote) {
   return Math.round(440 * Math.pow(2, (midiNote - 69) / 12));
 };
@@ -4543,6 +4567,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     this.currentEvent = null;
     this.bumperState = 0;
     this.touchState = 0;
+    // Root resets its odometry to (0, 0) whenever a new BLE connection is
+    // established. Keep only the last planned navigation target so the
+    // residual-motion watchdog can use a realistic point-to-point distance.
+    this.navigationPosition = {
+      x: 0,
+      y: 0
+    };
     this._playNoteForPicker = this._playNoteForPicker.bind(this);
     if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
   }
@@ -4622,6 +4653,24 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
             DEGREES: {
               type: 'root-arc-angle',
               defaultValue: 90
+            }
+          }
+        }, {
+          opcode: 'resetNavigation',
+          blockType: BlockType.COMMAND,
+          text: translate('block.resetNavigation', 'reset navigation position')
+        }, {
+          opcode: 'navigateTo',
+          blockType: BlockType.COMMAND,
+          text: translate('block.navigateTo', 'navigate to x [X] y [Y] cm'),
+          arguments: {
+            X: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 16
+            },
+            Y: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 16
             }
           }
         }, {
@@ -4974,6 +5023,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "connect",
     value: function connect() {
+      this.navigationPosition = {
+        x: 0,
+        y: 0
+      };
       this.transport.scan();
     }
   }, {
@@ -4999,12 +5052,14 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "motors",
     value: function motors(args) {
+      this.navigationPosition = null;
       return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)));
     }
   }, {
     key: "drive",
     value: function drive(args) {
       var distance = Cast.toNumber(args.MM);
+      this.navigationPosition = null;
       return this._sendAndWait(this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
     }
   }, {
@@ -5018,7 +5073,38 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function arc(args) {
       var degrees = Cast.toNumber(args.DEGREES);
       var radius = Cast.toNumber(args.RADIUS);
+      this.navigationPosition = null;
       return this._sendAndWait(this.protocol.driveArc(degrees * 10, radius), arcMotionWatchdogMs(degrees, radius));
+    }
+  }, {
+    key: "resetNavigation",
+    value: function resetNavigation() {
+      this.navigationPosition = {
+        x: 0,
+        y: 0
+      };
+      return this._send(this.protocol.resetPosition());
+    }
+  }, {
+    key: "navigateTo",
+    value: function navigateTo(args) {
+      var _this2 = this;
+      var target = {
+        x: Math.round(Cast.toNumber(args.X) * 10),
+        y: Math.round(Cast.toNumber(args.Y) * 10)
+      };
+      var origin = this.navigationPosition || {
+        x: 0,
+        y: 0
+      };
+      var watchdog = navigationMotionWatchdogMs(target.x - origin.x, target.y - origin.y);
+      var completion = this._sendAndWait(this.protocol.navigateTo(target.x, target.y), watchdog);
+      return completion.then(function () {
+        _this2.navigationPosition = target;
+      }, function (error) {
+        _this2.navigationPosition = null;
+        throw error;
+      });
     }
   }, {
     key: "stop",
@@ -5154,7 +5240,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_send",
     value: function _send(packet) {
-      var _this2 = this;
+      var _this3 = this;
       // Hardware writes are fire-and-forget from Scratch's point of view.
       // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
       // after CoreBluetooth accepted the bytes; returning that promise would
@@ -5163,7 +5249,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this2.transport.setError(error);
+            return _this3.transport.setError(error);
           });
         }
       } catch (error) {
@@ -5178,19 +5264,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendAndWait",
     value: function _sendAndWait(packet, motionWatchdogMs) {
-      var _this3 = this;
+      var _this4 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this3.pendingCommands.get(key);
+          var pending = _this4.pendingCommands.get(key);
           if (!pending) return;
-          _this3._clearPendingCommand(key, pending);
+          _this4._clearPendingCommand(key, pending);
           var error = new Error("Root command timed out (command ".concat(packet[1], ", packet ").concat(packet[2], ")"));
-          _this3.transport.setError(error);
+          _this4.transport.setError(error);
           reject(error);
         }, COMMAND_FINISH_TIMEOUT_MS);
         var watchdog = setTimeout(function () {
-          var pending = _this3.pendingCommands.get(key);
+          var pending = _this4.pendingCommands.get(key);
           if (!pending || pending.settling) return;
           pending.settling = true;
 
@@ -5201,15 +5287,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           // interrupted movement also produces its matching Finished
           // response. Resolve after a short BLE settling interval even if
           // old firmware omits that response.
-          _this3._sendMotionStop(key);
+          _this4._sendMotionStop(key);
           pending.settle = setTimeout(function () {
-            if (_this3.pendingCommands.get(key) !== pending) return;
-            _this3._clearPendingCommand(key, pending);
-            _this3.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
+            if (_this4.pendingCommands.get(key) !== pending) return;
+            _this4._clearPendingCommand(key, pending);
+            _this4.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
             resolve();
           }, MOTION_WATCHDOG_SETTLE_MS);
         }, motionWatchdogMs);
-        _this3.pendingCommands.set(key, {
+        _this4.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -5227,7 +5313,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this3._rejectPendingCommand(key, error);
+            return _this4._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -5243,19 +5329,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendSoundCommandAndWait",
     value: function _sendSoundCommandAndWait(packet, timeoutMs, description) {
-      var _this4 = this;
+      var _this5 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this4.pendingCommands.get(key);
+          var pending = _this5.pendingCommands.get(key);
           if (!pending) return;
-          _this4._clearPendingCommand(key, pending);
-          _this4.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
+          _this5._clearPendingCommand(key, pending);
+          _this5.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
           // Do not leave a Scratch stack stuck if a single notification
           // was lost after Root had enough time to finish the sound.
           resolve();
         }, timeoutMs);
-        _this4.pendingCommands.set(key, {
+        _this5.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -5269,7 +5355,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this4._rejectPendingCommand(key, error);
+            return _this5._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -5294,12 +5380,12 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendMotionStop",
     value: function _sendMotionStop(pendingKey) {
-      var _this5 = this;
+      var _this6 = this;
       try {
         var pendingWrite = this.transport.write(this.protocol.motors(0, 0));
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this5._rejectPendingCommand(pendingKey, error);
+            return _this6._rejectPendingCommand(pendingKey, error);
           });
         }
       } catch (error) {
@@ -5484,5 +5570,5 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }]);
 }();
 
-export { COMMAND_FINISH_TIMEOUT_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, turnMotionWatchdogMs };
+export { COMMAND_FINISH_TIMEOUT_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, navigationMotionWatchdogMs, turnMotionWatchdogMs };
 //# sourceMappingURL=irobotRoot.mjs.map

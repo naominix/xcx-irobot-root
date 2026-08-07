@@ -89,6 +89,10 @@ const arcMotionWatchdogMs = (degrees, radiusMm) => linearMotionWatchdogMs(
     Math.abs(degrees) * Math.PI / 180 * (Math.abs(radiusMm) + ROOT_HALF_TRACK_MM)
 );
 
+const navigationMotionWatchdogMs = (deltaXmm, deltaYmm) => linearMotionWatchdogMs(
+    Math.hypot(deltaXmm, deltaYmm) + (Math.PI * ROOT_HALF_TRACK_MM)
+);
+
 const midiNoteToFrequency = midiNote => Math.round(440 * Math.pow(2, (midiNote - 69) / 12));
 
 const FIXED_EVENT_HAT_MESSAGES = [
@@ -163,6 +167,10 @@ class IrobotRootBlocks {
         this.currentEvent = null;
         this.bumperState = 0;
         this.touchState = 0;
+        // Root resets its odometry to (0, 0) whenever a new BLE connection is
+        // established. Keep only the last planned navigation target so the
+        // residual-motion watchdog can use a realistic point-to-point distance.
+        this.navigationPosition = {x: 0, y: 0};
         this._playNoteForPicker = this._playNoteForPicker.bind(this);
         if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
     }
@@ -202,6 +210,13 @@ class IrobotRootBlocks {
                     text: translate('block.arc', 'drive an arc of [DEGREES] degrees with radius [RADIUS] mm'), arguments: {
                     RADIUS: {type: 'root-arc-radius', defaultValue: 100},
                     DEGREES: {type: 'root-arc-angle', defaultValue: 90}
+                }},
+                {opcode: 'resetNavigation', blockType: BlockType.COMMAND,
+                    text: translate('block.resetNavigation', 'reset navigation position')},
+                {opcode: 'navigateTo', blockType: BlockType.COMMAND,
+                    text: translate('block.navigateTo', 'navigate to x [X] y [Y] cm'), arguments: {
+                    X: {type: ArgumentType.NUMBER, defaultValue: 16},
+                    Y: {type: ArgumentType.NUMBER, defaultValue: 16}
                 }},
                 {opcode: 'stop', blockType: BlockType.COMMAND,
                     text: translate('block.stop', 'stop Root')},
@@ -336,16 +351,23 @@ class IrobotRootBlocks {
         };
     }
 
-    connect () { this.transport.scan(); }
+    connect () {
+        this.navigationPosition = {x: 0, y: 0};
+        this.transport.scan();
+    }
 
     disconnect () { this.transport.disconnect(); }
     isConnected () { return this.transport.isConnected(); }
     transportMode () { return this.transport.mode; }
     lastConnectionError () { return this.transport.lastError; }
 
-    motors (args) { return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT))); }
+    motors (args) {
+        this.navigationPosition = null;
+        return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)));
+    }
     drive (args) {
         const distance = Cast.toNumber(args.MM);
+        this.navigationPosition = null;
         return this._sendAndWait(this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
     }
     turn (args) {
@@ -355,10 +377,30 @@ class IrobotRootBlocks {
     arc (args) {
         const degrees = Cast.toNumber(args.DEGREES);
         const radius = Cast.toNumber(args.RADIUS);
+        this.navigationPosition = null;
         return this._sendAndWait(
             this.protocol.driveArc(degrees * 10, radius),
             arcMotionWatchdogMs(degrees, radius)
         );
+    }
+    resetNavigation () {
+        this.navigationPosition = {x: 0, y: 0};
+        return this._send(this.protocol.resetPosition());
+    }
+    navigateTo (args) {
+        const target = {
+            x: Math.round(Cast.toNumber(args.X) * 10),
+            y: Math.round(Cast.toNumber(args.Y) * 10)
+        };
+        const origin = this.navigationPosition || {x: 0, y: 0};
+        const watchdog = navigationMotionWatchdogMs(target.x - origin.x, target.y - origin.y);
+        const completion = this._sendAndWait(this.protocol.navigateTo(target.x, target.y), watchdog);
+        return completion.then(() => {
+            this.navigationPosition = target;
+        }, error => {
+            this.navigationPosition = null;
+            throw error;
+        });
     }
     stop () { return this._send(this.protocol.packet(0, 3)); }
     marker (args) { return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)])); }
@@ -680,5 +722,6 @@ export {
     IrobotRootBlocks as blockClass,
     linearMotionWatchdogMs,
     MOTION_WATCHDOG_SETTLE_MS,
+    navigationMotionWatchdogMs,
     turnMotionWatchdogMs
 };

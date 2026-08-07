@@ -2,7 +2,8 @@ import {
     COMMAND_FINISH_TIMEOUT_MS,
     MOTION_WATCHDOG_SETTLE_MS,
     blockClass,
-    linearMotionWatchdogMs
+    linearMotionWatchdogMs,
+    navigationMotionWatchdogMs
 } from '../../src/vm/extensions/block/index.js';
 import {
     ROOT_DISCOVERY_OPTIONS,
@@ -39,6 +40,9 @@ describe('iRobot Root extension', () => {
             .toBe('root-turn-angle');
         expect(block.getInfo().blocks.find(item => item.opcode === 'arc').arguments.RADIUS.type)
             .toBe('root-arc-radius');
+        expect(block.getInfo().blocks.some(item => item.opcode === 'resetNavigation')).toBe(true);
+        expect(block.getInfo().blocks.find(item => item.opcode === 'navigateTo').arguments.X.type)
+            .toBe('number');
         expect(block.getInfo().customFieldTypes['root-motor-left'].implementation).toMatchObject({
             type: 'root-motion-picker', mode: 'motor', side: 'left', min: -100, max: 100,
             directInput: true, keypad: true
@@ -77,6 +81,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(japaneseInfo, 'ledColor').text).toBe('LEDを [COLOR] にする');
         expect(findBlock(japaneseInfo, 'ledAnimationColor').text).toBe('LEDを [EFFECT] で [COLOR] にする');
         expect(findBlock(japaneseInfo, 'playNote').text).toBe('音階 [NOTE] を [MS] ミリ秒鳴らす');
+        expect(findBlock(japaneseInfo, 'resetNavigation').text).toBe('ナビをリセットする');
+        expect(findBlock(japaneseInfo, 'navigateTo').text).toBe('ナビで x [X] y [Y] cmへ移動する');
         expect(findBlock(japaneseInfo, 'sayPhrase').text).toBe('[PHRASE] と言う');
         expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
         expect(japaneseInfo.menus.markerMenu.items[0]).toEqual({text: '上げる', value: '0'});
@@ -88,6 +94,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(englishInfo, 'ledColor').text).toBe('set LED to [COLOR]');
         expect(findBlock(englishInfo, 'ledAnimationColor').text).toBe('set LED [EFFECT] to [COLOR]');
         expect(findBlock(englishInfo, 'playNote').text).toBe('play note [NOTE] for [MS] ms');
+        expect(findBlock(englishInfo, 'resetNavigation').text).toBe('reset navigation position');
+        expect(findBlock(englishInfo, 'navigateTo').text).toBe('navigate to x [X] y [Y] cm');
         expect(findBlock(englishInfo, 'sayPhrase').text).toBe('say [PHRASE]');
         expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
         expect(englishInfo.menus.markerMenu.items[0]).toEqual({text: 'up', value: '0'});
@@ -112,6 +120,21 @@ describe('iRobot Root extension', () => {
         expect(view.getUint32(3, false)).toBe(440);
         expect(view.getUint16(7, false)).toBe(500);
         expect(crc8(packet.slice(0, 19))).toBe(packet[19]);
+    });
+
+    test('encodes the documented reset and navigate-to-position packets', () => {
+        const protocol = new RootProtocol();
+        const reset = protocol.resetPosition();
+        const navigate = protocol.navigateTo(-160, 80);
+        const view = new DataView(navigate.buffer, navigate.byteOffset, navigate.byteLength);
+
+        expect(Array.from(reset.slice(0, 3))).toEqual([1, 15, 0]);
+        expect(crc8(reset.slice(0, 19))).toBe(reset[19]);
+        expect(Array.from(navigate.slice(0, 3))).toEqual([1, 17, 1]);
+        expect(view.getInt32(3, false)).toBe(-160);
+        expect(view.getInt32(7, false)).toBe(80);
+        expect(view.getInt16(11, false)).toBe(-1);
+        expect(crc8(navigate.slice(0, 19))).toBe(navigate[19]);
     });
 
     test.each([
@@ -348,7 +371,8 @@ describe('iRobot Root extension', () => {
     test.each([
         ['drive', {MM: 100}, 8],
         ['turn', {DEGREES: 90}, 12],
-        ['arc', {RADIUS: 100, DEGREES: 90}, 27]
+        ['arc', {RADIUS: 100, DEGREES: 90}, 27],
+        ['navigateTo', {X: -16, Y: 8}, 17]
     ])('%s waits for Root finished response with the matching packet ID', async (method, args, command) => {
         const block = new blockClass(runtime);
         block.transport.write = jest.fn(() => new Promise(() => {}));
@@ -381,6 +405,30 @@ describe('iRobot Root extension', () => {
         expect(stopPacket[0]).toBe(1);
         expect(stopPacket[1]).toBe(4);
         expect(Array.from(stopPacket.slice(3, 11))).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+    });
+
+    test('navigation reset uses centimeters and point-to-point watchdog distances', async () => {
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+
+        block.resetNavigation();
+        expect(Array.from(block.transport.write.mock.calls[0][0].slice(0, 3))).toEqual([1, 15, 0]);
+        expect(block.navigationPosition).toEqual({x: 0, y: 0});
+
+        const completion = block.navigateTo({X: 16, Y: 8});
+        const packet = block.transport.write.mock.calls[1][0];
+        const packetView = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
+        expect(packetView.getInt32(3, false)).toBe(160);
+        expect(packetView.getInt32(7, false)).toBe(80);
+        expect(packetView.getInt16(11, false)).toBe(-1);
+        expect(navigationMotionWatchdogMs(160, 80)).toBeGreaterThan(linearMotionWatchdogMs(160));
+
+        const finished = new RootProtocol().packet(1, 17);
+        finished[2] = packet[2];
+        finished[19] = crc8(finished.slice(0, 19));
+        block._receive(finished);
+        await expect(completion).resolves.toBeUndefined();
+        expect(block.navigationPosition).toEqual({x: 160, y: 80});
     });
 
     test('stops residual motion and advances when Root never reaches its finished response', async () => {

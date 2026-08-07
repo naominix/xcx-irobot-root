@@ -153,6 +153,17 @@ class RootProtocol {
     motors (left, right) { return this.packet(1, 4, this.int32Payload([clamp(left, -100, 100), clamp(right, -100, 100)])); }
     driveDistance (distanceMm) { return this.packet(1, 8, this.int32Payload([distanceMm])); }
     rotate (angleDeciDegrees) { return this.packet(1, 12, this.int32Payload([angleDeciDegrees])); }
+    resetPosition () { return this.packet(1, 15); }
+    navigateTo (xMm, yMm, headingDeciDegrees = -1) {
+        const payload = new Uint8Array(10);
+        const view = new DataView(payload.buffer);
+        view.setInt32(0, Math.round(clamp(xMm, -0x80000000, 0x7FFFFFFF)), false);
+        view.setInt32(4, Math.round(clamp(yMm, -0x80000000, 0x7FFFFFFF)), false);
+        const heading = Number(headingDeciDegrees) === -1 ? -1 :
+            Math.round(clamp(headingDeciDegrees, 0, 3599));
+        view.setInt16(8, heading, false);
+        return this.packet(1, 17, payload);
+    }
     driveArc (angleDeciDegrees, radiusMm) { return this.packet(1, 27, this.int32Payload([angleDeciDegrees, radiusMm])); }
     led (state, red, green, blue) {
         return this.packet(3, 2, [clamp(state, 0, 3), clamp(red, 0, 255), clamp(green, 0, 255), clamp(blue, 0, 255)]);

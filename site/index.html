@@ -61,16 +61,20 @@
       </div>
       <div class="showcase">
         <figure class="shot">
-          <img src="screenshots/motion-picker.svg" alt="Rootのモーター出力を図、直接入力、画面内テンキーで指定する操作画面">
-          <figcaption><strong>視覚的なモーションピッカー</strong>左右モーター、移動距離、回転角、円弧の半径と角度を、動きの図を見ながら調整できます。ドラッグは扱いやすい刻み幅で動き、数値欄では <code>-68.5</code> のような精密値も指定できます。</figcaption>
+          <img src="screenshots/motion-picker.png" alt="実際のXcratchで左モーターの出力を指定している画面">
+          <figcaption><strong>実際のモーター出力ピッカー</strong>これはXcratch上で動作している実画面です。Rootの図とスライダーを見ながら左右モーターの出力を調整でき、数値欄への直接入力にも対応します。移動距離、回転角、円弧の半径と角度にも、それぞれ動きに合った操作パネルを用意しています。</figcaption>
         </figure>
         <figure class="shot">
-          <img src="screenshots/led-picker.svg" alt="カラーピッカーでRootのLED色を選ぶ操作画面">
-          <figcaption><strong>Scratch標準の3本スライダー</strong>「色」「鮮やかさ」「明るさ」のスライダーとスポイトから、RGB値を覚えずに好きな色を選べます。点灯だけでなく、点滅や回転アニメーションにも同じ色指定を利用できます。</figcaption>
+          <img src="screenshots/led-picker.png" alt="実際のXcratchでカラーピッカーからRootのLED色を選んでいる画面">
+          <figcaption><strong>実際のLEDカラーピッカー</strong>これはXcratch上で動作している実画面です。「色」「鮮やかさ」「明るさ」の3本のスライダーとスポイトから、RGB値を覚えずに好きな色を選べます。点灯だけでなく、点滅や回転アニメーションにも同じ色指定を利用できます。</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="screenshots/note-picker.png" alt="実際のXcratchでピアノ鍵盤からRootの音階を選んでいる画面">
+          <figcaption><strong>ピアノ鍵盤で音階を選択・試聴</strong>音階の数値欄を押すと、実際のピアノと同じ並びの鍵盤が開きます。音名と高さを目と耳で確かめて選べるため、周波数を覚える必要はありません。Root接続中は選んだ音を短く試聴でき、指定したミリ秒の発音が終わってから次のブロックへ進みます。</figcaption>
         </figure>
         <div class="card">
           <h3>Scratchらしさを保った操作</h3>
-          <p>ピアノ鍵盤で音階を選び、Rootで短く試聴できます。従来の数値入力や演算ブロックも引き続き使えるため、入門から高度な作品まで同じブロックで発展できます。</p>
+          <p>モーター、色、音階を視覚的に選べます。従来の数値入力や演算ブロックも引き続き使えるため、入門から高度な作品まで同じブロックで発展できます。</p>
           <h3>PCとiPadで共通</h3>
           <p>PCではマウス、iPadでは指で操作できます。数値欄をタップすると数字キーボードが開き、さらに画面内テンキーも選べます。</p>
         </div>
@@ -89,7 +93,7 @@
     <section>
       <h2>主な機能</h2>
       <div class="grid">
-        <div class="card"><h3>動かす</h3><p>Rootの動きを図で確認しながら、左右モーター、距離、回転、円弧の値をドラッグ、直接入力、iPad対応テンキーで指定できます。</p></div>
+        <div class="card"><h3>動かす・座標ナビ</h3><p>Rootの動きを図で確認しながら、左右モーター、距離、回転、円弧を指定できます。位置をリセットし、開始地点からのX・Y座標（cm）へ移動するナビブロックにも対応します。</p></div>
         <div class="card"><h3>光・音・描画</h3><p>カラーピッカーまたはRGB値でLEDの点灯・点滅・回転を指定し、発音、マーカーと消しゴムを制御します。</p></div>
         <div class="card"><h3>イベント</h3><p>左右バンパー、4か所のタッチ、崖、バッテリー通知をHATブロックで受け取ります。</p></div>
         <div class="card"><h3>複数台から選択</h3><p>近くのRootを検索し、デバイス一覧から接続先を選べます。</p></div>
