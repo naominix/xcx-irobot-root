@@ -4417,6 +4417,7 @@ var SAY_PHRASE_TIMEOUT_MS = 30000;
 var MOTION_WATCHDOG_BASE_MS = 2000;
 var MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 var MOTION_WATCHDOG_SETTLE_MS = 300;
+var MOTION_COMMAND_GAP_MS = 300;
 var ROOT_HALF_TRACK_MM = 43;
 var extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 var rootMotionField = function rootMotionField(mode) {
@@ -5118,8 +5119,20 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // Root's finite rotate command is positive clockwise, while standard
       // xy headings increase counter-clockwise.
       var turn = normalizeTurn(origin.heading - targetHeading);
-      var rotation = Math.abs(turn) >= 0.05 ? this._sendAndWait(this.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn)) : Promise.resolve();
-      return rotation.then(function () {
+      var needsRotation = Math.abs(turn) >= 0.05;
+      var rotation = needsRotation ? this._sendAndWait(this.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn)) : Promise.resolve();
+      // A completed finite movement is followed by a zero-speed motor packet
+      // to suppress residual closed-loop corrections. Scratch Link/Scrub does
+      // not provide a dependable write-completion promise, so sending the next
+      // leg immediately can let that stop packet arrive after the drive packet
+      // and cancel it. Give BLE/CoreBluetooth one settling interval between
+      // the rotate and drive legs.
+      var settledRotation = needsRotation ? rotation.then(function () {
+        return new Promise(function (resolve) {
+          return setTimeout(resolve, MOTION_COMMAND_GAP_MS);
+        });
+      }) : rotation;
+      return settledRotation.then(function () {
         return _this2._sendAndWait(_this2.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
       }).then(function () {
         _this2.navigationPosition = {
@@ -5596,5 +5609,5 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }]);
 }();
 
-export { COMMAND_FINISH_TIMEOUT_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, navigationMotionWatchdogMs, turnMotionWatchdogMs };
+export { COMMAND_FINISH_TIMEOUT_MS, MOTION_COMMAND_GAP_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, navigationMotionWatchdogMs, turnMotionWatchdogMs };
 //# sourceMappingURL=irobotRoot.mjs.map

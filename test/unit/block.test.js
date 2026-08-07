@@ -1,5 +1,6 @@
 import {
     COMMAND_FINISH_TIMEOUT_MS,
+    MOTION_COMMAND_GAP_MS,
     MOTION_WATCHDOG_SETTLE_MS,
     blockClass,
     linearMotionWatchdogMs,
@@ -407,6 +408,7 @@ describe('iRobot Root extension', () => {
     });
 
     test('navigation reset uses client pose and converts coordinates to turn then drive', async () => {
+        jest.useFakeTimers();
         const block = new blockClass(runtime);
         block.transport.write = jest.fn(() => new Promise(() => {}));
 
@@ -427,6 +429,17 @@ describe('iRobot Root extension', () => {
         block._receive(turnFinished);
         await Promise.resolve();
 
+        // The zero-speed packet emitted after rotation must settle before the
+        // drive packet is sent, otherwise a delayed stop can cancel the drive.
+        expect(block.transport.write).toHaveBeenCalledTimes(2);
+        jest.advanceTimersByTime(MOTION_COMMAND_GAP_MS - 1);
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(block.transport.write).toHaveBeenCalledTimes(2);
+        jest.advanceTimersByTime(1);
+        await Promise.resolve();
+        await Promise.resolve();
+
         // Completing a finite movement emits a zero-speed packet before the
         // next navigation leg is sent.
         const drivePacket = block.transport.write.mock.calls[2][0];
@@ -442,6 +455,45 @@ describe('iRobot Root extension', () => {
         expect(block.navigationPosition.x).toBe(160);
         expect(block.navigationPosition.y).toBe(80);
         expect(block.navigationPosition.heading).toBeCloseTo(26.565, 3);
+        jest.useRealTimers();
+    });
+
+    test('navigation to x 5 y 5 waits between turning and driving', async () => {
+        jest.useFakeTimers();
+        const block = new blockClass(runtime);
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+
+        const completion = block.navigateTo({X: 5, Y: 5});
+        const turnPacket = block.transport.write.mock.calls[0][0];
+        const turnView = new DataView(turnPacket.buffer, turnPacket.byteOffset, turnPacket.byteLength);
+        expect(Array.from(turnPacket.slice(0, 2))).toEqual([1, 12]);
+        expect(turnView.getInt32(3, false)).toBe(450);
+
+        const turnFinished = new RootProtocol().packet(1, 12);
+        turnFinished[2] = turnPacket[2];
+        turnFinished[19] = crc8(turnFinished.slice(0, 19));
+        block._receive(turnFinished);
+        await Promise.resolve();
+        expect(block.transport.write).toHaveBeenCalledTimes(2);
+
+        jest.advanceTimersByTime(MOTION_COMMAND_GAP_MS - 1);
+        await Promise.resolve();
+        expect(block.transport.write).toHaveBeenCalledTimes(2);
+        jest.advanceTimersByTime(1);
+        await Promise.resolve();
+        await Promise.resolve();
+        const drivePacket = block.transport.write.mock.calls[2][0];
+        const driveView = new DataView(drivePacket.buffer, drivePacket.byteOffset, drivePacket.byteLength);
+        expect(Array.from(drivePacket.slice(0, 2))).toEqual([1, 8]);
+        expect(driveView.getInt32(3, false)).toBe(71);
+
+        const driveFinished = new RootProtocol().packet(1, 8);
+        driveFinished[2] = drivePacket[2];
+        driveFinished[19] = crc8(driveFinished.slice(0, 19));
+        block._receive(driveFinished);
+        await expect(completion).resolves.toBeUndefined();
+        expect(block.navigationPosition).toEqual({x: 50, y: 50, heading: 45});
+        jest.useRealTimers();
     });
 
     test('navigation skips the turn when the target is straight ahead', async () => {
@@ -449,6 +501,7 @@ describe('iRobot Root extension', () => {
         block.transport.write = jest.fn(() => new Promise(() => {}));
 
         const completion = block.navigateTo({X: 0, Y: 16});
+        await Promise.resolve();
         await Promise.resolve();
         const drivePacket = block.transport.write.mock.calls[0][0];
         const view = new DataView(drivePacket.buffer, drivePacket.byteOffset, drivePacket.byteLength);

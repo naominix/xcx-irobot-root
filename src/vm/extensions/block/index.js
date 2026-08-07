@@ -30,6 +30,7 @@ const SAY_PHRASE_TIMEOUT_MS = 30000;
 const MOTION_WATCHDOG_BASE_MS = 2000;
 const MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 const MOTION_WATCHDOG_SETTLE_MS = 300;
+const MOTION_COMMAND_GAP_MS = 300;
 const ROOT_HALF_TRACK_MM = 43;
 let extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 
@@ -410,10 +411,20 @@ class IrobotRootBlocks {
         // Root's finite rotate command is positive clockwise, while standard
         // xy headings increase counter-clockwise.
         const turn = normalizeTurn(origin.heading - targetHeading);
-        const rotation = Math.abs(turn) >= 0.05 ?
+        const needsRotation = Math.abs(turn) >= 0.05;
+        const rotation = needsRotation ?
             this._sendAndWait(this.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn)) :
             Promise.resolve();
-        return rotation.then(() => this._sendAndWait(
+        // A completed finite movement is followed by a zero-speed motor packet
+        // to suppress residual closed-loop corrections. Scratch Link/Scrub does
+        // not provide a dependable write-completion promise, so sending the next
+        // leg immediately can let that stop packet arrive after the drive packet
+        // and cancel it. Give BLE/CoreBluetooth one settling interval between
+        // the rotate and drive legs.
+        const settledRotation = needsRotation ?
+            rotation.then(() => new Promise(resolve => setTimeout(resolve, MOTION_COMMAND_GAP_MS))) :
+            rotation;
+        return settledRotation.then(() => this._sendAndWait(
             this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance)
         )).then(() => {
             this.navigationPosition = {x: target.x, y: target.y, heading: targetHeading};
@@ -742,6 +753,7 @@ export {
     IrobotRootBlocks as blockClass,
     linearMotionWatchdogMs,
     MOTION_WATCHDOG_SETTLE_MS,
+    MOTION_COMMAND_GAP_MS,
     navigationMotionWatchdogMs,
     turnMotionWatchdogMs
 };
