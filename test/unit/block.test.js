@@ -33,6 +33,18 @@ describe('iRobot Root extension', () => {
         expect(block).toBeInstanceOf(blockClass);
         expect(block.getInfo().id).toBe('irobotRoot');
         expect(block.getInfo().blocks.some(item => item.opcode === 'connect')).toBe(true);
+        expect(block.getInfo().blocks.find(item => item.opcode === 'motors').arguments.LEFT.type)
+            .toBe('root-motor-left');
+        expect(block.getInfo().blocks.find(item => item.opcode === 'turn').arguments.DEGREES.type)
+            .toBe('root-turn-angle');
+        expect(block.getInfo().blocks.find(item => item.opcode === 'arc').arguments.RADIUS.type)
+            .toBe('root-arc-radius');
+        expect(block.getInfo().customFieldTypes['root-motor-left'].implementation).toMatchObject({
+            type: 'root-motion-picker', mode: 'motor', side: 'left', min: -100, max: 100
+        });
+        expect(block.getInfo().customFieldTypes['root-arc-angle'].implementation).toMatchObject({
+            type: 'root-motion-picker', mode: 'arc', min: -360, max: 360
+        });
         expect(block.getInfo().blocks.find(item => item.opcode === 'ledColor').arguments.COLOR.type).toBe('color');
         expect(block.getInfo().blocks.find(item => item.opcode === 'ledAnimationColor').arguments.COLOR.type)
             .toBe('color');

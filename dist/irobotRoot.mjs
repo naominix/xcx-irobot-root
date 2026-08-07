@@ -4398,6 +4398,84 @@ var MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 var MOTION_WATCHDOG_SETTLE_MS = 300;
 var ROOT_HALF_TRACK_MM = 43;
 var extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
+var rootMotionField = function rootMotionField(mode) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  return {
+    output: 'Number',
+    outputShape: 2,
+    implementation: Object.assign({
+      type: 'root-motion-picker',
+      mode: mode,
+      fromJson: function fromJson() {
+        return null;
+      }
+    }, options)
+  };
+};
+var ROOT_MOTION_FIELD_TYPES = {
+  'root-motor-left': rootMotionField('motor', {
+    side: 'left',
+    min: -100,
+    max: 100,
+    step: 1,
+    unit: '%',
+    labels: {
+      en: 'Left motor power',
+      ja: '左モーターの出力'
+    }
+  }),
+  'root-motor-right': rootMotionField('motor', {
+    side: 'right',
+    min: -100,
+    max: 100,
+    step: 1,
+    unit: '%',
+    labels: {
+      en: 'Right motor power',
+      ja: '右モーターの出力'
+    }
+  }),
+  'root-distance': rootMotionField('distance', {
+    min: -500,
+    max: 500,
+    step: 10,
+    unit: 'mm',
+    labels: {
+      en: 'Travel distance',
+      ja: '移動する距離'
+    }
+  }),
+  'root-turn-angle': rootMotionField('turn', {
+    min: -180,
+    max: 180,
+    step: 5,
+    unit: '°',
+    labels: {
+      en: 'Turn angle',
+      ja: '回転する角度'
+    }
+  }),
+  'root-arc-radius': rootMotionField('radius', {
+    min: -500,
+    max: 500,
+    step: 10,
+    unit: 'mm',
+    labels: {
+      en: 'Arc radius',
+      ja: '円弧の半径'
+    }
+  }),
+  'root-arc-angle': rootMotionField('arc', {
+    min: -360,
+    max: 360,
+    step: 5,
+    unit: '°',
+    labels: {
+      en: 'Arc angle',
+      ja: '円弧の角度'
+    }
+  })
+};
 var clampMotionWatchdog = function clampMotionWatchdog(duration) {
   return Math.min(COMMAND_FINISH_TIMEOUT_MS - 1000, Math.max(MOTION_WATCHDOG_BASE_MS, Math.ceil(duration)));
 };
@@ -4502,11 +4580,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           text: translate('block.motors', 'set left motor [LEFT] right motor [RIGHT]'),
           arguments: {
             LEFT: {
-              type: ArgumentType.NUMBER,
+              type: 'root-motor-left',
               defaultValue: 30
             },
             RIGHT: {
-              type: ArgumentType.NUMBER,
+              type: 'root-motor-right',
               defaultValue: 30
             }
           }
@@ -4516,7 +4594,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           text: translate('block.drive', 'move [MM] mm'),
           arguments: {
             MM: {
-              type: ArgumentType.NUMBER,
+              type: 'root-distance',
               defaultValue: 100
             }
           }
@@ -4526,7 +4604,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           text: translate('block.turn', 'turn [DEGREES] degrees'),
           arguments: {
             DEGREES: {
-              type: ArgumentType.NUMBER,
+              type: 'root-turn-angle',
               defaultValue: 90
             }
           }
@@ -4536,11 +4614,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           text: translate('block.arc', 'drive an arc of [DEGREES] degrees with radius [RADIUS] mm'),
           arguments: {
             RADIUS: {
-              type: ArgumentType.NUMBER,
+              type: 'root-arc-radius',
               defaultValue: 100
             },
             DEGREES: {
-              type: ArgumentType.NUMBER,
+              type: 'root-arc-angle',
               defaultValue: 90
             }
           }
@@ -4748,6 +4826,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           blockType: BlockType.REPORTER,
           text: translate('block.detailedEvent', 'last detailed event')
         }]),
+        customFieldTypes: ROOT_MOTION_FIELD_TYPES,
         menus: {
           markerMenu: {
             acceptReporters: true,
