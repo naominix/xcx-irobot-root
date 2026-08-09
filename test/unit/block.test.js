@@ -88,6 +88,27 @@ describe('iRobot Root extension', () => {
         }
     });
 
+    test('keeps simulator marker trails and LED animation state while moving', async () => {
+        jest.useFakeTimers();
+        try {
+            const block = new blockClass(runtime);
+            block.transport.write = jest.fn();
+            block.setControlMode({MODE: 'simulator'});
+            block.marker({POSITION: '1'});
+            block.ledAnimation({EFFECT: '3', RED: 255, GREEN: 20, BLUE: 40});
+            const completion = block.drive({MM: 120});
+            jest.advanceTimersByTime(1000);
+            await completion;
+            expect(block.simulator.trail.length).toBeGreaterThan(0);
+            expect(block.simulator.marker).toBe(1);
+            expect(block.simulator.led).toEqual({effect: 3, red: 255, green: 20, blue: 40});
+            expect(block.simulator._ledPhase).toBeGreaterThan(0);
+            block.simulator.reset();
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
     test('updates block and menu labels between Japanese, hiragana Japanese, and English', () => {
         const localeSetup = {locale: 'ja', translations: {ja: {}, 'ja-Hira': {}, en: {}}};
         const localizedFormatMessage = message =>

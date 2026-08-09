@@ -4513,6 +4513,8 @@ var RootSimulator = /*#__PURE__*/function () {
     this.speedMultiplier = 2;
     this._animation = null;
     this._continuousMotion = null;
+    this._ledAnimationTimer = null;
+    this._ledPhase = 0;
     this._panel = null;
     this._canvas = null;
     this._context = null;
@@ -4522,6 +4524,7 @@ var RootSimulator = /*#__PURE__*/function () {
     key: "reset",
     value: function reset() {
       this.stop();
+      this._stopLedAnimation();
       this.pose = {
         x: 0,
         y: 0,
@@ -4580,12 +4583,21 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "setLed",
     value: function setLed(effect, red, green, blue) {
+      var _this = this;
+      this._stopLedAnimation();
       this.led = {
         effect: clamp(Math.round(Number(effect) || 0), 0, 3),
         red: clamp(Math.round(Number(red) || 0), 0, 255),
         green: clamp(Math.round(Number(green) || 0), 0, 255),
         blue: clamp(Math.round(Number(blue) || 0), 0, 255)
       };
+      this._ledPhase = 0;
+      if (this.led.effect === 2 || this.led.effect === 3) {
+        this._ledAnimationTimer = setInterval(function () {
+          _this._ledPhase = (_this._ledPhase + 1) % 12;
+          _this._draw();
+        }, 100);
+      }
       this._draw();
     }
   }, {
@@ -4608,7 +4620,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "move",
     value: function move(distanceMm) {
-      var _this = this;
+      var _this2 = this;
       var distance = Number(distanceMm) || 0;
       var start = Object.assign({}, this.pose);
       var radians = headingRadians(start.heading);
@@ -4618,7 +4630,7 @@ var RootSimulator = /*#__PURE__*/function () {
         heading: start.heading
       };
       return this._animate(Math.abs(distance) / DEFAULT_SPEED_MM_S * 1000, function (progress) {
-        _this._setPose({
+        _this2._setPose({
           x: start.x + (end.x - start.x) * progress,
           y: start.y + (end.y - start.y) * progress,
           heading: start.heading
@@ -4628,12 +4640,12 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "turn",
     value: function turn(degrees) {
-      var _this2 = this;
+      var _this3 = this;
       var turn = Number(degrees) || 0;
       var start = Object.assign({}, this.pose);
       return this._animate(Math.abs(turn) / DEFAULT_TURN_DEG_S * 1000, function (progress) {
         // Root defines a positive rotation as clockwise.
-        _this2._setPose(Object.assign({}, start, {
+        _this3._setPose(Object.assign({}, start, {
           heading: normalizeHeading$1(start.heading - turn * progress)
         }));
       });
@@ -4641,7 +4653,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "arc",
     value: function arc(radiusMm, degrees) {
-      var _this3 = this;
+      var _this4 = this;
       var radius = Number(radiusMm) || 0;
       var angle = Number(degrees) || 0;
       if (radius === 0) return this.turn(angle);
@@ -4657,7 +4669,7 @@ var RootSimulator = /*#__PURE__*/function () {
       return this._animate(duration, function (progress) {
         var heading = normalizeHeading$1(start.heading - angle * progress);
         var currentTheta = headingRadians(heading);
-        _this3._setPose({
+        _this4._setPose({
           x: center.x - radius * Math.sin(currentTheta),
           y: center.y + radius * Math.cos(currentTheta),
           heading: heading
@@ -4667,7 +4679,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "motors",
     value: function motors(left, right) {
-      var _this4 = this;
+      var _this5 = this;
       this._stopContinuousMotion();
       var leftPower = clamp(Number(left) || 0, -100, 100);
       var rightPower = clamp(Number(right) || 0, -100, 100);
@@ -4679,11 +4691,11 @@ var RootSimulator = /*#__PURE__*/function () {
         previous = now;
         var linear = (leftPower + rightPower) / 2 * 1.2;
         var angular = (rightPower - leftPower) * 1.2 / 86 / DEG;
-        var nextHeading = normalizeHeading$1(_this4.pose.heading - angular * elapsed);
-        var radians = headingRadians((_this4.pose.heading + nextHeading) / 2);
-        _this4._setPose({
-          x: _this4.pose.x + Math.cos(radians) * linear * elapsed,
-          y: _this4.pose.y + Math.sin(radians) * linear * elapsed,
+        var nextHeading = normalizeHeading$1(_this5.pose.heading - angular * elapsed);
+        var radians = headingRadians((_this5.pose.heading + nextHeading) / 2);
+        _this5._setPose({
+          x: _this5.pose.x + Math.cos(radians) * linear * elapsed,
+          y: _this5.pose.y + Math.sin(radians) * linear * elapsed,
           heading: nextHeading
         });
       }, 16);
@@ -4702,7 +4714,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "navigateTo",
     value: function navigateTo(xMm, yMm) {
-      var _this5 = this;
+      var _this6 = this;
       var deltaX = (Number(xMm) || 0) - this.pose.x;
       var deltaY = (Number(yMm) || 0) - this.pose.y;
       var distance = Math.hypot(deltaX, deltaY);
@@ -4710,7 +4722,7 @@ var RootSimulator = /*#__PURE__*/function () {
       var targetHeading = normalizeHeading$1(Math.atan2(deltaY, deltaX) / DEG);
       var turn = normalizeHeading$1(this.pose.heading - targetHeading + 180) - 180;
       return this.turn(turn).then(function () {
-        return _this5.move(distance);
+        return _this6.move(distance);
       });
     }
   }, {
@@ -4736,7 +4748,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "_animate",
     value: function _animate(durationMs, update) {
-      var _this6 = this;
+      var _this7 = this;
       this.stop();
       var duration = Math.max(0, durationMs / this.speedMultiplier);
       if (duration === 0) {
@@ -4748,7 +4760,7 @@ var RootSimulator = /*#__PURE__*/function () {
           cancelled: false,
           resolve: resolve
         };
-        _this6._animation = animation;
+        _this7._animation = animation;
         var start = Date.now();
         var _frame = function frame() {
           if (animation.cancelled) return;
@@ -4757,7 +4769,7 @@ var RootSimulator = /*#__PURE__*/function () {
           if (progress < 1) {
             animation.frame = setTimeout(_frame, 16);
           } else {
-            _this6._animation = null;
+            _this7._animation = null;
             resolve();
           }
         };
@@ -4767,9 +4779,9 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "_wait",
     value: function _wait(durationMs) {
-      var _this7 = this;
+      var _this8 = this;
       return new Promise(function (resolve) {
-        return setTimeout(resolve, durationMs / _this7.speedMultiplier);
+        return setTimeout(resolve, durationMs / _this8.speedMultiplier);
       });
     }
   }, {
@@ -4779,9 +4791,16 @@ var RootSimulator = /*#__PURE__*/function () {
       this._continuousMotion = null;
     }
   }, {
+    key: "_stopLedAnimation",
+    value: function _stopLedAnimation() {
+      if (this._ledAnimationTimer) clearInterval(this._ledAnimationTimer);
+      this._ledAnimationTimer = null;
+      this._ledPhase = 0;
+    }
+  }, {
     key: "_createPanel",
     value: function _createPanel() {
-      var _this8 = this;
+      var _this9 = this;
       var panel = document.createElement('div');
       panel.setAttribute('data-irobot-root-simulator', '');
       panel.style.cssText = 'position:fixed;z-index:10000;inset:4vh 4vw;background:#f7fbf9;border:3px solid #39846c;border-radius:18px;box-shadow:0 14px 40px #0008;display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;';
@@ -4792,7 +4811,7 @@ var RootSimulator = /*#__PURE__*/function () {
       close.textContent = '×';
       close.style.cssText = 'border:0;border-radius:50%;width:34px;height:34px;background:#286754;color:white;font-size:27px;line-height:28px;';
       close.onclick = function () {
-        return _this8.close();
+        return _this9.close();
       };
       header.appendChild(close);
       var canvas = document.createElement('canvas');
@@ -4889,10 +4908,21 @@ var RootSimulator = /*#__PURE__*/function () {
       context.moveTo(0, -22);
       context.lineTo(0, 21);
       context.stroke();
-      context.fillStyle = "rgb(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ")");
-      context.beginPath();
-      context.arc(0, 0, 9, 0, Math.PI * 2);
-      context.fill();
+      var ledColor = "rgb(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ")");
+      if (this.led.effect === 3) {
+        for (var _i = 0; _i < 4; _i++) {
+          var angle = (this._ledPhase + _i * 3) * Math.PI / 6;
+          context.fillStyle = _i === 0 ? ledColor : "rgba(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ",").concat(Math.max(0.15, 0.8 - _i * 0.18), ")");
+          context.beginPath();
+          context.arc(Math.cos(angle) * 17, Math.sin(angle) * 17, 5, 0, Math.PI * 2);
+          context.fill();
+        }
+      } else if (this.led.effect !== 2 || this._ledPhase < 6) {
+        context.fillStyle = ledColor;
+        context.beginPath();
+        context.arc(0, 0, 9, 0, Math.PI * 2);
+        context.fill();
+      }
       context.fillStyle = '#f2d941';
       context.beginPath();
       context.arc(0, -27, 6, 0, Math.PI * 2);
@@ -4901,7 +4931,7 @@ var RootSimulator = /*#__PURE__*/function () {
       context.fillStyle = '#26353a';
       context.font = '18px Arial';
       context.fillText("x: ".concat(this.pose.x.toFixed(1), " mm   y: ").concat(this.pose.y.toFixed(1), " mm   heading: ").concat(this.pose.heading.toFixed(1), "\xB0"), 18, 30);
-      context.fillText("marker: ".concat(['up', 'down', 'eraser'][this.marker], "   LED: rgb(").concat(this.led.red, ", ").concat(this.led.green, ", ").concat(this.led.blue, ")"), 18, 57);
+      context.fillText("marker: ".concat(['up', 'down', 'eraser'][this.marker], "   LED: ").concat(['off', 'on', 'blink', 'spin'][this.led.effect], " rgb(").concat(this.led.red, ", ").concat(this.led.green, ", ").concat(this.led.blue, ")"), 18, 57);
       if (this.phrase) context.fillText("say: ".concat(this.phrase), 18, 84);
     }
   }]);

@@ -19,6 +19,8 @@ class RootSimulator {
         this.speedMultiplier = 2;
         this._animation = null;
         this._continuousMotion = null;
+        this._ledAnimationTimer = null;
+        this._ledPhase = 0;
         this._panel = null;
         this._canvas = null;
         this._context = null;
@@ -27,6 +29,7 @@ class RootSimulator {
 
     reset () {
         this.stop();
+        this._stopLedAnimation();
         this.pose = {x: 0, y: 0, heading: DEFAULT_HEADING};
         this.marker = 0;
         this.led = {effect: 0, red: 0, green: 0, blue: 0};
@@ -71,12 +74,20 @@ class RootSimulator {
     }
 
     setLed (effect, red, green, blue) {
+        this._stopLedAnimation();
         this.led = {
             effect: clamp(Math.round(Number(effect) || 0), 0, 3),
             red: clamp(Math.round(Number(red) || 0), 0, 255),
             green: clamp(Math.round(Number(green) || 0), 0, 255),
             blue: clamp(Math.round(Number(blue) || 0), 0, 255)
         };
+        this._ledPhase = 0;
+        if (this.led.effect === 2 || this.led.effect === 3) {
+            this._ledAnimationTimer = setInterval(() => {
+                this._ledPhase = (this._ledPhase + 1) % 12;
+                this._draw();
+            }, 100);
+        }
         this._draw();
     }
 
@@ -233,6 +244,12 @@ class RootSimulator {
         this._continuousMotion = null;
     }
 
+    _stopLedAnimation () {
+        if (this._ledAnimationTimer) clearInterval(this._ledAnimationTimer);
+        this._ledAnimationTimer = null;
+        this._ledPhase = 0;
+    }
+
     _createPanel () {
         const panel = document.createElement('div');
         panel.setAttribute('data-irobot-root-simulator', '');
@@ -277,12 +294,23 @@ class RootSimulator {
         for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + i * Math.PI / 3; const x = Math.cos(a) * 36; const y = Math.sin(a) * 36; i ? context.lineTo(x, y) : context.moveTo(x, y); }
         context.closePath(); context.fill(); context.stroke();
         context.strokeStyle = '#29343a'; context.lineWidth = 7; context.beginPath(); context.moveTo(0, -22); context.lineTo(0, 21); context.stroke();
-        context.fillStyle = `rgb(${this.led.red},${this.led.green},${this.led.blue})`; context.beginPath(); context.arc(0, 0, 9, 0, Math.PI * 2); context.fill();
+        const ledColor = `rgb(${this.led.red},${this.led.green},${this.led.blue})`;
+        if (this.led.effect === 3) {
+            for (let i = 0; i < 4; i++) {
+                const angle = (this._ledPhase + i * 3) * Math.PI / 6;
+                context.fillStyle = i === 0 ? ledColor : `rgba(${this.led.red},${this.led.green},${this.led.blue},${Math.max(0.15, 0.8 - i * 0.18)})`;
+                context.beginPath();
+                context.arc(Math.cos(angle) * 17, Math.sin(angle) * 17, 5, 0, Math.PI * 2);
+                context.fill();
+            }
+        } else if (this.led.effect !== 2 || this._ledPhase < 6) {
+            context.fillStyle = ledColor; context.beginPath(); context.arc(0, 0, 9, 0, Math.PI * 2); context.fill();
+        }
         context.fillStyle = '#f2d941'; context.beginPath(); context.arc(0, -27, 6, 0, Math.PI * 2); context.fill();
         context.restore();
         context.fillStyle = '#26353a'; context.font = '18px Arial';
         context.fillText(`x: ${this.pose.x.toFixed(1)} mm   y: ${this.pose.y.toFixed(1)} mm   heading: ${this.pose.heading.toFixed(1)}°`, 18, 30);
-        context.fillText(`marker: ${['up', 'down', 'eraser'][this.marker]}   LED: rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 57);
+        context.fillText(`marker: ${['up', 'down', 'eraser'][this.marker]}   LED: ${['off', 'on', 'blink', 'spin'][this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 57);
         if (this.phrase) context.fillText(`say: ${this.phrase}`, 18, 84);
     }
 }
