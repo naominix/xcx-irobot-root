@@ -232,6 +232,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(japaneseInfo, 'sayPhrase').text).toBe('[PHRASE] と言う');
         expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
         expect(japaneseInfo.menus.markerMenu.items[0]).toEqual({text: '上げる', value: '0'});
+        expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ もう一度実行');
+        expect(block.simulator._t('clearObstacles', 'Clear obstacles')).toBe('障害物を全消去');
 
         localeSetup.locale = 'ja-Hira';
         const hiraganaInfo = block.getInfo();
@@ -246,6 +248,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(hiraganaInfo, 'whenFLTouch').text).toBe('FLたっちせんさーにふれたとき');
         expect(hiraganaInfo.menus.markerMenu.items[0]).toEqual({text: 'あげる', value: '0'});
         expect(hiraganaInfo.menus.bumperActionMenu.items[0]).toEqual({text: 'おされた', value: 'PUSH'});
+        expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ もういちどうごかす');
+        expect(block.simulator._t('clearObstacles', 'Clear obstacles')).toBe('しょうがいぶつをぜんぶけす');
         expect(hiraganaInfo.customFieldTypes['root-motor-left'].implementation.labels['ja-Hira'])
             .toBe('ひだりもーたーのしゅつりょく');
 
@@ -261,6 +265,7 @@ describe('iRobot Root extension', () => {
         expect(findBlock(englishInfo, 'sayPhrase').text).toBe('say [PHRASE]');
         expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
         expect(englishInfo.menus.markerMenu.items[0]).toEqual({text: 'up', value: '0'});
+        expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ Run again');
     });
 
     test('keeps the hiragana locale complete and free of kanji and katakana letters', () => {

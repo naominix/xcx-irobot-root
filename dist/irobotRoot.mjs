@@ -922,7 +922,35 @@ var en = {
 	"irobotRoot.menu.action.touch": "Touch",
 	"irobotRoot.menu.controlMode.auto": "automatic",
 	"irobotRoot.menu.controlMode.simulator": "simulator",
-	"irobotRoot.menu.controlMode.physical": "physical Root"
+	"irobotRoot.menu.controlMode.physical": "physical Root",
+	"irobotRoot.simulator.title": "iRobot Root Simulator",
+	"irobotRoot.simulator.runAgain": "▶ Run again",
+	"irobotRoot.simulator.stop": "■ Stop",
+	"irobotRoot.simulator.reset": "↺ Reset",
+	"irobotRoot.simulator.addWall": "+ Wall",
+	"irobotRoot.simulator.addBlock": "+ Block",
+	"irobotRoot.simulator.delete": "Delete",
+	"irobotRoot.simulator.clearObstacles": "Clear obstacles",
+	"irobotRoot.simulator.speed": "Speed ",
+	"irobotRoot.simulator.help": "Drag obstacles · Tap Root sensors",
+	"irobotRoot.simulator.x": "x",
+	"irobotRoot.simulator.y": "y",
+	"irobotRoot.simulator.heading": "heading",
+	"irobotRoot.simulator.marker": "marker",
+	"irobotRoot.simulator.up": "up",
+	"irobotRoot.simulator.down": "down",
+	"irobotRoot.simulator.eraser": "eraser",
+	"irobotRoot.simulator.off": "off",
+	"irobotRoot.simulator.on": "on",
+	"irobotRoot.simulator.blink": "blink",
+	"irobotRoot.simulator.spin": "spin",
+	"irobotRoot.simulator.none": "none",
+	"irobotRoot.simulator.leftPush": "LEFT PUSH",
+	"irobotRoot.simulator.rightPush": "RIGHT PUSH",
+	"irobotRoot.simulator.bothPush": "BOTH PUSH",
+	"irobotRoot.simulator.bumper": "bumper",
+	"irobotRoot.simulator.touchMask": "touch mask",
+	"irobotRoot.simulator.say": "say"
 };
 var ja = {
 	"irobotRoot.name": "iRobot Root",
@@ -1005,7 +1033,35 @@ var ja = {
 	"irobotRoot.menu.action.touch": "タッチ",
 	"irobotRoot.menu.controlMode.auto": "自動",
 	"irobotRoot.menu.controlMode.simulator": "シミュレーター",
-	"irobotRoot.menu.controlMode.physical": "実機Root"
+	"irobotRoot.menu.controlMode.physical": "実機Root",
+	"irobotRoot.simulator.title": "iRobot Rootシミュレーター",
+	"irobotRoot.simulator.runAgain": "▶ もう一度実行",
+	"irobotRoot.simulator.stop": "■ 停止",
+	"irobotRoot.simulator.reset": "↺ リセット",
+	"irobotRoot.simulator.addWall": "+ 壁",
+	"irobotRoot.simulator.addBlock": "+ 障害物",
+	"irobotRoot.simulator.delete": "削除",
+	"irobotRoot.simulator.clearObstacles": "障害物を全消去",
+	"irobotRoot.simulator.speed": "速度 ",
+	"irobotRoot.simulator.help": "障害物をドラッグ・Rootのセンサーをタップ",
+	"irobotRoot.simulator.x": "x",
+	"irobotRoot.simulator.y": "y",
+	"irobotRoot.simulator.heading": "向き",
+	"irobotRoot.simulator.marker": "マーカー",
+	"irobotRoot.simulator.up": "上げる",
+	"irobotRoot.simulator.down": "下げる",
+	"irobotRoot.simulator.eraser": "消しゴム",
+	"irobotRoot.simulator.off": "消灯",
+	"irobotRoot.simulator.on": "点灯",
+	"irobotRoot.simulator.blink": "点滅",
+	"irobotRoot.simulator.spin": "回転",
+	"irobotRoot.simulator.none": "なし",
+	"irobotRoot.simulator.leftPush": "左 PUSH",
+	"irobotRoot.simulator.rightPush": "右 PUSH",
+	"irobotRoot.simulator.bothPush": "左右 PUSH",
+	"irobotRoot.simulator.bumper": "バンパー",
+	"irobotRoot.simulator.touchMask": "タッチ状態",
+	"irobotRoot.simulator.say": "発話"
 };
 var translations = {
 	en: en,
@@ -1091,7 +1147,35 @@ var translations = {
 	"irobotRoot.menu.action.touch": "ふれられた",
 	"irobotRoot.menu.controlMode.auto": "じどう",
 	"irobotRoot.menu.controlMode.simulator": "しみゅれーたー",
-	"irobotRoot.menu.controlMode.physical": "じっきるーと"
+	"irobotRoot.menu.controlMode.physical": "じっきるーと",
+	"irobotRoot.simulator.title": "iRobot Root しみゅれーたー",
+	"irobotRoot.simulator.runAgain": "▶ もういちどうごかす",
+	"irobotRoot.simulator.stop": "■ とめる",
+	"irobotRoot.simulator.reset": "↺ りせっと",
+	"irobotRoot.simulator.addWall": "+ かべ",
+	"irobotRoot.simulator.addBlock": "+ しょうがいぶつ",
+	"irobotRoot.simulator.delete": "けす",
+	"irobotRoot.simulator.clearObstacles": "しょうがいぶつをぜんぶけす",
+	"irobotRoot.simulator.speed": "はやさ ",
+	"irobotRoot.simulator.help": "しょうがいぶつをうごかす・るーとのせんさーをおす",
+	"irobotRoot.simulator.x": "x",
+	"irobotRoot.simulator.y": "y",
+	"irobotRoot.simulator.heading": "むき",
+	"irobotRoot.simulator.marker": "まーかー",
+	"irobotRoot.simulator.up": "あげる",
+	"irobotRoot.simulator.down": "さげる",
+	"irobotRoot.simulator.eraser": "けしごむ",
+	"irobotRoot.simulator.off": "けす",
+	"irobotRoot.simulator.on": "つける",
+	"irobotRoot.simulator.blink": "てんめつ",
+	"irobotRoot.simulator.spin": "かいてん",
+	"irobotRoot.simulator.none": "なし",
+	"irobotRoot.simulator.leftPush": "ひだり おされた",
+	"irobotRoot.simulator.rightPush": "みぎ おされた",
+	"irobotRoot.simulator.bothPush": "さゆう おされた",
+	"irobotRoot.simulator.bumper": "ばんぱー",
+	"irobotRoot.simulator.touchMask": "たっちのじょうたい",
+	"irobotRoot.simulator.say": "いう"
 }
 };
 
@@ -4528,6 +4612,7 @@ var RootSimulator = /*#__PURE__*/function () {
     this._collisionPoint = null;
     this._runButton = null;
     this._stopButton = null;
+    this._localizedElements = [];
     this.reset();
   }
   return _createClass$1(RootSimulator, [{
@@ -4643,6 +4728,27 @@ var RootSimulator = /*#__PURE__*/function () {
     key: "_canControlProject",
     value: function _canControlProject() {
       return !this.controls.isActive || this.controls.isActive();
+    }
+  }, {
+    key: "_t",
+    value: function _t(id, defaultText) {
+      return this.controls.translate ? this.controls.translate(id, defaultText) : defaultText;
+    }
+  }, {
+    key: "_updateTranslations",
+    value: function _updateTranslations() {
+      var _iterator = _createForOfIteratorHelper$1(this._localizedElements),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var item = _step.value;
+          item.element.textContent = this._t(item.id, item.defaultText);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
     }
   }, {
     key: "open",
@@ -4872,11 +4978,11 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "_collisionAt",
     value: function _collisionAt(pose) {
-      var _iterator = _createForOfIteratorHelper$1(this.obstacles),
-        _step;
+      var _iterator2 = _createForOfIteratorHelper$1(this.obstacles),
+        _step2;
       try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var obstacle = _step.value;
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var obstacle = _step2.value;
           var halfWidth = obstacle.width / 2;
           var halfHeight = obstacle.height / 2;
           var closestX = clamp(pose.x, obstacle.x - halfWidth, obstacle.x + halfWidth);
@@ -4901,9 +5007,9 @@ var RootSimulator = /*#__PURE__*/function () {
           };
         }
       } catch (err) {
-        _iterator.e(err);
+        _iterator2.e(err);
       } finally {
-        _iterator.f();
+        _iterator2.f();
       }
       return null;
     }
@@ -4994,7 +5100,13 @@ var RootSimulator = /*#__PURE__*/function () {
       panel.style.cssText = 'position:fixed;z-index:10000;inset:4vh 4vw;background:#f7fbf9;border:3px solid #39846c;border-radius:18px;box-shadow:0 14px 40px #0008;display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;';
       var header = document.createElement('div');
       header.style.cssText = 'padding:12px 18px;background:#39846c;color:white;font-size:20px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;';
-      header.appendChild(document.createTextNode('iRobot Root Simulator'));
+      var title = document.createElement('span');
+      header.appendChild(title);
+      this._localizedElements.push({
+        element: title,
+        id: 'title',
+        defaultText: 'iRobot Root Simulator'
+      });
       var close = document.createElement('button');
       close.textContent = '×';
       close.style.cssText = 'border:0;border-radius:50%;width:34px;height:34px;background:#286754;color:white;font-size:27px;line-height:28px;';
@@ -5004,38 +5116,48 @@ var RootSimulator = /*#__PURE__*/function () {
       header.appendChild(close);
       var toolbar = document.createElement('div');
       toolbar.style.cssText = 'padding:8px 12px;background:#e8f4f0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;';
-      var addButton = function addButton(label, action) {
+      var addButton = function addButton(id, label, action) {
         var button = document.createElement('button');
-        button.textContent = label;
         button.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px 12px;background:white;color:#264c40;font-weight:bold;cursor:pointer;';
         button.onclick = action;
         toolbar.appendChild(button);
+        _this9._localizedElements.push({
+          element: button,
+          id: id,
+          defaultText: label
+        });
         return button;
       };
-      this._runButton = addButton('▶ Run again', function () {
+      this._runButton = addButton('runAgain', '▶ Run again', function () {
         return _this9.runProject();
       });
-      this._stopButton = addButton('■ Stop', function () {
+      this._stopButton = addButton('stop', '■ Stop', function () {
         return _this9.stopProject();
       });
-      addButton('↺ Reset', function () {
+      addButton('reset', '↺ Reset', function () {
         return _this9.reset();
       });
-      addButton('+ Wall', function () {
+      addButton('addWall', '+ Wall', function () {
         return _this9.addObstacle('wall');
       });
-      addButton('+ Block', function () {
+      addButton('addBlock', '+ Block', function () {
         return _this9.addObstacle('block');
       });
-      addButton('Delete', function () {
+      addButton('delete', 'Delete', function () {
         return _this9.deleteSelectedObstacle();
       });
-      addButton('Clear obstacles', function () {
+      addButton('clearObstacles', 'Clear obstacles', function () {
         return _this9.clearObstacles();
       });
       var speedLabel = document.createElement('label');
-      speedLabel.textContent = 'Speed ';
       speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
+      var speedText = document.createElement('span');
+      speedLabel.appendChild(speedText);
+      this._localizedElements.push({
+        element: speedText,
+        id: 'speed',
+        defaultText: 'Speed '
+      });
       var speedSelect = document.createElement('select');
       speedSelect.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px;background:white;color:#264c40;font-weight:bold;';
       for (var _i = 0, _arr = [0.25, 0.5, 1, 2, 4]; _i < _arr.length; _i++) {
@@ -5052,9 +5174,13 @@ var RootSimulator = /*#__PURE__*/function () {
       speedLabel.appendChild(speedSelect);
       toolbar.appendChild(speedLabel);
       var help = document.createElement('span');
-      help.textContent = 'Drag obstacles · Tap Root sensors';
       help.style.cssText = 'margin-left:auto;color:#42675b;font-size:14px;';
       toolbar.appendChild(help);
+      this._localizedElements.push({
+        element: help,
+        id: 'help',
+        defaultText: 'Drag obstacles · Tap Root sensors'
+      });
       var canvas = document.createElement('canvas');
       canvas.width = 1000;
       canvas.height = 680;
@@ -5082,6 +5208,7 @@ var RootSimulator = /*#__PURE__*/function () {
       this._panel = panel;
       this._canvas = canvas;
       this._context = canvas.getContext('2d');
+      this._updateTranslations();
     }
   }, {
     key: "_eventWorld",
@@ -5154,6 +5281,7 @@ var RootSimulator = /*#__PURE__*/function () {
     value: function _draw() {
       var _this0 = this;
       if (!this._context || !this._canvas) return;
+      this._updateTranslations();
       var controlsEnabled = this._canControlProject();
       if (this._runButton) {
         this._runButton.disabled = !controlsEnabled;
@@ -5224,11 +5352,11 @@ var RootSimulator = /*#__PURE__*/function () {
       context.strokeStyle = this.marker === 2 ? '#fff' : '#22a6a6';
       context.lineWidth = 4;
       context.lineCap = 'round';
-      var _iterator2 = _createForOfIteratorHelper$1(this.trail),
-        _step2;
+      var _iterator3 = _createForOfIteratorHelper$1(this.trail),
+        _step3;
       try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var segment = _step2.value;
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var segment = _step3.value;
           var _a = point({
             x: segment.x1,
             y: segment.y1
@@ -5243,9 +5371,9 @@ var RootSimulator = /*#__PURE__*/function () {
           context.stroke();
         }
       } catch (err) {
-        _iterator2.e(err);
+        _iterator3.e(err);
       } finally {
-        _iterator2.f();
+        _iterator3.f();
       }
       var p = point(this.pose);
       context.save();
@@ -5328,11 +5456,13 @@ var RootSimulator = /*#__PURE__*/function () {
       context.restore();
       context.fillStyle = '#26353a';
       context.font = '18px Arial';
-      context.fillText("x: ".concat(this.pose.x.toFixed(1), " mm   y: ").concat(this.pose.y.toFixed(1), " mm   heading: ").concat(this.pose.heading.toFixed(1), "\xB0"), 18, 30);
-      context.fillText("marker: ".concat(['up', 'down', 'eraser'][this.marker], "   LED: ").concat(['off', 'on', 'blink', 'spin'][this.led.effect], " rgb(").concat(this.led.red, ", ").concat(this.led.green, ", ").concat(this.led.blue, ")"), 18, 57);
-      var bumper = this.last.leftBumper && this.last.rightBumper ? 'BOTH PUSH' : this.last.leftBumper ? 'LEFT PUSH' : this.last.rightBumper ? 'RIGHT PUSH' : 'none';
-      context.fillText("bumper: ".concat(bumper, "   touch mask: ").concat(this.last.touchMask.toString(2).padStart(4, '0')), 18, 84);
-      if (this.phrase) context.fillText("say: ".concat(this.phrase), 18, 111);
+      context.fillText("".concat(this._t('x', 'x'), ": ").concat(this.pose.x.toFixed(1), " mm   ").concat(this._t('y', 'y'), ": ").concat(this.pose.y.toFixed(1), " mm   ").concat(this._t('heading', 'heading'), ": ").concat(this.pose.heading.toFixed(1), "\xB0"), 18, 30);
+      var markerStates = [this._t('up', 'up'), this._t('down', 'down'), this._t('eraser', 'eraser')];
+      var ledStates = [this._t('off', 'off'), this._t('on', 'on'), this._t('blink', 'blink'), this._t('spin', 'spin')];
+      context.fillText("".concat(this._t('marker', 'marker'), ": ").concat(markerStates[this.marker], "   LED: ").concat(ledStates[this.led.effect], " rgb(").concat(this.led.red, ", ").concat(this.led.green, ", ").concat(this.led.blue, ")"), 18, 57);
+      var bumper = this.last.leftBumper && this.last.rightBumper ? this._t('bothPush', 'BOTH PUSH') : this.last.leftBumper ? this._t('leftPush', 'LEFT PUSH') : this.last.rightBumper ? this._t('rightPush', 'RIGHT PUSH') : this._t('none', 'none');
+      context.fillText("".concat(this._t('bumper', 'bumper'), ": ").concat(bumper, "   ").concat(this._t('touchMask', 'touch mask'), ": ").concat(this.last.touchMask.toString(2).padStart(4, '0')), 18, 84);
+      if (this.phrase) context.fillText("".concat(this._t('say', 'say'), ": ").concat(this.phrase), 18, 111);
     }
   }]);
 }();
@@ -5353,7 +5483,7 @@ var setupTranslations = function setupTranslations() {
   if (!localeSetup.translations[locale]) localeSetup.translations[locale] = {};
   Object.assign(localeSetup.translations[locale], localizedMessages);
 };
-var translate = function translate(id, defaultText, description) {
+var _translate = function translate(id, defaultText, description) {
   return formatMessage({
     id: "irobotRoot.".concat(id),
     default: defaultText,
@@ -5495,7 +5625,7 @@ var fixedEventHats = function fixedEventHats() {
       opcode: opcode,
       func: 'whenFixedEvent',
       blockType: BlockType.HAT,
-      text: translate(id, defaultText),
+      text: _translate(id, defaultText),
       isEdgeActivated: false
     };
   });
@@ -5540,6 +5670,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       isActive: function isActive() {
         return _this._isSimulatorActive();
       },
+      translate: function translate(id, defaultText) {
+        setupTranslations();
+        return _translate("simulator.".concat(id), defaultText);
+      },
       onRun: function onRun() {
         _this.bumperState = 0;
         _this.touchState = 0;
@@ -5578,27 +5712,27 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         blocks: [{
           opcode: 'connect',
           blockType: BlockType.COMMAND,
-          text: translate('block.connect', 'connect to Root')
+          text: _translate('block.connect', 'connect to Root')
         }, {
           opcode: 'disconnect',
           blockType: BlockType.COMMAND,
-          text: translate('block.disconnect', 'disconnect Root')
+          text: _translate('block.disconnect', 'disconnect Root')
         }, {
           opcode: 'isConnected',
           blockType: BlockType.BOOLEAN,
-          text: translate('block.isConnected', 'Root is connected?')
+          text: _translate('block.isConnected', 'Root is connected?')
         }, {
           opcode: 'transportMode',
           blockType: BlockType.REPORTER,
-          text: translate('block.transportMode', 'Root connection method')
+          text: _translate('block.transportMode', 'Root connection method')
         }, {
           opcode: 'lastConnectionError',
           blockType: BlockType.REPORTER,
-          text: translate('block.lastConnectionError', 'last connection error')
+          text: _translate('block.lastConnectionError', 'last connection error')
         }, {
           opcode: 'setControlMode',
           blockType: BlockType.COMMAND,
-          text: translate('block.setControlMode', 'set control mode to [MODE]'),
+          text: _translate('block.setControlMode', 'set control mode to [MODE]'),
           arguments: {
             MODE: {
               type: ArgumentType.STRING,
@@ -5608,19 +5742,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'controlTarget',
           blockType: BlockType.REPORTER,
-          text: translate('block.controlTarget', 'current control target')
+          text: _translate('block.controlTarget', 'current control target')
         }, {
           opcode: 'openSimulator',
           blockType: BlockType.COMMAND,
-          text: translate('block.openSimulator', 'open Root simulator')
+          text: _translate('block.openSimulator', 'open Root simulator')
         }, {
           opcode: 'resetSimulator',
           blockType: BlockType.COMMAND,
-          text: translate('block.resetSimulator', 'reset Root simulator')
+          text: _translate('block.resetSimulator', 'reset Root simulator')
         }, '---', {
           opcode: 'motors',
           blockType: BlockType.COMMAND,
-          text: translate('block.motors', 'set left motor [LEFT] right motor [RIGHT]'),
+          text: _translate('block.motors', 'set left motor [LEFT] right motor [RIGHT]'),
           arguments: {
             LEFT: {
               type: 'root-motor-left',
@@ -5634,7 +5768,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'drive',
           blockType: BlockType.COMMAND,
-          text: translate('block.drive', 'move [MM] mm'),
+          text: _translate('block.drive', 'move [MM] mm'),
           arguments: {
             MM: {
               type: 'root-distance',
@@ -5644,7 +5778,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'turn',
           blockType: BlockType.COMMAND,
-          text: translate('block.turn', 'turn [DEGREES] degrees'),
+          text: _translate('block.turn', 'turn [DEGREES] degrees'),
           arguments: {
             DEGREES: {
               type: 'root-turn-angle',
@@ -5654,7 +5788,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'arc',
           blockType: BlockType.COMMAND,
-          text: translate('block.arc', 'drive an arc of [DEGREES] degrees with radius [RADIUS] mm'),
+          text: _translate('block.arc', 'drive an arc of [DEGREES] degrees with radius [RADIUS] mm'),
           arguments: {
             RADIUS: {
               type: 'root-arc-radius',
@@ -5668,11 +5802,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'resetNavigation',
           blockType: BlockType.COMMAND,
-          text: translate('block.resetNavigation', 'reset navigation position')
+          text: _translate('block.resetNavigation', 'reset navigation position')
         }, {
           opcode: 'navigateTo',
           blockType: BlockType.COMMAND,
-          text: translate('block.navigateTo', 'navigate to x [X] y [Y] cm'),
+          text: _translate('block.navigateTo', 'navigate to x [X] y [Y] cm'),
           arguments: {
             X: {
               type: ArgumentType.NUMBER,
@@ -5686,11 +5820,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'stop',
           blockType: BlockType.COMMAND,
-          text: translate('block.stop', 'stop Root')
+          text: _translate('block.stop', 'stop Root')
         }, {
           opcode: 'marker',
           blockType: BlockType.COMMAND,
-          text: translate('block.marker', 'set marker [POSITION]'),
+          text: _translate('block.marker', 'set marker [POSITION]'),
           arguments: {
             POSITION: {
               type: ArgumentType.STRING,
@@ -5700,7 +5834,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'ledColor',
           blockType: BlockType.COMMAND,
-          text: translate('block.ledColor', 'set LED to [COLOR]'),
+          text: _translate('block.ledColor', 'set LED to [COLOR]'),
           arguments: {
             COLOR: {
               type: ArgumentType.COLOR,
@@ -5710,7 +5844,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'ledAnimationColor',
           blockType: BlockType.COMMAND,
-          text: translate('block.ledAnimationColor', 'set LED [EFFECT] to [COLOR]'),
+          text: _translate('block.ledAnimationColor', 'set LED [EFFECT] to [COLOR]'),
           arguments: {
             EFFECT: {
               type: ArgumentType.STRING,
@@ -5724,7 +5858,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'led',
           blockType: BlockType.COMMAND,
-          text: translate('block.led', 'set LED red [RED] green [GREEN] blue [BLUE]'),
+          text: _translate('block.led', 'set LED red [RED] green [GREEN] blue [BLUE]'),
           arguments: {
             RED: {
               type: ArgumentType.NUMBER,
@@ -5742,7 +5876,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'ledAnimation',
           blockType: BlockType.COMMAND,
-          text: translate('block.ledAnimation', 'set LED [EFFECT] red [RED] green [GREEN] blue [BLUE]'),
+          text: _translate('block.ledAnimation', 'set LED [EFFECT] red [RED] green [GREEN] blue [BLUE]'),
           arguments: {
             EFFECT: {
               type: ArgumentType.STRING,
@@ -5764,7 +5898,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'playNote',
           blockType: BlockType.COMMAND,
-          text: translate('block.playNote', 'play note [NOTE] for [MS] ms'),
+          text: _translate('block.playNote', 'play note [NOTE] for [MS] ms'),
           arguments: {
             NOTE: {
               type: ArgumentType.NOTE,
@@ -5778,7 +5912,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'note',
           blockType: BlockType.COMMAND,
-          text: translate('block.note', 'play frequency [HZ] Hz for [MS] ms'),
+          text: _translate('block.note', 'play frequency [HZ] Hz for [MS] ms'),
           arguments: {
             HZ: {
               type: ArgumentType.NUMBER,
@@ -5792,7 +5926,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'sayPhrase',
           blockType: BlockType.COMMAND,
-          text: translate('block.sayPhrase', 'say [PHRASE]'),
+          text: _translate('block.sayPhrase', 'say [PHRASE]'),
           arguments: {
             PHRASE: {
               type: ArgumentType.STRING,
@@ -5802,7 +5936,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, '---', {
           opcode: 'refreshSensor',
           blockType: BlockType.COMMAND,
-          text: translate('block.refreshSensor', 'read [SENSOR]'),
+          text: _translate('block.refreshSensor', 'read [SENSOR]'),
           arguments: {
             SENSOR: {
               type: ArgumentType.STRING,
@@ -5812,7 +5946,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'sensor',
           blockType: BlockType.REPORTER,
-          text: translate('block.sensor', '[VALUE] value'),
+          text: _translate('block.sensor', '[VALUE] value'),
           arguments: {
             VALUE: {
               type: ArgumentType.STRING,
@@ -5822,7 +5956,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenEvent',
           blockType: BlockType.HAT,
-          text: translate('block.whenEvent', 'when [EVENT] changes'),
+          text: _translate('block.whenEvent', 'when [EVENT] changes'),
           isEdgeActivated: false,
           arguments: {
             EVENT: {
@@ -5833,7 +5967,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenBumper',
           blockType: BlockType.HAT,
-          text: translate('block.whenBumper', 'when [BUMPER] bumper is [ACTION]'),
+          text: _translate('block.whenBumper', 'when [BUMPER] bumper is [ACTION]'),
           isEdgeActivated: false,
           arguments: {
             BUMPER: {
@@ -5848,7 +5982,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenTouchSensor',
           blockType: BlockType.HAT,
-          text: translate('block.whenTouchSensor', 'when [SENSOR] touch sensor is [ACTION]'),
+          text: _translate('block.whenTouchSensor', 'when [SENSOR] touch sensor is [ACTION]'),
           isEdgeActivated: false,
           arguments: {
             SENSOR: {
@@ -5863,7 +5997,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }].concat(_toConsumableArray$1(fixedEventHats()), ['---', {
           opcode: 'raw',
           blockType: BlockType.COMMAND,
-          text: translate('block.raw', 'device [DEVICE] command [COMMAND] payload [PAYLOAD]'),
+          text: _translate('block.raw', 'device [DEVICE] command [COMMAND] payload [PAYLOAD]'),
           arguments: {
             DEVICE: {
               type: ArgumentType.NUMBER,
@@ -5881,125 +6015,125 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'lastPacket',
           blockType: BlockType.REPORTER,
-          text: translate('block.lastPacket', 'last received packet')
+          text: _translate('block.lastPacket', 'last received packet')
         }, {
           opcode: 'detailedEvent',
           blockType: BlockType.REPORTER,
-          text: translate('block.detailedEvent', 'last detailed event')
+          text: _translate('block.detailedEvent', 'last detailed event')
         }]),
         customFieldTypes: ROOT_MOTION_FIELD_TYPES,
         menus: {
           markerMenu: {
             acceptReporters: true,
             items: [{
-              text: translate('menu.marker.up', 'up'),
+              text: _translate('menu.marker.up', 'up'),
               value: '0'
             }, {
-              text: translate('menu.marker.down', 'down'),
+              text: _translate('menu.marker.down', 'down'),
               value: '1'
             }, {
-              text: translate('menu.marker.eraser', 'eraser'),
+              text: _translate('menu.marker.eraser', 'eraser'),
               value: '2'
             }]
           },
           sensorMenu: {
             items: [{
-              text: translate('menu.sensor.battery', 'battery'),
+              text: _translate('menu.sensor.battery', 'battery'),
               value: 'battery'
             }, {
-              text: translate('menu.sensor.light', 'light'),
+              text: _translate('menu.sensor.light', 'light'),
               value: 'light'
             }, {
-              text: translate('menu.sensor.accel', 'accelerometer'),
+              text: _translate('menu.sensor.accel', 'accelerometer'),
               value: 'accel'
             }]
           },
           ledEffectMenu: {
             acceptReporters: true,
             items: [{
-              text: translate('menu.led.off', 'off'),
+              text: _translate('menu.led.off', 'off'),
               value: '0'
             }, {
-              text: translate('menu.led.on', 'on'),
+              text: _translate('menu.led.on', 'on'),
               value: '1'
             }, {
-              text: translate('menu.led.blink', 'blink'),
+              text: _translate('menu.led.blink', 'blink'),
               value: '2'
             }, {
-              text: translate('menu.led.spin', 'spin'),
+              text: _translate('menu.led.spin', 'spin'),
               value: '3'
             }]
           },
           valueMenu: {
             acceptReporters: true,
             items: [{
-              text: translate('menu.value.batteryPercent', 'battery level (%)'),
+              text: _translate('menu.value.batteryPercent', 'battery level (%)'),
               value: 'batteryPercent'
             }, {
-              text: translate('menu.value.batteryMv', 'battery voltage (mV)'),
+              text: _translate('menu.value.batteryMv', 'battery voltage (mV)'),
               value: 'batteryMv'
             }, {
-              text: translate('menu.value.lightLeft', 'left light level'),
+              text: _translate('menu.value.lightLeft', 'left light level'),
               value: 'lightLeft'
             }, {
-              text: translate('menu.value.lightRight', 'right light level'),
+              text: _translate('menu.value.lightRight', 'right light level'),
               value: 'lightRight'
             }, {
-              text: translate('menu.value.accelX', 'acceleration X'),
+              text: _translate('menu.value.accelX', 'acceleration X'),
               value: 'accelX'
             }, {
-              text: translate('menu.value.accelY', 'acceleration Y'),
+              text: _translate('menu.value.accelY', 'acceleration Y'),
               value: 'accelY'
             }, {
-              text: translate('menu.value.accelZ', 'acceleration Z'),
+              text: _translate('menu.value.accelZ', 'acceleration Z'),
               value: 'accelZ'
             }, {
-              text: translate('menu.value.leftBumper', 'left bumper'),
+              text: _translate('menu.value.leftBumper', 'left bumper'),
               value: 'leftBumper'
             }, {
-              text: translate('menu.value.rightBumper', 'right bumper'),
+              text: _translate('menu.value.rightBumper', 'right bumper'),
               value: 'rightBumper'
             }, {
-              text: translate('menu.value.touchMask', 'touch sensor mask'),
+              text: _translate('menu.value.touchMask', 'touch sensor mask'),
               value: 'touchMask'
             }, {
-              text: translate('menu.value.cliff', 'cliff sensor'),
+              text: _translate('menu.value.cliff', 'cliff sensor'),
               value: 'cliff'
             }]
           },
           eventMenu: {
             items: [{
-              text: translate('menu.event.bumper', 'bumper'),
+              text: _translate('menu.event.bumper', 'bumper'),
               value: 'bumper'
             }, {
-              text: translate('menu.event.touch', 'touch'),
+              text: _translate('menu.event.touch', 'touch'),
               value: 'touch'
             }, {
-              text: translate('menu.event.cliff', 'cliff sensor'),
+              text: _translate('menu.event.cliff', 'cliff sensor'),
               value: 'cliff'
             }, {
-              text: translate('menu.event.battery', 'battery'),
+              text: _translate('menu.event.battery', 'battery'),
               value: 'battery'
             }]
           },
           bumperMenu: {
             items: [{
-              text: translate('menu.bumper.left', 'left'),
+              text: _translate('menu.bumper.left', 'left'),
               value: 'LEFT'
             }, {
-              text: translate('menu.bumper.right', 'right'),
+              text: _translate('menu.bumper.right', 'right'),
               value: 'RIGHT'
             }, {
-              text: translate('menu.bumper.both', 'both'),
+              text: _translate('menu.bumper.both', 'both'),
               value: 'BOTH'
             }]
           },
           bumperActionMenu: {
             items: [{
-              text: translate('menu.action.push', 'Push'),
+              text: _translate('menu.action.push', 'Push'),
               value: 'PUSH'
             }, {
-              text: translate('menu.action.release', 'Release'),
+              text: _translate('menu.action.release', 'Release'),
               value: 'RELEASE'
             }]
           },
@@ -6020,23 +6154,23 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           },
           touchActionMenu: {
             items: [{
-              text: translate('menu.action.touch', 'Touch'),
+              text: _translate('menu.action.touch', 'Touch'),
               value: 'TOUCH'
             }, {
-              text: translate('menu.action.release', 'Release'),
+              text: _translate('menu.action.release', 'Release'),
               value: 'RELEASE'
             }]
           },
           controlModeMenu: {
             acceptReporters: true,
             items: [{
-              text: translate('menu.controlMode.auto', 'automatic'),
+              text: _translate('menu.controlMode.auto', 'automatic'),
               value: CONTROL_MODE_AUTO
             }, {
-              text: translate('menu.controlMode.simulator', 'simulator'),
+              text: _translate('menu.controlMode.simulator', 'simulator'),
               value: CONTROL_MODE_SIMULATOR
             }, {
-              text: translate('menu.controlMode.physical', 'physical Root'),
+              text: _translate('menu.controlMode.physical', 'physical Root'),
               value: CONTROL_MODE_PHYSICAL
             }]
           }

@@ -180,6 +180,10 @@ class IrobotRootBlocks {
         this.controlMode = CONTROL_MODE_PHYSICAL;
         this.simulator = new RootSimulator(event => this._receiveSimulatorEvent(event), {
             isActive: () => this._isSimulatorActive(),
+            translate: (id, defaultText) => {
+                setupTranslations();
+                return translate(`simulator.${id}`, defaultText);
+            },
             onRun: () => {
                 this.bumperState = 0;
                 this.touchState = 0;

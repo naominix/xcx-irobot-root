@@ -33,6 +33,7 @@ class RootSimulator {
         this._collisionPoint = null;
         this._runButton = null;
         this._stopButton = null;
+        this._localizedElements = [];
         this.reset();
     }
 
@@ -115,6 +116,16 @@ class RootSimulator {
 
     _canControlProject () {
         return !this.controls.isActive || this.controls.isActive();
+    }
+
+    _t (id, defaultText) {
+        return this.controls.translate ? this.controls.translate(id, defaultText) : defaultText;
+    }
+
+    _updateTranslations () {
+        for (const item of this._localizedElements) {
+            item.element.textContent = this._t(item.id, item.defaultText);
+        }
     }
 
     open () {
@@ -396,7 +407,9 @@ class RootSimulator {
         panel.style.cssText = 'position:fixed;z-index:10000;inset:4vh 4vw;background:#f7fbf9;border:3px solid #39846c;border-radius:18px;box-shadow:0 14px 40px #0008;display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;';
         const header = document.createElement('div');
         header.style.cssText = 'padding:12px 18px;background:#39846c;color:white;font-size:20px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;';
-        header.appendChild(document.createTextNode('iRobot Root Simulator'));
+        const title = document.createElement('span');
+        header.appendChild(title);
+        this._localizedElements.push({element: title, id: 'title', defaultText: 'iRobot Root Simulator'});
         const close = document.createElement('button');
         close.textContent = '×';
         close.style.cssText = 'border:0;border-radius:50%;width:34px;height:34px;background:#286754;color:white;font-size:27px;line-height:28px;';
@@ -404,24 +417,26 @@ class RootSimulator {
         header.appendChild(close);
         const toolbar = document.createElement('div');
         toolbar.style.cssText = 'padding:8px 12px;background:#e8f4f0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;';
-        const addButton = (label, action) => {
+        const addButton = (id, label, action) => {
             const button = document.createElement('button');
-            button.textContent = label;
             button.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px 12px;background:white;color:#264c40;font-weight:bold;cursor:pointer;';
             button.onclick = action;
             toolbar.appendChild(button);
+            this._localizedElements.push({element: button, id, defaultText: label});
             return button;
         };
-        this._runButton = addButton('▶ Run again', () => this.runProject());
-        this._stopButton = addButton('■ Stop', () => this.stopProject());
-        addButton('↺ Reset', () => this.reset());
-        addButton('+ Wall', () => this.addObstacle('wall'));
-        addButton('+ Block', () => this.addObstacle('block'));
-        addButton('Delete', () => this.deleteSelectedObstacle());
-        addButton('Clear obstacles', () => this.clearObstacles());
+        this._runButton = addButton('runAgain', '▶ Run again', () => this.runProject());
+        this._stopButton = addButton('stop', '■ Stop', () => this.stopProject());
+        addButton('reset', '↺ Reset', () => this.reset());
+        addButton('addWall', '+ Wall', () => this.addObstacle('wall'));
+        addButton('addBlock', '+ Block', () => this.addObstacle('block'));
+        addButton('delete', 'Delete', () => this.deleteSelectedObstacle());
+        addButton('clearObstacles', 'Clear obstacles', () => this.clearObstacles());
         const speedLabel = document.createElement('label');
-        speedLabel.textContent = 'Speed ';
         speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
+        const speedText = document.createElement('span');
+        speedLabel.appendChild(speedText);
+        this._localizedElements.push({element: speedText, id: 'speed', defaultText: 'Speed '});
         const speedSelect = document.createElement('select');
         speedSelect.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px;background:white;color:#264c40;font-weight:bold;';
         for (const speed of [0.25, 0.5, 1, 2, 4]) {
@@ -435,9 +450,13 @@ class RootSimulator {
         speedLabel.appendChild(speedSelect);
         toolbar.appendChild(speedLabel);
         const help = document.createElement('span');
-        help.textContent = 'Drag obstacles · Tap Root sensors';
         help.style.cssText = 'margin-left:auto;color:#42675b;font-size:14px;';
         toolbar.appendChild(help);
+        this._localizedElements.push({
+            element: help,
+            id: 'help',
+            defaultText: 'Drag obstacles · Tap Root sensors'
+        });
         const canvas = document.createElement('canvas');
         canvas.width = 1000;
         canvas.height = 680;
@@ -457,6 +476,7 @@ class RootSimulator {
         this._panel = panel;
         this._canvas = canvas;
         this._context = canvas.getContext('2d');
+        this._updateTranslations();
     }
 
     _eventWorld (event) {
@@ -521,6 +541,7 @@ class RootSimulator {
 
     _draw () {
         if (!this._context || !this._canvas) return;
+        this._updateTranslations();
         const controlsEnabled = this._canControlProject();
         if (this._runButton) {
             this._runButton.disabled = !controlsEnabled;
@@ -608,12 +629,15 @@ class RootSimulator {
         context.fillStyle = '#f2d941'; context.beginPath(); context.arc(0, -27, 6, 0, Math.PI * 2); context.fill();
         context.restore();
         context.fillStyle = '#26353a'; context.font = '18px Arial';
-        context.fillText(`x: ${this.pose.x.toFixed(1)} mm   y: ${this.pose.y.toFixed(1)} mm   heading: ${this.pose.heading.toFixed(1)}°`, 18, 30);
-        context.fillText(`marker: ${['up', 'down', 'eraser'][this.marker]}   LED: ${['off', 'on', 'blink', 'spin'][this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 57);
-        const bumper = this.last.leftBumper && this.last.rightBumper ? 'BOTH PUSH' :
-            (this.last.leftBumper ? 'LEFT PUSH' : (this.last.rightBumper ? 'RIGHT PUSH' : 'none'));
-        context.fillText(`bumper: ${bumper}   touch mask: ${this.last.touchMask.toString(2).padStart(4, '0')}`, 18, 84);
-        if (this.phrase) context.fillText(`say: ${this.phrase}`, 18, 111);
+        context.fillText(`${this._t('x', 'x')}: ${this.pose.x.toFixed(1)} mm   ${this._t('y', 'y')}: ${this.pose.y.toFixed(1)} mm   ${this._t('heading', 'heading')}: ${this.pose.heading.toFixed(1)}°`, 18, 30);
+        const markerStates = [this._t('up', 'up'), this._t('down', 'down'), this._t('eraser', 'eraser')];
+        const ledStates = [this._t('off', 'off'), this._t('on', 'on'), this._t('blink', 'blink'), this._t('spin', 'spin')];
+        context.fillText(`${this._t('marker', 'marker')}: ${markerStates[this.marker]}   LED: ${ledStates[this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 57);
+        const bumper = this.last.leftBumper && this.last.rightBumper ? this._t('bothPush', 'BOTH PUSH') :
+            (this.last.leftBumper ? this._t('leftPush', 'LEFT PUSH') :
+                (this.last.rightBumper ? this._t('rightPush', 'RIGHT PUSH') : this._t('none', 'none')));
+        context.fillText(`${this._t('bumper', 'bumper')}: ${bumper}   ${this._t('touchMask', 'touch mask')}: ${this.last.touchMask.toString(2).padStart(4, '0')}`, 18, 84);
+        if (this.phrase) context.fillText(`${this._t('say', 'say')}: ${this.phrase}`, 18, 111);
     }
 }
 
