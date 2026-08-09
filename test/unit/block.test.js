@@ -109,6 +109,20 @@ describe('iRobot Root extension', () => {
         }
     });
 
+    test('navigation reset preserves simulator marker and LED state', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.marker({POSITION: '1'});
+        block.ledAnimation({EFFECT: '3', RED: 20, GREEN: 40, BLUE: 255});
+        block.simulator.trail.push({x1: 0, y1: 0, x2: 10, y2: 0});
+        block.resetNavigation();
+        expect(block.simulator.pose).toEqual({x: 0, y: 0, heading: 90});
+        expect(block.simulator.marker).toBe(1);
+        expect(block.simulator.led).toEqual({effect: 3, red: 20, green: 40, blue: 255});
+        expect(block.simulator.trail).toHaveLength(1);
+        block.simulator.reset();
+    });
+
     test('updates block and menu labels between Japanese, hiragana Japanese, and English', () => {
         const localeSetup = {locale: 'ja', translations: {ja: {}, 'ja-Hira': {}, en: {}}};
         const localizedFormatMessage = message =>

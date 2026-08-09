@@ -4557,6 +4557,17 @@ var RootSimulator = /*#__PURE__*/function () {
       this._draw();
     }
   }, {
+    key: "resetNavigation",
+    value: function resetNavigation() {
+      this.stop();
+      this.pose = {
+        x: 0,
+        y: 0,
+        heading: DEFAULT_HEADING
+      };
+      this._draw();
+    }
+  }, {
     key: "open",
     value: function open() {
       if (typeof document === 'undefined') return;
@@ -5742,7 +5753,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
-      if (this._isSimulatorActive()) this.simulator.reset();
+      if (this._isSimulatorActive()) this.simulator.resetNavigation();
     }
   }, {
     key: "navigateTo",

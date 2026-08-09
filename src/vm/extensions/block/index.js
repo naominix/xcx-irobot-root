@@ -449,7 +449,7 @@ class IrobotRootBlocks {
         // Reset Position / Navigate to Position packets are not accepted by
         // every Root firmware even though they exist in the shared protocol.
         this.navigationPosition = {x: 0, y: 0, heading: 90};
-        if (this._isSimulatorActive()) this.simulator.reset();
+        if (this._isSimulatorActive()) this.simulator.resetNavigation();
     }
     navigateTo (args) {
         const target = {

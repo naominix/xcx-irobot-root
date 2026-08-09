@@ -53,6 +53,12 @@ class RootSimulator {
         this._draw();
     }
 
+    resetNavigation () {
+        this.stop();
+        this.pose = {x: 0, y: 0, heading: DEFAULT_HEADING};
+        this._draw();
+    }
+
     open () {
         if (typeof document === 'undefined') return;
         if (!this._panel) this._createPanel();
