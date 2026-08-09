@@ -29,6 +29,7 @@ class RootSimulator {
         this._selectedObstacle = -1;
         this._dragOffset = null;
         this._activeTouchPointer = null;
+        this._collisionPoint = null;
         this.reset();
     }
 
@@ -43,6 +44,7 @@ class RootSimulator {
         this.trail = [];
         if (!this.obstacles) this.obstacles = [];
         this._selectedObstacle = -1;
+        this._collisionPoint = null;
         this.last = {
             batteryPercent: 100,
             batteryMv: 7400,
@@ -252,6 +254,7 @@ class RootSimulator {
             };
             const collision = this._collisionAt(candidate);
             if (collision) {
+                this._collisionPoint = {x: collision.x, y: collision.y};
                 this._setBumpers(collision.left, collision.right);
                 if (accepted !== previous) this._commitPose(previous, accepted);
                 this._draw();
@@ -292,7 +295,9 @@ class RootSimulator {
             const centerThreshold = ROOT_COLLISION_RADIUS_MM * 0.22;
             return {
                 left: lateral <= centerThreshold,
-                right: lateral >= -centerThreshold
+                right: lateral >= -centerThreshold,
+                x: closestX,
+                y: closestY
             };
         }
         return null;
@@ -304,6 +309,7 @@ class RootSimulator {
         if (this.last.leftBumper === nextLeft && this.last.rightBumper === nextRight) return;
         this.last.leftBumper = nextLeft;
         this.last.rightBumper = nextRight;
+        if (!nextLeft && !nextRight) this._collisionPoint = null;
         if (this.onEvent) this.onEvent({type: 'bumper', left: nextLeft, right: nextRight});
     }
 
@@ -494,6 +500,20 @@ class RootSimulator {
             context.fill();
             context.stroke();
         });
+        if (this._collisionPoint) {
+            const collisionPoint = point(this._collisionPoint);
+            context.strokeStyle = '#ef3e36';
+            context.fillStyle = 'rgba(239,62,54,0.25)';
+            context.lineWidth = 4;
+            context.beginPath(); context.arc(collisionPoint.x, collisionPoint.y, 12, 0, Math.PI * 2);
+            context.fill(); context.stroke();
+            context.beginPath();
+            context.moveTo(collisionPoint.x - 8, collisionPoint.y - 8);
+            context.lineTo(collisionPoint.x + 8, collisionPoint.y + 8);
+            context.moveTo(collisionPoint.x + 8, collisionPoint.y - 8);
+            context.lineTo(collisionPoint.x - 8, collisionPoint.y + 8);
+            context.stroke();
+        }
         context.strokeStyle = this.marker === 2 ? '#fff' : '#22a6a6'; context.lineWidth = 4; context.lineCap = 'round';
         for (const segment of this.trail) { const a = point({x: segment.x1, y: segment.y1}); const b = point({x: segment.x2, y: segment.y2}); context.beginPath(); context.moveTo(a.x, a.y); context.lineTo(b.x, b.y); context.stroke(); }
         const p = point(this.pose);
@@ -502,11 +522,20 @@ class RootSimulator {
         context.beginPath();
         for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + i * Math.PI / 3; const x = Math.cos(a) * 36; const y = Math.sin(a) * 36; i ? context.lineTo(x, y) : context.moveTo(x, y); }
         context.closePath(); context.fill(); context.stroke();
-        context.fillStyle = 'rgba(50,160,210,0.18)';
-        context.beginPath(); context.arc(-13, -14, 7, 0, Math.PI * 2); context.fill();
-        context.beginPath(); context.arc(13, -14, 7, 0, Math.PI * 2); context.fill();
-        context.beginPath(); context.arc(-13, 14, 7, 0, Math.PI * 2); context.fill();
-        context.beginPath(); context.arc(13, 14, 7, 0, Math.PI * 2); context.fill();
+        context.lineCap = 'round';
+        context.lineWidth = 8;
+        context.strokeStyle = this.last.leftBumper ? '#ef3e36' : '#9ba9af';
+        context.beginPath(); context.moveTo(-2, -35); context.lineTo(-29, -18); context.stroke();
+        context.strokeStyle = this.last.rightBumper ? '#ef3e36' : '#9ba9af';
+        context.beginPath(); context.moveTo(2, -35); context.lineTo(29, -18); context.stroke();
+        const touchSensors = [
+            {x: -13, y: -14, mask: 0x8}, {x: 13, y: -14, mask: 0x4},
+            {x: -13, y: 14, mask: 0x1}, {x: 13, y: 14, mask: 0x2}
+        ];
+        for (const sensor of touchSensors) {
+            context.fillStyle = this.last.touchMask & sensor.mask ? '#1976d2' : 'rgba(50,160,210,0.2)';
+            context.beginPath(); context.arc(sensor.x, sensor.y, 7, 0, Math.PI * 2); context.fill();
+        }
         context.strokeStyle = '#29343a'; context.lineWidth = 7; context.beginPath(); context.moveTo(0, -22); context.lineTo(0, 21); context.stroke();
         const ledColor = `rgb(${this.led.red},${this.led.green},${this.led.blue})`;
         if (this.led.effect === 3) {
@@ -525,7 +554,10 @@ class RootSimulator {
         context.fillStyle = '#26353a'; context.font = '18px Arial';
         context.fillText(`x: ${this.pose.x.toFixed(1)} mm   y: ${this.pose.y.toFixed(1)} mm   heading: ${this.pose.heading.toFixed(1)}°`, 18, 30);
         context.fillText(`marker: ${['up', 'down', 'eraser'][this.marker]}   LED: ${['off', 'on', 'blink', 'spin'][this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 57);
-        if (this.phrase) context.fillText(`say: ${this.phrase}`, 18, 84);
+        const bumper = this.last.leftBumper && this.last.rightBumper ? 'BOTH PUSH' :
+            (this.last.leftBumper ? 'LEFT PUSH' : (this.last.rightBumper ? 'RIGHT PUSH' : 'none'));
+        context.fillText(`bumper: ${bumper}   touch mask: ${this.last.touchMask.toString(2).padStart(4, '0')}`, 18, 84);
+        if (this.phrase) context.fillText(`say: ${this.phrase}`, 18, 111);
     }
 }
 

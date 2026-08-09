@@ -135,6 +135,7 @@ describe('iRobot Root extension', () => {
             expect(block.simulator.pose.y).toBeLessThan(70);
             expect(block.simulator.last.leftBumper).toBe(true);
             expect(block.simulator.last.rightBumper).toBe(true);
+            expect(block.simulator._collisionPoint).toEqual(expect.objectContaining({x: expect.any(Number), y: expect.any(Number)}));
             expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenBothBumpersPush');
 
             const backward = block.drive({MM: -30});
@@ -142,6 +143,7 @@ describe('iRobot Root extension', () => {
             await backward;
             expect(block.simulator.last.leftBumper).toBe(false);
             expect(block.simulator.last.rightBumper).toBe(false);
+            expect(block.simulator._collisionPoint).toBeNull();
             expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenBothBumpersRelease');
         } finally {
             jest.useRealTimers();
