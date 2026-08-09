@@ -123,6 +123,40 @@ describe('iRobot Root extension', () => {
         block.simulator.reset();
     });
 
+    test('simulator obstacles stop Root and fire bumper push and release hats', async () => {
+        jest.useFakeTimers();
+        try {
+            const block = new blockClass(runtime);
+            block.setControlMode({MODE: 'simulator'});
+            block.simulator.obstacles.push({type: 'wall', x: 0, y: 70, width: 120, height: 14});
+            const forward = block.drive({MM: 120});
+            jest.advanceTimersByTime(1000);
+            await forward;
+            expect(block.simulator.pose.y).toBeLessThan(70);
+            expect(block.simulator.last.leftBumper).toBe(true);
+            expect(block.simulator.last.rightBumper).toBe(true);
+            expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenBothBumpersPush');
+
+            const backward = block.drive({MM: -30});
+            jest.advanceTimersByTime(500);
+            await backward;
+            expect(block.simulator.last.leftBumper).toBe(false);
+            expect(block.simulator.last.rightBumper).toBe(false);
+            expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenBothBumpersRelease');
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
+    test('simulator touch input fires individual touch and release hats', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.simulator._setTouchMask(0x8);
+        block.simulator._setTouchMask(0);
+        expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenFLTouch');
+        expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenFLRelease');
+    });
+
     test('updates block and menu labels between Japanese, hiragana Japanese, and English', () => {
         const localeSetup = {locale: 'ja', translations: {ja: {}, 'ja-Hira': {}, en: {}}};
         const localizedFormatMessage = message =>

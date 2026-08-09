@@ -8,6 +8,8 @@ const DEG = Math.PI / 180;
 const DEFAULT_HEADING = 90;
 const DEFAULT_SPEED_MM_S = 120;
 const DEFAULT_TURN_DEG_S = 120;
+const SIMULATOR_SCALE = 1.8;
+const ROOT_COLLISION_RADIUS_MM = 24;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const headingRadians = heading => heading * DEG;
@@ -24,6 +26,9 @@ class RootSimulator {
         this._panel = null;
         this._canvas = null;
         this._context = null;
+        this._selectedObstacle = -1;
+        this._dragOffset = null;
+        this._activeTouchPointer = null;
         this.reset();
     }
 
@@ -36,7 +41,8 @@ class RootSimulator {
         this.note = null;
         this.phrase = '';
         this.trail = [];
-        this.obstacles = [];
+        if (!this.obstacles) this.obstacles = [];
+        this._selectedObstacle = -1;
         this.last = {
             batteryPercent: 100,
             batteryMv: 7400,
@@ -55,7 +61,32 @@ class RootSimulator {
 
     resetNavigation () {
         this.stop();
+        this._setBumpers(false, false);
         this.pose = {x: 0, y: 0, heading: DEFAULT_HEADING};
+        this._draw();
+    }
+
+    addObstacle (type = 'block') {
+        const obstacle = type === 'wall' ?
+            {type: 'wall', x: 80, y: 80, width: 120, height: 14} :
+            {type: 'block', x: 80, y: 80, width: 50, height: 50};
+        this.obstacles.push(obstacle);
+        this._selectedObstacle = this.obstacles.length - 1;
+        this._draw();
+        return obstacle;
+    }
+
+    deleteSelectedObstacle () {
+        if (this._selectedObstacle < 0) return;
+        this.obstacles.splice(this._selectedObstacle, 1);
+        this._selectedObstacle = -1;
+        this._draw();
+    }
+
+    clearObstacles () {
+        this.obstacles = [];
+        this._selectedObstacle = -1;
+        this._setBumpers(false, false);
         this._draw();
     }
 
@@ -208,11 +239,79 @@ class RootSimulator {
 
     _setPose (pose) {
         const previous = this.pose;
+        const deltaX = pose.x - previous.x;
+        const deltaY = pose.y - previous.y;
+        const steps = Math.max(1, Math.ceil(Math.hypot(deltaX, deltaY) / (ROOT_COLLISION_RADIUS_MM / 2)));
+        let accepted = previous;
+        for (let step = 1; step <= steps; step++) {
+            const progress = step / steps;
+            const candidate = {
+                x: previous.x + deltaX * progress,
+                y: previous.y + deltaY * progress,
+                heading: normalizeHeading(previous.heading + (pose.heading - previous.heading) * progress)
+            };
+            const collision = this._collisionAt(candidate);
+            if (collision) {
+                this._setBumpers(collision.left, collision.right);
+                if (accepted !== previous) this._commitPose(previous, accepted);
+                this._draw();
+                return false;
+            }
+            accepted = candidate;
+        }
+        this._setBumpers(false, false);
+        this._commitPose(previous, pose);
+        this._draw();
+        return true;
+    }
+
+    _commitPose (previous, pose) {
         this.pose = pose;
         if (this.marker === 1 && (previous.x !== pose.x || previous.y !== pose.y)) {
             this.trail.push({x1: previous.x, y1: previous.y, x2: pose.x, y2: pose.y});
         }
-        this._draw();
+    }
+
+    _collisionAt (pose) {
+        for (const obstacle of this.obstacles) {
+            const halfWidth = obstacle.width / 2;
+            const halfHeight = obstacle.height / 2;
+            const closestX = clamp(pose.x, obstacle.x - halfWidth, obstacle.x + halfWidth);
+            const closestY = clamp(pose.y, obstacle.y - halfHeight, obstacle.y + halfHeight);
+            let dx = closestX - pose.x;
+            let dy = closestY - pose.y;
+            if ((dx * dx) + (dy * dy) >= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) continue;
+            if (dx === 0 && dy === 0) {
+                dx = obstacle.x - pose.x;
+                dy = obstacle.y - pose.y;
+            }
+            const heading = headingRadians(pose.heading);
+            const rightX = Math.sin(heading);
+            const rightY = -Math.cos(heading);
+            const lateral = (dx * rightX) + (dy * rightY);
+            const centerThreshold = ROOT_COLLISION_RADIUS_MM * 0.22;
+            return {
+                left: lateral <= centerThreshold,
+                right: lateral >= -centerThreshold
+            };
+        }
+        return null;
+    }
+
+    _setBumpers (left, right) {
+        const nextLeft = Boolean(left);
+        const nextRight = Boolean(right);
+        if (this.last.leftBumper === nextLeft && this.last.rightBumper === nextRight) return;
+        this.last.leftBumper = nextLeft;
+        this.last.rightBumper = nextRight;
+        if (this.onEvent) this.onEvent({type: 'bumper', left: nextLeft, right: nextRight});
+    }
+
+    _setTouchMask (mask) {
+        const next = mask & 0xF;
+        if (this.last.touchMask === next) return;
+        this.last.touchMask = next;
+        if (this.onEvent) this.onEvent({type: 'touch', mask: next});
     }
 
     _animate (durationMs, update) {
@@ -268,11 +367,38 @@ class RootSimulator {
         close.style.cssText = 'border:0;border-radius:50%;width:34px;height:34px;background:#286754;color:white;font-size:27px;line-height:28px;';
         close.onclick = () => this.close();
         header.appendChild(close);
+        const toolbar = document.createElement('div');
+        toolbar.style.cssText = 'padding:8px 12px;background:#e8f4f0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;';
+        const addButton = (label, action) => {
+            const button = document.createElement('button');
+            button.textContent = label;
+            button.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px 12px;background:white;color:#264c40;font-weight:bold;cursor:pointer;';
+            button.onclick = action;
+            toolbar.appendChild(button);
+            return button;
+        };
+        addButton('+ Wall', () => this.addObstacle('wall'));
+        addButton('+ Block', () => this.addObstacle('block'));
+        addButton('Delete', () => this.deleteSelectedObstacle());
+        addButton('Clear obstacles', () => this.clearObstacles());
+        const help = document.createElement('span');
+        help.textContent = 'Drag obstacles · Tap Root sensors';
+        help.style.cssText = 'margin-left:auto;color:#42675b;font-size:14px;';
+        toolbar.appendChild(help);
         const canvas = document.createElement('canvas');
         canvas.width = 1000;
         canvas.height = 680;
-        canvas.style.cssText = 'width:100%;height:calc(100% - 58px);touch-action:none;background:#fff;';
+        canvas.style.cssText = 'width:100%;height:calc(100% - 108px);touch-action:none;background:#fff;';
+        canvas.addEventListener('pointerdown', event => this._pointerDown(event));
+        canvas.addEventListener('pointermove', event => this._pointerMove(event));
+        canvas.addEventListener('pointerup', event => this._pointerUp(event));
+        canvas.addEventListener('pointercancel', event => this._pointerUp(event));
+        panel.tabIndex = 0;
+        panel.addEventListener('keydown', event => {
+            if (event.key === 'Backspace' || event.key === 'Delete') this.deleteSelectedObstacle();
+        });
         panel.appendChild(header);
+        panel.appendChild(toolbar);
         panel.appendChild(canvas);
         document.body.appendChild(panel);
         this._panel = panel;
@@ -280,17 +406,94 @@ class RootSimulator {
         this._context = canvas.getContext('2d');
     }
 
+    _eventWorld (event) {
+        const bounds = this._canvas.getBoundingClientRect();
+        const canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
+        const canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+        return {
+            x: (canvasX - this._canvas.width / 2) / SIMULATOR_SCALE,
+            y: (this._canvas.height / 2 - canvasY) / SIMULATOR_SCALE
+        };
+    }
+
+    _pointerDown (event) {
+        const point = this._eventWorld(event);
+        const dx = point.x - this.pose.x;
+        const dy = point.y - this.pose.y;
+        if ((dx * dx) + (dy * dy) <= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) {
+            const heading = headingRadians(this.pose.heading);
+            const forward = (dx * Math.cos(heading)) + (dy * Math.sin(heading));
+            const right = (dx * Math.sin(heading)) - (dy * Math.cos(heading));
+            const mask = forward >= 0 ? (right < 0 ? 0x8 : 0x4) : (right < 0 ? 0x1 : 0x2);
+            this._activeTouchPointer = event.pointerId;
+            this._setTouchMask(mask);
+            this._canvas.setPointerCapture(event.pointerId);
+            this._draw();
+            return;
+        }
+        this._selectedObstacle = -1;
+        for (let index = this.obstacles.length - 1; index >= 0; index--) {
+            const obstacle = this.obstacles[index];
+            if (Math.abs(point.x - obstacle.x) <= obstacle.width / 2 &&
+                Math.abs(point.y - obstacle.y) <= obstacle.height / 2) {
+                this._selectedObstacle = index;
+                this._dragOffset = {x: point.x - obstacle.x, y: point.y - obstacle.y};
+                this._canvas.setPointerCapture(event.pointerId);
+                break;
+            }
+        }
+        this._draw();
+    }
+
+    _pointerMove (event) {
+        if (!this._dragOffset || this._selectedObstacle < 0) return;
+        const point = this._eventWorld(event);
+        const obstacle = this.obstacles[this._selectedObstacle];
+        obstacle.x = point.x - this._dragOffset.x;
+        obstacle.y = point.y - this._dragOffset.y;
+        this._draw();
+    }
+
+    _pointerUp (event) {
+        if (this._activeTouchPointer === event.pointerId) {
+            this._activeTouchPointer = null;
+            this._setTouchMask(0);
+        }
+        this._dragOffset = null;
+        if (this._canvas.hasPointerCapture && this._canvas.hasPointerCapture(event.pointerId)) {
+            this._canvas.releasePointerCapture(event.pointerId);
+        }
+        this._draw();
+    }
+
     _draw () {
         if (!this._context || !this._canvas) return;
         const context = this._context;
         const {width, height} = this._canvas;
-        const scale = 1.8;
+        const scale = SIMULATOR_SCALE;
         const point = ({x, y}) => ({x: width / 2 + x * scale, y: height / 2 - y * scale});
         context.clearRect(0, 0, width, height);
         context.fillStyle = '#fcfdfd'; context.fillRect(0, 0, width, height);
         context.strokeStyle = '#e0ebe7'; context.lineWidth = 1;
         for (let x = width / 2 % (50 * scale); x < width; x += 50 * scale) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke(); }
         for (let y = height / 2 % (50 * scale); y < height; y += 50 * scale) { context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke(); }
+        this.obstacles.forEach((obstacle, index) => {
+            const center = point(obstacle);
+            const obstacleWidth = obstacle.width * scale;
+            const obstacleHeight = obstacle.height * scale;
+            context.fillStyle = obstacle.type === 'wall' ? '#71828a' : '#d9864d';
+            context.strokeStyle = index === this._selectedObstacle ? '#f2c94c' : '#3d4d54';
+            context.lineWidth = index === this._selectedObstacle ? 5 : 3;
+            context.beginPath();
+            context.rect(
+                center.x - obstacleWidth / 2,
+                center.y - obstacleHeight / 2,
+                obstacleWidth,
+                obstacleHeight
+            );
+            context.fill();
+            context.stroke();
+        });
         context.strokeStyle = this.marker === 2 ? '#fff' : '#22a6a6'; context.lineWidth = 4; context.lineCap = 'round';
         for (const segment of this.trail) { const a = point({x: segment.x1, y: segment.y1}); const b = point({x: segment.x2, y: segment.y2}); context.beginPath(); context.moveTo(a.x, a.y); context.lineTo(b.x, b.y); context.stroke(); }
         const p = point(this.pose);
@@ -299,6 +502,11 @@ class RootSimulator {
         context.beginPath();
         for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + i * Math.PI / 3; const x = Math.cos(a) * 36; const y = Math.sin(a) * 36; i ? context.lineTo(x, y) : context.moveTo(x, y); }
         context.closePath(); context.fill(); context.stroke();
+        context.fillStyle = 'rgba(50,160,210,0.18)';
+        context.beginPath(); context.arc(-13, -14, 7, 0, Math.PI * 2); context.fill();
+        context.beginPath(); context.arc(13, -14, 7, 0, Math.PI * 2); context.fill();
+        context.beginPath(); context.arc(-13, 14, 7, 0, Math.PI * 2); context.fill();
+        context.beginPath(); context.arc(13, 14, 7, 0, Math.PI * 2); context.fill();
         context.strokeStyle = '#29343a'; context.lineWidth = 7; context.beginPath(); context.moveTo(0, -22); context.lineTo(0, 21); context.stroke();
         const ledColor = `rgb(${this.led.red},${this.led.green},${this.led.blue})`;
         if (this.led.effect === 3) {

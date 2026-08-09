@@ -4497,6 +4497,8 @@ var DEG = Math.PI / 180;
 var DEFAULT_HEADING = 90;
 var DEFAULT_SPEED_MM_S = 120;
 var DEFAULT_TURN_DEG_S = 120;
+var SIMULATOR_SCALE = 1.8;
+var ROOT_COLLISION_RADIUS_MM = 24;
 var clamp = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 };
@@ -4518,6 +4520,9 @@ var RootSimulator = /*#__PURE__*/function () {
     this._panel = null;
     this._canvas = null;
     this._context = null;
+    this._selectedObstacle = -1;
+    this._dragOffset = null;
+    this._activeTouchPointer = null;
     this.reset();
   }
   return _createClass$1(RootSimulator, [{
@@ -4540,7 +4545,8 @@ var RootSimulator = /*#__PURE__*/function () {
       this.note = null;
       this.phrase = '';
       this.trail = [];
-      this.obstacles = [];
+      if (!this.obstacles) this.obstacles = [];
+      this._selectedObstacle = -1;
       this.last = {
         batteryPercent: 100,
         batteryMv: 7400,
@@ -4560,11 +4566,50 @@ var RootSimulator = /*#__PURE__*/function () {
     key: "resetNavigation",
     value: function resetNavigation() {
       this.stop();
+      this._setBumpers(false, false);
       this.pose = {
         x: 0,
         y: 0,
         heading: DEFAULT_HEADING
       };
+      this._draw();
+    }
+  }, {
+    key: "addObstacle",
+    value: function addObstacle() {
+      var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'block';
+      var obstacle = type === 'wall' ? {
+        type: 'wall',
+        x: 80,
+        y: 80,
+        width: 120,
+        height: 14
+      } : {
+        type: 'block',
+        x: 80,
+        y: 80,
+        width: 50,
+        height: 50
+      };
+      this.obstacles.push(obstacle);
+      this._selectedObstacle = this.obstacles.length - 1;
+      this._draw();
+      return obstacle;
+    }
+  }, {
+    key: "deleteSelectedObstacle",
+    value: function deleteSelectedObstacle() {
+      if (this._selectedObstacle < 0) return;
+      this.obstacles.splice(this._selectedObstacle, 1);
+      this._selectedObstacle = -1;
+      this._draw();
+    }
+  }, {
+    key: "clearObstacles",
+    value: function clearObstacles() {
+      this.obstacles = [];
+      this._selectedObstacle = -1;
+      this._setBumpers(false, false);
       this._draw();
     }
   }, {
@@ -4745,6 +4790,34 @@ var RootSimulator = /*#__PURE__*/function () {
     key: "_setPose",
     value: function _setPose(pose) {
       var previous = this.pose;
+      var deltaX = pose.x - previous.x;
+      var deltaY = pose.y - previous.y;
+      var steps = Math.max(1, Math.ceil(Math.hypot(deltaX, deltaY) / (ROOT_COLLISION_RADIUS_MM / 2)));
+      var accepted = previous;
+      for (var step = 1; step <= steps; step++) {
+        var progress = step / steps;
+        var candidate = {
+          x: previous.x + deltaX * progress,
+          y: previous.y + deltaY * progress,
+          heading: normalizeHeading$1(previous.heading + (pose.heading - previous.heading) * progress)
+        };
+        var collision = this._collisionAt(candidate);
+        if (collision) {
+          this._setBumpers(collision.left, collision.right);
+          if (accepted !== previous) this._commitPose(previous, accepted);
+          this._draw();
+          return false;
+        }
+        accepted = candidate;
+      }
+      this._setBumpers(false, false);
+      this._commitPose(previous, pose);
+      this._draw();
+      return true;
+    }
+  }, {
+    key: "_commitPose",
+    value: function _commitPose(previous, pose) {
       this.pose = pose;
       if (this.marker === 1 && (previous.x !== pose.x || previous.y !== pose.y)) {
         this.trail.push({
@@ -4754,7 +4827,67 @@ var RootSimulator = /*#__PURE__*/function () {
           y2: pose.y
         });
       }
-      this._draw();
+    }
+  }, {
+    key: "_collisionAt",
+    value: function _collisionAt(pose) {
+      var _iterator = _createForOfIteratorHelper$1(this.obstacles),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var obstacle = _step.value;
+          var halfWidth = obstacle.width / 2;
+          var halfHeight = obstacle.height / 2;
+          var closestX = clamp(pose.x, obstacle.x - halfWidth, obstacle.x + halfWidth);
+          var closestY = clamp(pose.y, obstacle.y - halfHeight, obstacle.y + halfHeight);
+          var dx = closestX - pose.x;
+          var dy = closestY - pose.y;
+          if (dx * dx + dy * dy >= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) continue;
+          if (dx === 0 && dy === 0) {
+            dx = obstacle.x - pose.x;
+            dy = obstacle.y - pose.y;
+          }
+          var heading = headingRadians(pose.heading);
+          var rightX = Math.sin(heading);
+          var rightY = -Math.cos(heading);
+          var lateral = dx * rightX + dy * rightY;
+          var centerThreshold = ROOT_COLLISION_RADIUS_MM * 0.22;
+          return {
+            left: lateral <= centerThreshold,
+            right: lateral >= -centerThreshold
+          };
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      return null;
+    }
+  }, {
+    key: "_setBumpers",
+    value: function _setBumpers(left, right) {
+      var nextLeft = Boolean(left);
+      var nextRight = Boolean(right);
+      if (this.last.leftBumper === nextLeft && this.last.rightBumper === nextRight) return;
+      this.last.leftBumper = nextLeft;
+      this.last.rightBumper = nextRight;
+      if (this.onEvent) this.onEvent({
+        type: 'bumper',
+        left: nextLeft,
+        right: nextRight
+      });
+    }
+  }, {
+    key: "_setTouchMask",
+    value: function _setTouchMask(mask) {
+      var next = mask & 0xF;
+      if (this.last.touchMask === next) return;
+      this.last.touchMask = next;
+      if (this.onEvent) this.onEvent({
+        type: 'touch',
+        mask: next
+      });
     }
   }, {
     key: "_animate",
@@ -4825,11 +4958,54 @@ var RootSimulator = /*#__PURE__*/function () {
         return _this9.close();
       };
       header.appendChild(close);
+      var toolbar = document.createElement('div');
+      toolbar.style.cssText = 'padding:8px 12px;background:#e8f4f0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;';
+      var addButton = function addButton(label, action) {
+        var button = document.createElement('button');
+        button.textContent = label;
+        button.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px 12px;background:white;color:#264c40;font-weight:bold;cursor:pointer;';
+        button.onclick = action;
+        toolbar.appendChild(button);
+        return button;
+      };
+      addButton('+ Wall', function () {
+        return _this9.addObstacle('wall');
+      });
+      addButton('+ Block', function () {
+        return _this9.addObstacle('block');
+      });
+      addButton('Delete', function () {
+        return _this9.deleteSelectedObstacle();
+      });
+      addButton('Clear obstacles', function () {
+        return _this9.clearObstacles();
+      });
+      var help = document.createElement('span');
+      help.textContent = 'Drag obstacles · Tap Root sensors';
+      help.style.cssText = 'margin-left:auto;color:#42675b;font-size:14px;';
+      toolbar.appendChild(help);
       var canvas = document.createElement('canvas');
       canvas.width = 1000;
       canvas.height = 680;
-      canvas.style.cssText = 'width:100%;height:calc(100% - 58px);touch-action:none;background:#fff;';
+      canvas.style.cssText = 'width:100%;height:calc(100% - 108px);touch-action:none;background:#fff;';
+      canvas.addEventListener('pointerdown', function (event) {
+        return _this9._pointerDown(event);
+      });
+      canvas.addEventListener('pointermove', function (event) {
+        return _this9._pointerMove(event);
+      });
+      canvas.addEventListener('pointerup', function (event) {
+        return _this9._pointerUp(event);
+      });
+      canvas.addEventListener('pointercancel', function (event) {
+        return _this9._pointerUp(event);
+      });
+      panel.tabIndex = 0;
+      panel.addEventListener('keydown', function (event) {
+        if (event.key === 'Backspace' || event.key === 'Delete') _this9.deleteSelectedObstacle();
+      });
       panel.appendChild(header);
+      panel.appendChild(toolbar);
       panel.appendChild(canvas);
       document.body.appendChild(panel);
       this._panel = panel;
@@ -4837,14 +5013,81 @@ var RootSimulator = /*#__PURE__*/function () {
       this._context = canvas.getContext('2d');
     }
   }, {
+    key: "_eventWorld",
+    value: function _eventWorld(event) {
+      var bounds = this._canvas.getBoundingClientRect();
+      var canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
+      var canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+      return {
+        x: (canvasX - this._canvas.width / 2) / SIMULATOR_SCALE,
+        y: (this._canvas.height / 2 - canvasY) / SIMULATOR_SCALE
+      };
+    }
+  }, {
+    key: "_pointerDown",
+    value: function _pointerDown(event) {
+      var point = this._eventWorld(event);
+      var dx = point.x - this.pose.x;
+      var dy = point.y - this.pose.y;
+      if (dx * dx + dy * dy <= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) {
+        var heading = headingRadians(this.pose.heading);
+        var forward = dx * Math.cos(heading) + dy * Math.sin(heading);
+        var right = dx * Math.sin(heading) - dy * Math.cos(heading);
+        var mask = forward >= 0 ? right < 0 ? 0x8 : 0x4 : right < 0 ? 0x1 : 0x2;
+        this._activeTouchPointer = event.pointerId;
+        this._setTouchMask(mask);
+        this._canvas.setPointerCapture(event.pointerId);
+        this._draw();
+        return;
+      }
+      this._selectedObstacle = -1;
+      for (var index = this.obstacles.length - 1; index >= 0; index--) {
+        var obstacle = this.obstacles[index];
+        if (Math.abs(point.x - obstacle.x) <= obstacle.width / 2 && Math.abs(point.y - obstacle.y) <= obstacle.height / 2) {
+          this._selectedObstacle = index;
+          this._dragOffset = {
+            x: point.x - obstacle.x,
+            y: point.y - obstacle.y
+          };
+          this._canvas.setPointerCapture(event.pointerId);
+          break;
+        }
+      }
+      this._draw();
+    }
+  }, {
+    key: "_pointerMove",
+    value: function _pointerMove(event) {
+      if (!this._dragOffset || this._selectedObstacle < 0) return;
+      var point = this._eventWorld(event);
+      var obstacle = this.obstacles[this._selectedObstacle];
+      obstacle.x = point.x - this._dragOffset.x;
+      obstacle.y = point.y - this._dragOffset.y;
+      this._draw();
+    }
+  }, {
+    key: "_pointerUp",
+    value: function _pointerUp(event) {
+      if (this._activeTouchPointer === event.pointerId) {
+        this._activeTouchPointer = null;
+        this._setTouchMask(0);
+      }
+      this._dragOffset = null;
+      if (this._canvas.hasPointerCapture && this._canvas.hasPointerCapture(event.pointerId)) {
+        this._canvas.releasePointerCapture(event.pointerId);
+      }
+      this._draw();
+    }
+  }, {
     key: "_draw",
     value: function _draw() {
+      var _this0 = this;
       if (!this._context || !this._canvas) return;
       var context = this._context;
       var _this$_canvas = this._canvas,
         width = _this$_canvas.width,
         height = _this$_canvas.height;
-      var scale = 1.8;
+      var scale = SIMULATOR_SCALE;
       var point = function point(_ref) {
         var x = _ref.x,
           y = _ref.y;
@@ -4870,14 +5113,26 @@ var RootSimulator = /*#__PURE__*/function () {
         context.lineTo(width, y);
         context.stroke();
       }
+      this.obstacles.forEach(function (obstacle, index) {
+        var center = point(obstacle);
+        var obstacleWidth = obstacle.width * scale;
+        var obstacleHeight = obstacle.height * scale;
+        context.fillStyle = obstacle.type === 'wall' ? '#71828a' : '#d9864d';
+        context.strokeStyle = index === _this0._selectedObstacle ? '#f2c94c' : '#3d4d54';
+        context.lineWidth = index === _this0._selectedObstacle ? 5 : 3;
+        context.beginPath();
+        context.rect(center.x - obstacleWidth / 2, center.y - obstacleHeight / 2, obstacleWidth, obstacleHeight);
+        context.fill();
+        context.stroke();
+      });
       context.strokeStyle = this.marker === 2 ? '#fff' : '#22a6a6';
       context.lineWidth = 4;
       context.lineCap = 'round';
-      var _iterator = _createForOfIteratorHelper$1(this.trail),
-        _step;
+      var _iterator2 = _createForOfIteratorHelper$1(this.trail),
+        _step2;
       try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var segment = _step.value;
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var segment = _step2.value;
           var _a = point({
             x: segment.x1,
             y: segment.y1
@@ -4892,9 +5147,9 @@ var RootSimulator = /*#__PURE__*/function () {
           context.stroke();
         }
       } catch (err) {
-        _iterator.e(err);
+        _iterator2.e(err);
       } finally {
-        _iterator.f();
+        _iterator2.f();
       }
       var p = point(this.pose);
       context.save();
@@ -4913,6 +5168,19 @@ var RootSimulator = /*#__PURE__*/function () {
       context.closePath();
       context.fill();
       context.stroke();
+      context.fillStyle = 'rgba(50,160,210,0.18)';
+      context.beginPath();
+      context.arc(-13, -14, 7, 0, Math.PI * 2);
+      context.fill();
+      context.beginPath();
+      context.arc(13, -14, 7, 0, Math.PI * 2);
+      context.fill();
+      context.beginPath();
+      context.arc(-13, 14, 7, 0, Math.PI * 2);
+      context.fill();
+      context.beginPath();
+      context.arc(13, 14, 7, 0, Math.PI * 2);
+      context.fill();
       context.strokeStyle = '#29343a';
       context.lineWidth = 7;
       context.beginPath();
