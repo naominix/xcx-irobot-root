@@ -36,6 +36,8 @@ describe('iRobot Root extension', () => {
         expect(block).toBeInstanceOf(blockClass);
         expect(block.getInfo().id).toBe('irobotRoot');
         expect(block.getInfo().blocks.some(item => item.opcode === 'connect')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'setControlMode')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'openSimulator')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'motors').arguments.LEFT.type)
             .toBe('root-motor-left');
         expect(block.getInfo().blocks.find(item => item.opcode === 'turn').arguments.DEGREES.type)
@@ -66,6 +68,24 @@ describe('iRobot Root extension', () => {
         expect(block.whenTouchSensor()).toBe(true);
         expect(block.whenFixedEvent()).toBe(true);
         expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot', block.transport);
+    });
+
+    test('runs motion in simulator-fixed mode without writing BLE packets', async () => {
+        jest.useFakeTimers();
+        try {
+            const block = new blockClass(runtime);
+            block.transport.write = jest.fn();
+            block.setControlMode({MODE: 'simulator'});
+            const completion = block.drive({MM: 120});
+            expect(block.controlTarget()).toBe('Simulator');
+            expect(block.transport.write).not.toHaveBeenCalled();
+            jest.advanceTimersByTime(1000);
+            await completion;
+            expect(block.simulator.pose.y).toBeCloseTo(120, 0);
+            expect(block.transport.write).not.toHaveBeenCalled();
+        } finally {
+            jest.useRealTimers();
+        }
     });
 
     test('updates block and menu labels between Japanese, hiragana Japanese, and English', () => {

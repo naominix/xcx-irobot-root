@@ -68,25 +68,25 @@ var entry = {
   translationMap: translations$1
 };
 
-function _arrayLikeToArray$5(r, a) {
+function _arrayLikeToArray$6(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles$1(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$5(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$6(r);
 }
 
 function _iterableToArray$1(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$5(r, a) {
+function _unsupportedIterableToArray$6(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$5(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$6(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$6(r, a) : void 0;
   }
 }
 
@@ -95,7 +95,7 @@ function _nonIterableSpread$1() {
 }
 
 function _toConsumableArray$1(r) {
-  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$5(r) || _nonIterableSpread$1();
+  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$6(r) || _nonIterableSpread$1();
 }
 
 function _classCallCheck$1(a, n) {
@@ -177,7 +177,7 @@ function _nonIterableRest$1() {
 }
 
 function _slicedToArray$1(r, e) {
-  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$5(r, e) || _nonIterableRest$1();
+  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$6(r, e) || _nonIterableRest$1();
 }
 
 function getDefaultExportFromCjs (x) {
@@ -848,6 +848,10 @@ var en = {
 	"irobotRoot.block.isConnected": "Root is connected?",
 	"irobotRoot.block.transportMode": "Root connection method",
 	"irobotRoot.block.lastConnectionError": "last connection error",
+	"irobotRoot.block.setControlMode": "set control mode to [MODE]",
+	"irobotRoot.block.controlTarget": "current control target",
+	"irobotRoot.block.openSimulator": "open Root simulator",
+	"irobotRoot.block.resetSimulator": "reset Root simulator",
 	"irobotRoot.block.motors": "set left motor [LEFT] right motor [RIGHT]",
 	"irobotRoot.block.drive": "move [MM] mm",
 	"irobotRoot.block.turn": "turn [DEGREES] degrees",
@@ -915,7 +919,10 @@ var en = {
 	"irobotRoot.menu.bumper.both": "both",
 	"irobotRoot.menu.action.push": "Push",
 	"irobotRoot.menu.action.release": "Release",
-	"irobotRoot.menu.action.touch": "Touch"
+	"irobotRoot.menu.action.touch": "Touch",
+	"irobotRoot.menu.controlMode.auto": "automatic",
+	"irobotRoot.menu.controlMode.simulator": "simulator",
+	"irobotRoot.menu.controlMode.physical": "physical Root"
 };
 var ja = {
 	"irobotRoot.name": "iRobot Root",
@@ -924,6 +931,10 @@ var ja = {
 	"irobotRoot.block.isConnected": "Rootは接続済み",
 	"irobotRoot.block.transportMode": "Rootの通信方式",
 	"irobotRoot.block.lastConnectionError": "最後の接続エラー",
+	"irobotRoot.block.setControlMode": "制御モードを [MODE] にする",
+	"irobotRoot.block.controlTarget": "現在の制御先",
+	"irobotRoot.block.openSimulator": "Rootシミュレーターを開く",
+	"irobotRoot.block.resetSimulator": "Rootシミュレーターをリセットする",
 	"irobotRoot.block.motors": "左モーター [LEFT] 右モーター [RIGHT]",
 	"irobotRoot.block.drive": "[MM] mm進む",
 	"irobotRoot.block.turn": "[DEGREES] 度回る",
@@ -991,7 +1002,10 @@ var ja = {
 	"irobotRoot.menu.bumper.both": "左右同時",
 	"irobotRoot.menu.action.push": "Push",
 	"irobotRoot.menu.action.release": "Release",
-	"irobotRoot.menu.action.touch": "タッチ"
+	"irobotRoot.menu.action.touch": "タッチ",
+	"irobotRoot.menu.controlMode.auto": "自動",
+	"irobotRoot.menu.controlMode.simulator": "シミュレーター",
+	"irobotRoot.menu.controlMode.physical": "実機Root"
 };
 var translations = {
 	en: en,
@@ -1003,6 +1017,10 @@ var translations = {
 	"irobotRoot.block.isConnected": "るーとはつながっている",
 	"irobotRoot.block.transportMode": "るーとのつなぎかた",
 	"irobotRoot.block.lastConnectionError": "さいごのせつぞくのもんだい",
+	"irobotRoot.block.setControlMode": "せいぎょもーどを [MODE] にする",
+	"irobotRoot.block.controlTarget": "いまのせいぎょさき",
+	"irobotRoot.block.openSimulator": "るーとしみゅれーたーをひらく",
+	"irobotRoot.block.resetSimulator": "るーとしみゅれーたーをりせっとする",
 	"irobotRoot.block.motors": "ひだりもーたー [LEFT] みぎもーたー [RIGHT]",
 	"irobotRoot.block.drive": "[MM] mmすすむ",
 	"irobotRoot.block.turn": "[DEGREES] どまわる",
@@ -1070,7 +1088,10 @@ var translations = {
 	"irobotRoot.menu.bumper.both": "さゆうどうじ",
 	"irobotRoot.menu.action.push": "おされた",
 	"irobotRoot.menu.action.release": "はなされた",
-	"irobotRoot.menu.action.touch": "ふれられた"
+	"irobotRoot.menu.action.touch": "ふれられた",
+	"irobotRoot.menu.controlMode.auto": "じどう",
+	"irobotRoot.menu.controlMode.simulator": "しみゅれーたー",
+	"irobotRoot.menu.controlMode.physical": "じっきるーと"
 }
 };
 
@@ -1310,25 +1331,25 @@ function requireJsonrpc() {
   return jsonrpc;
 }
 
-function _arrayLikeToArray$4(r, a) {
+function _arrayLikeToArray$5(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$4(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$5(r);
 }
 
 function _iterableToArray(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$4(r, a) {
+function _unsupportedIterableToArray$5(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$4(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$5(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0;
   }
 }
 
@@ -1337,7 +1358,7 @@ function _nonIterableSpread() {
 }
 
 function _toConsumableArray(r) {
-  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$4(r) || _nonIterableSpread();
+  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$5(r) || _nonIterableSpread();
 }
 
 function _defineProperty(e, r, t) {
@@ -1402,7 +1423,7 @@ function _nonIterableRest() {
 }
 
 function _slicedToArray(r, e) {
-  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$4(r, e) || _nonIterableRest();
+  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$5(r, e) || _nonIterableRest();
 }
 
 var urlToObj = {};
@@ -1639,9 +1660,9 @@ var errorUtils = {};
 
 var stackTrace = {};
 
-function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
-function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$4(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$4(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$4(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$4(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0; } }
+function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var hasRequiredStackTrace;
 function requireStackTrace() {
   if (hasRequiredStackTrace) return stackTrace;
@@ -1677,7 +1698,7 @@ function requireStackTrace() {
   }
   function toStackFrames(lines, parseLine) {
     var frames = [];
-    var _iterator = _createForOfIteratorHelper$3(lines),
+    var _iterator = _createForOfIteratorHelper$4(lines),
       _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2335,9 +2356,9 @@ function requireInterfaces() {
   return interfaces;
 }
 
-function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
-function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
+function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys$2(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$2(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$2(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var hasRequiredBaseLogger;
@@ -2665,7 +2686,7 @@ function requireBaseLogger() {
       function tokensToCss(tokens) {
         var seen = new Set();
         var cssParts = [];
-        var _iterator = _createForOfIteratorHelper$2(tokens),
+        var _iterator = _createForOfIteratorHelper$3(tokens),
           _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2775,7 +2796,7 @@ function requireBaseLogger() {
         var withoutDrive = drivePrefix ? replaced.slice(drivePrefix.length) : replaced;
         var segments = withoutDrive.split("/");
         var normalizedSegments = [];
-        var _iterator2 = _createForOfIteratorHelper$2(segments),
+        var _iterator2 = _createForOfIteratorHelper$3(segments),
           _step2;
         try {
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -3207,7 +3228,7 @@ function requireBaseLogger() {
             if (typeof source === "string") {
               var _this$settings4;
               var modifiedSource = source;
-              var _iterator3 = _createForOfIteratorHelper$2(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
+              var _iterator3 = _createForOfIteratorHelper$3(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
                 _step3;
               try {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -4055,9 +4076,9 @@ function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t =
 function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
-function _createForOfIteratorHelper$1(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$1(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$1(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
-function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
+function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var ROOT_SERVICE = '48c5d828-ac2a-442d-97a3-0c9822b04979';
 var UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 var RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -4070,12 +4091,12 @@ var ROOT_DISCOVERY_OPTIONS = {
 };
 var SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
 var SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
-var clamp = function clamp(value, min, max) {
+var clamp$1 = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value)));
 };
 var crc8 = function crc8(bytes) {
   var crc = 0;
-  var _iterator = _createForOfIteratorHelper$1(bytes),
+  var _iterator = _createForOfIteratorHelper$2(bytes),
     _step;
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -4102,7 +4123,7 @@ var bytesToHex = function bytesToHex(bytes) {
 // in both Web Bluetooth and Scrub.
 var bytesToBase64 = function bytesToBase64(bytes) {
   var binary = '';
-  var _iterator2 = _createForOfIteratorHelper$1(bytes),
+  var _iterator2 = _createForOfIteratorHelper$2(bytes),
     _step2;
   try {
     for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -4243,7 +4264,7 @@ var RootProtocol = /*#__PURE__*/function () {
   }, {
     key: "motors",
     value: function motors(left, right) {
-      return this.packet(1, 4, this.int32Payload([clamp(left, -100, 100), clamp(right, -100, 100)]));
+      return this.packet(1, 4, this.int32Payload([clamp$1(left, -100, 100), clamp$1(right, -100, 100)]));
     }
   }, {
     key: "driveDistance",
@@ -4266,9 +4287,9 @@ var RootProtocol = /*#__PURE__*/function () {
       var headingDeciDegrees = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
       var payload = new Uint8Array(10);
       var view = new DataView(payload.buffer);
-      view.setInt32(0, Math.round(clamp(xMm, -2147483648, 0x7FFFFFFF)), false);
-      view.setInt32(4, Math.round(clamp(yMm, -2147483648, 0x7FFFFFFF)), false);
-      var heading = Number(headingDeciDegrees) === -1 ? -1 : Math.round(clamp(headingDeciDegrees, 0, 3599));
+      view.setInt32(0, Math.round(clamp$1(xMm, -2147483648, 0x7FFFFFFF)), false);
+      view.setInt32(4, Math.round(clamp$1(yMm, -2147483648, 0x7FFFFFFF)), false);
+      var heading = Number(headingDeciDegrees) === -1 ? -1 : Math.round(clamp$1(headingDeciDegrees, 0, 3599));
       view.setInt16(8, heading, false);
       return this.packet(1, 17, payload);
     }
@@ -4280,15 +4301,15 @@ var RootProtocol = /*#__PURE__*/function () {
   }, {
     key: "led",
     value: function led(state, red, green, blue) {
-      return this.packet(3, 2, [clamp(state, 0, 3), clamp(red, 0, 255), clamp(green, 0, 255), clamp(blue, 0, 255)]);
+      return this.packet(3, 2, [clamp$1(state, 0, 3), clamp$1(red, 0, 255), clamp$1(green, 0, 255), clamp$1(blue, 0, 255)]);
     }
   }, {
     key: "note",
     value: function note(frequency, durationMs) {
       var payload = new Uint8Array(6);
       var view = new DataView(payload.buffer);
-      view.setUint32(0, clamp(frequency, 0, 0xFFFFFFFF), false);
-      view.setUint16(4, clamp(durationMs, 0, 0xFFFF), false);
+      view.setUint32(0, clamp$1(frequency, 0, 0xFFFFFFFF), false);
+      view.setUint16(4, clamp$1(durationMs, 0, 0xFFFF), false);
       return this.packet(5, 0, payload);
     }
   }, {
@@ -4300,7 +4321,7 @@ var RootProtocol = /*#__PURE__*/function () {
       // Protocol payloads are limited to 16 UTF-8 bytes. Add complete
       // Unicode code points only, so truncation never leaves malformed
       // Japanese text or half of an emoji in the packet.
-      var _iterator3 = _createForOfIteratorHelper$1(String(phrase)),
+      var _iterator3 = _createForOfIteratorHelper$2(String(phrase)),
         _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -4463,6 +4484,429 @@ var RootTransport = /*#__PURE__*/function () {
   }]);
 }();
 
+function _createForOfIteratorHelper$1(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$1(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$1(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
+function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+/*
+ * Root's simulator is deliberately independent from Scratch targets, costumes,
+ * and the Pen extension.  This keeps the extension usable from the official
+ * Xcratch editor as a normal external extension.
+ */
+
+var DEG = Math.PI / 180;
+var DEFAULT_HEADING = 90;
+var DEFAULT_SPEED_MM_S = 120;
+var DEFAULT_TURN_DEG_S = 120;
+var clamp = function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+};
+var headingRadians = function headingRadians(heading) {
+  return heading * DEG;
+};
+var normalizeHeading$1 = function normalizeHeading(heading) {
+  return (heading % 360 + 360) % 360;
+};
+var RootSimulator = /*#__PURE__*/function () {
+  function RootSimulator(onEvent) {
+    _classCallCheck$1(this, RootSimulator);
+    this.onEvent = onEvent;
+    this.speedMultiplier = 2;
+    this._animation = null;
+    this._continuousMotion = null;
+    this._panel = null;
+    this._canvas = null;
+    this._context = null;
+    this.reset();
+  }
+  return _createClass$1(RootSimulator, [{
+    key: "reset",
+    value: function reset() {
+      this.stop();
+      this.pose = {
+        x: 0,
+        y: 0,
+        heading: DEFAULT_HEADING
+      };
+      this.marker = 0;
+      this.led = {
+        effect: 0,
+        red: 0,
+        green: 0,
+        blue: 0
+      };
+      this.note = null;
+      this.phrase = '';
+      this.trail = [];
+      this.obstacles = [];
+      this.last = {
+        batteryPercent: 100,
+        batteryMv: 7400,
+        lightLeft: 0,
+        lightRight: 0,
+        accelX: 0,
+        accelY: 0,
+        accelZ: 1000,
+        leftBumper: false,
+        rightBumper: false,
+        touchMask: 0,
+        cliff: false
+      };
+      this._draw();
+    }
+  }, {
+    key: "open",
+    value: function open() {
+      if (typeof document === 'undefined') return;
+      if (!this._panel) this._createPanel();
+      this._panel.style.display = 'flex';
+      this._draw();
+    }
+  }, {
+    key: "close",
+    value: function close() {
+      if (this._panel) this._panel.style.display = 'none';
+    }
+  }, {
+    key: "isOpen",
+    value: function isOpen() {
+      return Boolean(this._panel && this._panel.style.display !== 'none');
+    }
+  }, {
+    key: "setMarker",
+    value: function setMarker(position) {
+      this.marker = clamp(Math.round(Number(position) || 0), 0, 2);
+      this._draw();
+    }
+  }, {
+    key: "setLed",
+    value: function setLed(effect, red, green, blue) {
+      this.led = {
+        effect: clamp(Math.round(Number(effect) || 0), 0, 3),
+        red: clamp(Math.round(Number(red) || 0), 0, 255),
+        green: clamp(Math.round(Number(green) || 0), 0, 255),
+        blue: clamp(Math.round(Number(blue) || 0), 0, 255)
+      };
+      this._draw();
+    }
+  }, {
+    key: "playNote",
+    value: function playNote(frequency, durationMs) {
+      this.note = {
+        frequency: frequency,
+        until: Date.now() + durationMs
+      };
+      this._draw();
+      return this._wait(Math.max(0, durationMs));
+    }
+  }, {
+    key: "sayPhrase",
+    value: function sayPhrase(phrase) {
+      this.phrase = String(phrase || '');
+      this._draw();
+      return this._wait(Math.min(30000, Math.max(250, this.phrase.length * 110)));
+    }
+  }, {
+    key: "move",
+    value: function move(distanceMm) {
+      var _this = this;
+      var distance = Number(distanceMm) || 0;
+      var start = Object.assign({}, this.pose);
+      var radians = headingRadians(start.heading);
+      var end = {
+        x: start.x + Math.cos(radians) * distance,
+        y: start.y + Math.sin(radians) * distance,
+        heading: start.heading
+      };
+      return this._animate(Math.abs(distance) / DEFAULT_SPEED_MM_S * 1000, function (progress) {
+        _this._setPose({
+          x: start.x + (end.x - start.x) * progress,
+          y: start.y + (end.y - start.y) * progress,
+          heading: start.heading
+        });
+      });
+    }
+  }, {
+    key: "turn",
+    value: function turn(degrees) {
+      var _this2 = this;
+      var turn = Number(degrees) || 0;
+      var start = Object.assign({}, this.pose);
+      return this._animate(Math.abs(turn) / DEFAULT_TURN_DEG_S * 1000, function (progress) {
+        // Root defines a positive rotation as clockwise.
+        _this2._setPose(Object.assign({}, start, {
+          heading: normalizeHeading$1(start.heading - turn * progress)
+        }));
+      });
+    }
+  }, {
+    key: "arc",
+    value: function arc(radiusMm, degrees) {
+      var _this3 = this;
+      var radius = Number(radiusMm) || 0;
+      var angle = Number(degrees) || 0;
+      if (radius === 0) return this.turn(angle);
+      var start = Object.assign({}, this.pose);
+      var theta = headingRadians(start.heading);
+      // Positive Root angles are clockwise. A positive radius therefore
+      // describes the right-hand circle seen by a Root facing forward.
+      var center = {
+        x: start.x + radius * Math.sin(theta),
+        y: start.y - radius * Math.cos(theta)
+      };
+      var duration = Math.abs(radius * angle * DEG) / DEFAULT_SPEED_MM_S * 1000;
+      return this._animate(duration, function (progress) {
+        var heading = normalizeHeading$1(start.heading - angle * progress);
+        var currentTheta = headingRadians(heading);
+        _this3._setPose({
+          x: center.x - radius * Math.sin(currentTheta),
+          y: center.y + radius * Math.cos(currentTheta),
+          heading: heading
+        });
+      });
+    }
+  }, {
+    key: "motors",
+    value: function motors(left, right) {
+      var _this4 = this;
+      this._stopContinuousMotion();
+      var leftPower = clamp(Number(left) || 0, -100, 100);
+      var rightPower = clamp(Number(right) || 0, -100, 100);
+      if (leftPower === 0 && rightPower === 0) return;
+      var previous = Date.now();
+      this._continuousMotion = setInterval(function () {
+        var now = Date.now();
+        var elapsed = Math.min(100, now - previous) / 1000;
+        previous = now;
+        var linear = (leftPower + rightPower) / 2 * 1.2;
+        var angular = (rightPower - leftPower) * 1.2 / 86 / DEG;
+        var nextHeading = normalizeHeading$1(_this4.pose.heading - angular * elapsed);
+        var radians = headingRadians((_this4.pose.heading + nextHeading) / 2);
+        _this4._setPose({
+          x: _this4.pose.x + Math.cos(radians) * linear * elapsed,
+          y: _this4.pose.y + Math.sin(radians) * linear * elapsed,
+          heading: nextHeading
+        });
+      }, 16);
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      if (this._animation) {
+        this._animation.cancelled = true;
+        this._animation.resolve();
+        this._animation = null;
+      }
+      this._stopContinuousMotion();
+      this._draw();
+    }
+  }, {
+    key: "navigateTo",
+    value: function navigateTo(xMm, yMm) {
+      var _this5 = this;
+      var deltaX = (Number(xMm) || 0) - this.pose.x;
+      var deltaY = (Number(yMm) || 0) - this.pose.y;
+      var distance = Math.hypot(deltaX, deltaY);
+      if (distance < 0.01) return Promise.resolve();
+      var targetHeading = normalizeHeading$1(Math.atan2(deltaY, deltaX) / DEG);
+      var turn = normalizeHeading$1(this.pose.heading - targetHeading + 180) - 180;
+      return this.turn(turn).then(function () {
+        return _this5.move(distance);
+      });
+    }
+  }, {
+    key: "getSensor",
+    value: function getSensor(key) {
+      return this.last[key] === undefined ? 0 : this.last[key];
+    }
+  }, {
+    key: "_setPose",
+    value: function _setPose(pose) {
+      var previous = this.pose;
+      this.pose = pose;
+      if (this.marker === 1 && (previous.x !== pose.x || previous.y !== pose.y)) {
+        this.trail.push({
+          x1: previous.x,
+          y1: previous.y,
+          x2: pose.x,
+          y2: pose.y
+        });
+      }
+      this._draw();
+    }
+  }, {
+    key: "_animate",
+    value: function _animate(durationMs, update) {
+      var _this6 = this;
+      this.stop();
+      var duration = Math.max(0, durationMs / this.speedMultiplier);
+      if (duration === 0) {
+        update(1);
+        return Promise.resolve();
+      }
+      return new Promise(function (resolve) {
+        var animation = {
+          cancelled: false,
+          resolve: resolve
+        };
+        _this6._animation = animation;
+        var start = Date.now();
+        var _frame = function frame() {
+          if (animation.cancelled) return;
+          var progress = Math.min(1, (Date.now() - start) / duration);
+          update(progress);
+          if (progress < 1) {
+            animation.frame = setTimeout(_frame, 16);
+          } else {
+            _this6._animation = null;
+            resolve();
+          }
+        };
+        _frame();
+      });
+    }
+  }, {
+    key: "_wait",
+    value: function _wait(durationMs) {
+      var _this7 = this;
+      return new Promise(function (resolve) {
+        return setTimeout(resolve, durationMs / _this7.speedMultiplier);
+      });
+    }
+  }, {
+    key: "_stopContinuousMotion",
+    value: function _stopContinuousMotion() {
+      if (this._continuousMotion) clearInterval(this._continuousMotion);
+      this._continuousMotion = null;
+    }
+  }, {
+    key: "_createPanel",
+    value: function _createPanel() {
+      var _this8 = this;
+      var panel = document.createElement('div');
+      panel.setAttribute('data-irobot-root-simulator', '');
+      panel.style.cssText = 'position:fixed;z-index:10000;inset:4vh 4vw;background:#f7fbf9;border:3px solid #39846c;border-radius:18px;box-shadow:0 14px 40px #0008;display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;';
+      var header = document.createElement('div');
+      header.style.cssText = 'padding:12px 18px;background:#39846c;color:white;font-size:20px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;';
+      header.appendChild(document.createTextNode('iRobot Root Simulator'));
+      var close = document.createElement('button');
+      close.textContent = '×';
+      close.style.cssText = 'border:0;border-radius:50%;width:34px;height:34px;background:#286754;color:white;font-size:27px;line-height:28px;';
+      close.onclick = function () {
+        return _this8.close();
+      };
+      header.appendChild(close);
+      var canvas = document.createElement('canvas');
+      canvas.width = 1000;
+      canvas.height = 680;
+      canvas.style.cssText = 'width:100%;height:calc(100% - 58px);touch-action:none;background:#fff;';
+      panel.appendChild(header);
+      panel.appendChild(canvas);
+      document.body.appendChild(panel);
+      this._panel = panel;
+      this._canvas = canvas;
+      this._context = canvas.getContext('2d');
+    }
+  }, {
+    key: "_draw",
+    value: function _draw() {
+      if (!this._context || !this._canvas) return;
+      var context = this._context;
+      var _this$_canvas = this._canvas,
+        width = _this$_canvas.width,
+        height = _this$_canvas.height;
+      var scale = 1.8;
+      var point = function point(_ref) {
+        var x = _ref.x,
+          y = _ref.y;
+        return {
+          x: width / 2 + x * scale,
+          y: height / 2 - y * scale
+        };
+      };
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = '#fcfdfd';
+      context.fillRect(0, 0, width, height);
+      context.strokeStyle = '#e0ebe7';
+      context.lineWidth = 1;
+      for (var x = width / 2 % (50 * scale); x < width; x += 50 * scale) {
+        context.beginPath();
+        context.moveTo(x, 0);
+        context.lineTo(x, height);
+        context.stroke();
+      }
+      for (var y = height / 2 % (50 * scale); y < height; y += 50 * scale) {
+        context.beginPath();
+        context.moveTo(0, y);
+        context.lineTo(width, y);
+        context.stroke();
+      }
+      context.strokeStyle = this.marker === 2 ? '#fff' : '#22a6a6';
+      context.lineWidth = 4;
+      context.lineCap = 'round';
+      var _iterator = _createForOfIteratorHelper$1(this.trail),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var segment = _step.value;
+          var _a = point({
+            x: segment.x1,
+            y: segment.y1
+          });
+          var b = point({
+            x: segment.x2,
+            y: segment.y2
+          });
+          context.beginPath();
+          context.moveTo(_a.x, _a.y);
+          context.lineTo(b.x, b.y);
+          context.stroke();
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      var p = point(this.pose);
+      context.save();
+      context.translate(p.x, p.y);
+      context.rotate((90 - this.pose.heading) * DEG);
+      context.fillStyle = '#fff';
+      context.strokeStyle = '#29343a';
+      context.lineWidth = 5;
+      context.beginPath();
+      for (var i = 0; i < 6; i++) {
+        var a = -Math.PI / 2 + i * Math.PI / 3;
+        var _x = Math.cos(a) * 36;
+        var _y = Math.sin(a) * 36;
+        i ? context.lineTo(_x, _y) : context.moveTo(_x, _y);
+      }
+      context.closePath();
+      context.fill();
+      context.stroke();
+      context.strokeStyle = '#29343a';
+      context.lineWidth = 7;
+      context.beginPath();
+      context.moveTo(0, -22);
+      context.lineTo(0, 21);
+      context.stroke();
+      context.fillStyle = "rgb(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ")");
+      context.beginPath();
+      context.arc(0, 0, 9, 0, Math.PI * 2);
+      context.fill();
+      context.fillStyle = '#f2d941';
+      context.beginPath();
+      context.arc(0, -27, 6, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+      context.fillStyle = '#26353a';
+      context.font = '18px Arial';
+      context.fillText("x: ".concat(this.pose.x.toFixed(1), " mm   y: ").concat(this.pose.y.toFixed(1), " mm   heading: ").concat(this.pose.heading.toFixed(1), "\xB0"), 18, 30);
+      context.fillText("marker: ".concat(['up', 'down', 'eraser'][this.marker], "   LED: rgb(").concat(this.led.red, ", ").concat(this.led.green, ", ").concat(this.led.blue, ")"), 18, 57);
+      if (this.phrase) context.fillText("say: ".concat(this.phrase), 18, 84);
+    }
+  }]);
+}();
+
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -4495,6 +4939,9 @@ var MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 var MOTION_WATCHDOG_SETTLE_MS = 300;
 var MOTION_COMMAND_GAP_MS = 300;
 var ROOT_HALF_TRACK_MM = 43;
+var CONTROL_MODE_AUTO = 'auto';
+var CONTROL_MODE_SIMULATOR = 'simulator';
+var CONTROL_MODE_PHYSICAL = 'physical';
 var extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 var rootMotionField = function rootMotionField(mode) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -4652,6 +5099,14 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     }, function () {
       return _this._cancelPendingCommands(new Error('Root connection was reset'));
     });
+    // Preserve the established extension behaviour for existing projects.
+    // New projects can opt into Auto (simulator while disconnected) or
+    // Simulator fixed explicitly; this default will be reconsidered only
+    // after the simulator has completed classroom validation.
+    this.controlMode = CONTROL_MODE_PHYSICAL;
+    this.simulator = new RootSimulator(function (event) {
+      return _this._receiveSimulatorEvent(event);
+    });
     this.last = {};
     this.lastDetailedEvent = '';
     this.currentEvent = null;
@@ -4698,6 +5153,28 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           opcode: 'lastConnectionError',
           blockType: BlockType.REPORTER,
           text: translate('block.lastConnectionError', 'last connection error')
+        }, {
+          opcode: 'setControlMode',
+          blockType: BlockType.COMMAND,
+          text: translate('block.setControlMode', 'set control mode to [MODE]'),
+          arguments: {
+            MODE: {
+              type: ArgumentType.STRING,
+              menu: 'controlModeMenu'
+            }
+          }
+        }, {
+          opcode: 'controlTarget',
+          blockType: BlockType.REPORTER,
+          text: translate('block.controlTarget', 'current control target')
+        }, {
+          opcode: 'openSimulator',
+          blockType: BlockType.COMMAND,
+          text: translate('block.openSimulator', 'open Root simulator')
+        }, {
+          opcode: 'resetSimulator',
+          blockType: BlockType.COMMAND,
+          text: translate('block.resetSimulator', 'reset Root simulator')
         }, '---', {
           opcode: 'motors',
           blockType: BlockType.COMMAND,
@@ -5107,6 +5584,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
               text: translate('menu.action.release', 'Release'),
               value: 'RELEASE'
             }]
+          },
+          controlModeMenu: {
+            acceptReporters: true,
+            items: [{
+              text: translate('menu.controlMode.auto', 'automatic'),
+              value: CONTROL_MODE_AUTO
+            }, {
+              text: translate('menu.controlMode.simulator', 'simulator'),
+              value: CONTROL_MODE_SIMULATOR
+            }, {
+              text: translate('menu.controlMode.physical', 'physical Root'),
+              value: CONTROL_MODE_PHYSICAL
+            }]
           }
         }
       };
@@ -5119,6 +5609,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
+      if (this.controlMode === CONTROL_MODE_SIMULATOR) {
+        this.simulator.open();
+        return;
+      }
       this.transport.scan();
     }
   }, {
@@ -5142,9 +5636,45 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       return this.transport.lastError;
     }
   }, {
+    key: "setControlMode",
+    value: function setControlMode(args) {
+      var requested = String(args.MODE || CONTROL_MODE_AUTO);
+      var mode = [CONTROL_MODE_AUTO, CONTROL_MODE_SIMULATOR, CONTROL_MODE_PHYSICAL].includes(requested) ? requested : CONTROL_MODE_AUTO;
+      var wasPhysical = !this._isSimulatorActive();
+      this.controlMode = mode;
+      if (this._isSimulatorActive()) {
+        if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
+        this._cancelPendingCommands(new Error('Root control target changed to simulator'));
+        this.simulator.reset();
+        this.simulator.open();
+      }
+    }
+  }, {
+    key: "controlTarget",
+    value: function controlTarget() {
+      return this._isSimulatorActive() ? 'Simulator' : 'Physical Root';
+    }
+  }, {
+    key: "openSimulator",
+    value: function openSimulator() {
+      this.simulator.open();
+    }
+  }, {
+    key: "resetSimulator",
+    value: function resetSimulator() {
+      this.simulator.reset();
+      this.simulator.open();
+    }
+  }, {
+    key: "_isSimulatorActive",
+    value: function _isSimulatorActive() {
+      return this.controlMode === CONTROL_MODE_SIMULATOR || this.controlMode === CONTROL_MODE_AUTO && !this.transport.isConnected();
+    }
+  }, {
     key: "motors",
     value: function motors(args) {
       this.navigationPosition = null;
+      if (this._isSimulatorActive()) return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
       return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)));
     }
   }, {
@@ -5152,12 +5682,14 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function drive(args) {
       var distance = Cast.toNumber(args.MM);
       this.navigationPosition = null;
+      if (this._isSimulatorActive()) return this.simulator.move(distance);
       return this._sendAndWait(this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
     }
   }, {
     key: "turn",
     value: function turn(args) {
       var degrees = Cast.toNumber(args.DEGREES);
+      if (this._isSimulatorActive()) return this.simulator.turn(degrees);
       return this._sendAndWait(this.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees));
     }
   }, {
@@ -5166,6 +5698,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var degrees = Cast.toNumber(args.DEGREES);
       var radius = Cast.toNumber(args.RADIUS);
       this.navigationPosition = null;
+      if (this._isSimulatorActive()) return this.simulator.arc(radius, degrees);
       return this._sendAndWait(this.protocol.driveArc(degrees * 10, radius), arcMotionWatchdogMs(degrees, radius));
     }
   }, {
@@ -5179,6 +5712,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
+      if (this._isSimulatorActive()) this.simulator.reset();
     }
   }, {
     key: "navigateTo",
@@ -5193,6 +5727,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
+      if (this._isSimulatorActive()) return this.simulator.navigateTo(target.x, target.y);
       var deltaX = target.x - origin.x;
       var deltaY = target.y - origin.y;
       var distance = Math.round(Math.hypot(deltaX, deltaY));
@@ -5230,11 +5765,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "stop",
     value: function stop() {
+      if (this._isSimulatorActive()) return this.simulator.stop();
       return this._send(this.protocol.packet(0, 3));
     }
   }, {
     key: "marker",
     value: function marker(args) {
+      if (this._isSimulatorActive()) return this.simulator.setMarker(args.POSITION);
       return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]));
     }
   }, {
@@ -5245,6 +5782,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         red = _Cast$toRgbColorList2[0],
         green = _Cast$toRgbColorList2[1],
         blue = _Cast$toRgbColorList2[2];
+      if (this._isSimulatorActive()) return this.simulator.setLed(1, red, green, blue);
       return this._send(this.protocol.led(1, red, green, blue));
     }
   }, {
@@ -5255,16 +5793,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         red = _Cast$toRgbColorList4[0],
         green = _Cast$toRgbColorList4[1],
         blue = _Cast$toRgbColorList4[2];
+      if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
       return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue));
     }
   }, {
     key: "led",
     value: function led(args) {
+      if (this._isSimulatorActive()) return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
       return this._send(this.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
     }
   }, {
     key: "ledAnimation",
     value: function ledAnimation(args) {
+      if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
       return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
     }
   }, {
@@ -5286,6 +5827,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // than a browser timer, so BLE latency cannot make the next note
       // interrupt this one just before it actually finishes.
       var durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
+      if (this._isSimulatorActive()) return this.simulator.playNote(frequency, durationMs);
       var packet = this.protocol.note(frequency, durationMs);
       if (durationMs === 0) {
         this._send(packet);
@@ -5296,17 +5838,24 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_playNoteForPicker",
     value: function _playNoteForPicker(midiNote, category) {
-      if (category !== this.getInfo().name || !this.transport.isConnected()) return;
+      if (category !== this.getInfo().name) return;
+      if (this._isSimulatorActive()) {
+        this.simulator.playNote(midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
+        return;
+      }
+      if (!this.transport.isConnected()) return;
       this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
     }
   }, {
     key: "sayPhrase",
     value: function sayPhrase(args) {
+      if (this._isSimulatorActive()) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
       return this._sendSoundCommandAndWait(this.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase');
     }
   }, {
     key: "refreshSensor",
     value: function refreshSensor(args) {
+      if (this._isSimulatorActive()) return;
       var commands = {
         battery: [14, 1],
         light: [13, 1],
@@ -5318,6 +5867,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "sensor",
     value: function sensor(args) {
+      if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
       return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
     }
   }, {
@@ -5346,6 +5896,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "raw",
     value: function raw(args) {
+      if (this._isSimulatorActive()) {
+        this.transport.setError(new Error('Raw BLE packets are unavailable in simulator mode'));
+        return;
+      }
       return this._send(this.protocol.packet(Cast.toNumber(args.DEVICE), Cast.toNumber(args.COMMAND), RootProtocol.hexToBytes(args.PAYLOAD)));
     }
   }, {
@@ -5644,6 +6198,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_receive",
     value: function _receive(packet) {
+      // A connected physical Root may keep sending sensor notifications while
+      // the student deliberately works in simulator-fixed mode. Never let
+      // those events launch scripts for the virtual Root.
+      if (this._isSimulatorActive()) return;
       var decoded = this.protocol.decode(packet);
       if (!decoded) return;
       this.last = Object.assign({}, this.last, decoded);
@@ -5659,6 +6217,21 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       };
       var name = names[decoded.device];
       if (name) this._startEventHat('whenEvent', 'currentEvent', name);
+    }
+  }, {
+    key: "_receiveSimulatorEvent",
+    value: function _receiveSimulatorEvent(event) {
+      if (!this._isSimulatorActive() || !event) return;
+      if (event.type === 'bumper') {
+        this._receiveBumperEvent({
+          leftBumper: event.left,
+          rightBumper: event.right
+        });
+      } else if (event.type === 'touch') {
+        this._receiveTouchEvent({
+          touchMask: event.mask
+        });
+      }
     }
   }], [{
     key: "formatMessage",

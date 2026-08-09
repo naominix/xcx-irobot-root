@@ -6,6 +6,10 @@
     "irobotRoot.block.isConnected": "Root is connected?",
     "irobotRoot.block.transportMode": "Root connection method",
     "irobotRoot.block.lastConnectionError": "last connection error",
+    "irobotRoot.block.setControlMode": "set control mode to [MODE]",
+    "irobotRoot.block.controlTarget": "current control target",
+    "irobotRoot.block.openSimulator": "open Root simulator",
+    "irobotRoot.block.resetSimulator": "reset Root simulator",
     "irobotRoot.block.motors": "set left motor [LEFT] right motor [RIGHT]",
     "irobotRoot.block.drive": "move [MM] mm",
     "irobotRoot.block.turn": "turn [DEGREES] degrees",
@@ -73,7 +77,10 @@
     "irobotRoot.menu.bumper.both": "both",
     "irobotRoot.menu.action.push": "Push",
     "irobotRoot.menu.action.release": "Release",
-    "irobotRoot.menu.action.touch": "Touch"
+    "irobotRoot.menu.action.touch": "Touch",
+    "irobotRoot.menu.controlMode.auto": "automatic",
+    "irobotRoot.menu.controlMode.simulator": "simulator",
+    "irobotRoot.menu.controlMode.physical": "physical Root"
   },
   "ja": {
     "irobotRoot.name": "iRobot Root",
@@ -82,6 +89,10 @@
     "irobotRoot.block.isConnected": "Rootは接続済み",
     "irobotRoot.block.transportMode": "Rootの通信方式",
     "irobotRoot.block.lastConnectionError": "最後の接続エラー",
+    "irobotRoot.block.setControlMode": "制御モードを [MODE] にする",
+    "irobotRoot.block.controlTarget": "現在の制御先",
+    "irobotRoot.block.openSimulator": "Rootシミュレーターを開く",
+    "irobotRoot.block.resetSimulator": "Rootシミュレーターをリセットする",
     "irobotRoot.block.motors": "左モーター [LEFT] 右モーター [RIGHT]",
     "irobotRoot.block.drive": "[MM] mm進む",
     "irobotRoot.block.turn": "[DEGREES] 度回る",
@@ -149,7 +160,10 @@
     "irobotRoot.menu.bumper.both": "左右同時",
     "irobotRoot.menu.action.push": "Push",
     "irobotRoot.menu.action.release": "Release",
-    "irobotRoot.menu.action.touch": "タッチ"
+    "irobotRoot.menu.action.touch": "タッチ",
+    "irobotRoot.menu.controlMode.auto": "自動",
+    "irobotRoot.menu.controlMode.simulator": "シミュレーター",
+    "irobotRoot.menu.controlMode.physical": "実機Root"
   },
   "ja-Hira": {
     "irobotRoot.name": "iRobot Root",
@@ -158,6 +172,10 @@
     "irobotRoot.block.isConnected": "るーとはつながっている",
     "irobotRoot.block.transportMode": "るーとのつなぎかた",
     "irobotRoot.block.lastConnectionError": "さいごのせつぞくのもんだい",
+    "irobotRoot.block.setControlMode": "せいぎょもーどを [MODE] にする",
+    "irobotRoot.block.controlTarget": "いまのせいぎょさき",
+    "irobotRoot.block.openSimulator": "るーとしみゅれーたーをひらく",
+    "irobotRoot.block.resetSimulator": "るーとしみゅれーたーをりせっとする",
     "irobotRoot.block.motors": "ひだりもーたー [LEFT] みぎもーたー [RIGHT]",
     "irobotRoot.block.drive": "[MM] mmすすむ",
     "irobotRoot.block.turn": "[DEGREES] どまわる",
@@ -225,6 +243,9 @@
     "irobotRoot.menu.bumper.both": "さゆうどうじ",
     "irobotRoot.menu.action.push": "おされた",
     "irobotRoot.menu.action.release": "はなされた",
-    "irobotRoot.menu.action.touch": "ふれられた"
+    "irobotRoot.menu.action.touch": "ふれられた",
+    "irobotRoot.menu.controlMode.auto": "じどう",
+    "irobotRoot.menu.controlMode.simulator": "しみゅれーたー",
+    "irobotRoot.menu.controlMode.physical": "じっきるーと"
   }
 }
