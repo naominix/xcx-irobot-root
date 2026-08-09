@@ -26,6 +26,7 @@ describe('iRobot Root extension', () => {
     formatMessage.setup = () => ({locale: 'ja', translations: {ja: {}}});
     const runtime = {
         formatMessage,
+        irobotRootMotionPickerSupported: true,
         registerPeripheralExtension: jest.fn(),
         startHats: jest.fn(),
         greenFlag: jest.fn(),
@@ -76,6 +77,20 @@ describe('iRobot Root extension', () => {
         expect(block.whenTouchSensor()).toBe(true);
         expect(block.whenFixedEvent()).toBe(true);
         expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot', block.transport);
+    });
+
+    test('falls back to standard Scratch number fields when the editor has no motion picker', () => {
+        const fallbackRuntime = Object.assign({}, runtime, {irobotRootMotionPickerSupported: false});
+        const info = new blockClass(fallbackRuntime).getInfo();
+        const findBlock = opcode => info.blocks.find(item => item.opcode === opcode);
+
+        expect(findBlock('motors').arguments.LEFT.type).toBe('number');
+        expect(findBlock('motors').arguments.RIGHT.type).toBe('number');
+        expect(findBlock('drive').arguments.MM.type).toBe('number');
+        expect(findBlock('turn').arguments.DEGREES.type).toBe('number');
+        expect(findBlock('arc').arguments.RADIUS.type).toBe('number');
+        expect(findBlock('arc').arguments.DEGREES.type).toBe('number');
+        expect(info.customFieldTypes).toEqual({});
     });
 
     test('runs motion in simulator-fixed mode without writing BLE packets', async () => {

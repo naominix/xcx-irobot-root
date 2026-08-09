@@ -36,6 +36,7 @@ const ROOT_HALF_TRACK_MM = 43;
 const CONTROL_MODE_AUTO = 'auto';
 const CONTROL_MODE_SIMULATOR = 'simulator';
 const CONTROL_MODE_PHYSICAL = 'physical';
+const ROOT_MOTION_PICKER_CAPABILITY = 'irobotRootMotionPickerSupported';
 let extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 
 const rootMotionField = (mode, options = {}) => ({
@@ -164,6 +165,12 @@ class IrobotRootBlocks {
 
     constructor (runtime) {
         this.runtime = runtime;
+        // A custom Scratch field needs a renderer supplied by the editor GUI.
+        // Official Xcratch and Scrub do not currently expose the Root motion
+        // renderer, so use ordinary Scratch number inputs unless the host
+        // explicitly advertises that capability. This keeps every motion block
+        // editable while preserving the visual picker in enhanced editors.
+        this.supportsRootMotionPicker = Boolean(runtime && runtime[ROOT_MOTION_PICKER_CAPABILITY]);
         if (runtime.formatMessage) formatMessage = runtime.formatMessage;
         this.protocol = new RootProtocol();
         this.pendingCommands = new Map();
@@ -208,6 +215,9 @@ class IrobotRootBlocks {
 
     getInfo () {
         setupTranslations();
+        const motionArgumentType = customType => (
+            this.supportsRootMotionPicker ? customType : ArgumentType.NUMBER
+        );
         return {
             id: IrobotRootBlocks.EXTENSION_ID,
             name: IrobotRootBlocks.EXTENSION_NAME,
@@ -238,19 +248,19 @@ class IrobotRootBlocks {
                 '---',
                 {opcode: 'motors', blockType: BlockType.COMMAND,
                     text: translate('block.motors', 'set left motor [LEFT] right motor [RIGHT]'), arguments: {
-                    LEFT: {type: 'root-motor-left', defaultValue: 30},
-                    RIGHT: {type: 'root-motor-right', defaultValue: 30}
+                    LEFT: {type: motionArgumentType('root-motor-left'), defaultValue: 30},
+                    RIGHT: {type: motionArgumentType('root-motor-right'), defaultValue: 30}
                 }},
                 {opcode: 'drive', blockType: BlockType.COMMAND,
                     text: translate('block.drive', 'move [MM] mm'),
-                    arguments: {MM: {type: 'root-distance', defaultValue: 100}}},
+                    arguments: {MM: {type: motionArgumentType('root-distance'), defaultValue: 100}}},
                 {opcode: 'turn', blockType: BlockType.COMMAND,
                     text: translate('block.turn', 'turn [DEGREES] degrees'),
-                    arguments: {DEGREES: {type: 'root-turn-angle', defaultValue: 90}}},
+                    arguments: {DEGREES: {type: motionArgumentType('root-turn-angle'), defaultValue: 90}}},
                 {opcode: 'arc', blockType: BlockType.COMMAND,
                     text: translate('block.arc', 'drive an arc of [DEGREES] degrees with radius [RADIUS] mm'), arguments: {
-                    RADIUS: {type: 'root-arc-radius', defaultValue: 100},
-                    DEGREES: {type: 'root-arc-angle', defaultValue: 90}
+                    RADIUS: {type: motionArgumentType('root-arc-radius'), defaultValue: 100},
+                    DEGREES: {type: motionArgumentType('root-arc-angle'), defaultValue: 90}
                 }},
                 {opcode: 'resetNavigation', blockType: BlockType.COMMAND,
                     text: translate('block.resetNavigation', 'reset navigation position')},
@@ -334,7 +344,7 @@ class IrobotRootBlocks {
                 {opcode: 'detailedEvent', blockType: BlockType.REPORTER,
                     text: translate('block.detailedEvent', 'last detailed event')}
             ],
-            customFieldTypes: ROOT_MOTION_FIELD_TYPES,
+            customFieldTypes: this.supportsRootMotionPicker ? ROOT_MOTION_FIELD_TYPES : {},
             menus: {
                 markerMenu: {acceptReporters: true, items: [
                     {text: translate('menu.marker.up', 'up'), value: '0'},

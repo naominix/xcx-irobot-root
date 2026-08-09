@@ -5502,6 +5502,7 @@ var ROOT_HALF_TRACK_MM = 43;
 var CONTROL_MODE_AUTO = 'auto';
 var CONTROL_MODE_SIMULATOR = 'simulator';
 var CONTROL_MODE_PHYSICAL = 'physical';
+var ROOT_MOTION_PICKER_CAPABILITY = 'irobotRootMotionPickerSupported';
 var extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 var rootMotionField = function rootMotionField(mode) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -5651,6 +5652,12 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     var _this = this;
     _classCallCheck$1(this, IrobotRootBlocks);
     this.runtime = runtime;
+    // A custom Scratch field needs a renderer supplied by the editor GUI.
+    // Official Xcratch and Scrub do not currently expose the Root motion
+    // renderer, so use ordinary Scratch number inputs unless the host
+    // explicitly advertises that capability. This keeps every motion block
+    // editable while preserving the visual picker in enhanced editors.
+    this.supportsRootMotionPicker = Boolean(runtime && runtime[ROOT_MOTION_PICKER_CAPABILITY]);
     if (runtime.formatMessage) formatMessage = runtime.formatMessage;
     this.protocol = new RootProtocol();
     this.pendingCommands = new Map();
@@ -5702,7 +5709,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   return _createClass$1(IrobotRootBlocks, [{
     key: "getInfo",
     value: function getInfo() {
+      var _this2 = this;
       setupTranslations();
+      var motionArgumentType = function motionArgumentType(customType) {
+        return _this2.supportsRootMotionPicker ? customType : ArgumentType.NUMBER;
+      };
       return {
         id: IrobotRootBlocks.EXTENSION_ID,
         name: IrobotRootBlocks.EXTENSION_NAME,
@@ -5757,11 +5768,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           text: _translate('block.motors', 'set left motor [LEFT] right motor [RIGHT]'),
           arguments: {
             LEFT: {
-              type: 'root-motor-left',
+              type: motionArgumentType('root-motor-left'),
               defaultValue: 30
             },
             RIGHT: {
-              type: 'root-motor-right',
+              type: motionArgumentType('root-motor-right'),
               defaultValue: 30
             }
           }
@@ -5771,7 +5782,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           text: _translate('block.drive', 'move [MM] mm'),
           arguments: {
             MM: {
-              type: 'root-distance',
+              type: motionArgumentType('root-distance'),
               defaultValue: 100
             }
           }
@@ -5781,7 +5792,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           text: _translate('block.turn', 'turn [DEGREES] degrees'),
           arguments: {
             DEGREES: {
-              type: 'root-turn-angle',
+              type: motionArgumentType('root-turn-angle'),
               defaultValue: 90
             }
           }
@@ -5791,11 +5802,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           text: _translate('block.arc', 'drive an arc of [DEGREES] degrees with radius [RADIUS] mm'),
           arguments: {
             RADIUS: {
-              type: 'root-arc-radius',
+              type: motionArgumentType('root-arc-radius'),
               defaultValue: 100
             },
             DEGREES: {
-              type: 'root-arc-angle',
+              type: motionArgumentType('root-arc-angle'),
               defaultValue: 90
             }
           }
@@ -6021,7 +6032,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           blockType: BlockType.REPORTER,
           text: _translate('block.detailedEvent', 'last detailed event')
         }]),
-        customFieldTypes: ROOT_MOTION_FIELD_TYPES,
+        customFieldTypes: this.supportsRootMotionPicker ? ROOT_MOTION_FIELD_TYPES : {},
         menus: {
           markerMenu: {
             acceptReporters: true,
@@ -6294,7 +6305,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "navigateTo",
     value: function navigateTo(args) {
-      var _this2 = this;
+      var _this3 = this;
       var target = {
         x: Math.round(Cast.toNumber(args.X) * 10),
         y: Math.round(Cast.toNumber(args.Y) * 10)
@@ -6327,15 +6338,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         });
       }) : rotation;
       return settledRotation.then(function () {
-        return _this2._sendAndWait(_this2.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
+        return _this3._sendAndWait(_this3.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
       }).then(function () {
-        _this2.navigationPosition = {
+        _this3.navigationPosition = {
           x: target.x,
           y: target.y,
           heading: targetHeading
         };
       }).catch(function (error) {
-        _this2.navigationPosition = null;
+        _this3.navigationPosition = null;
         throw error;
       });
     }
@@ -6492,7 +6503,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_send",
     value: function _send(packet) {
-      var _this3 = this;
+      var _this4 = this;
       // Hardware writes are fire-and-forget from Scratch's point of view.
       // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
       // after CoreBluetooth accepted the bytes; returning that promise would
@@ -6501,7 +6512,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this3.transport.setError(error);
+            return _this4.transport.setError(error);
           });
         }
       } catch (error) {
@@ -6516,19 +6527,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendAndWait",
     value: function _sendAndWait(packet, motionWatchdogMs) {
-      var _this4 = this;
+      var _this5 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this4.pendingCommands.get(key);
+          var pending = _this5.pendingCommands.get(key);
           if (!pending) return;
-          _this4._clearPendingCommand(key, pending);
+          _this5._clearPendingCommand(key, pending);
           var error = new Error("Root command timed out (command ".concat(packet[1], ", packet ").concat(packet[2], ")"));
-          _this4.transport.setError(error);
+          _this5.transport.setError(error);
           reject(error);
         }, COMMAND_FINISH_TIMEOUT_MS);
         var watchdog = setTimeout(function () {
-          var pending = _this4.pendingCommands.get(key);
+          var pending = _this5.pendingCommands.get(key);
           if (!pending || pending.settling) return;
           pending.settling = true;
 
@@ -6539,15 +6550,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           // interrupted movement also produces its matching Finished
           // response. Resolve after a short BLE settling interval even if
           // old firmware omits that response.
-          _this4._sendMotionStop(key);
+          _this5._sendMotionStop(key);
           pending.settle = setTimeout(function () {
-            if (_this4.pendingCommands.get(key) !== pending) return;
-            _this4._clearPendingCommand(key, pending);
-            _this4.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
+            if (_this5.pendingCommands.get(key) !== pending) return;
+            _this5._clearPendingCommand(key, pending);
+            _this5.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
             resolve();
           }, MOTION_WATCHDOG_SETTLE_MS);
         }, motionWatchdogMs);
-        _this4.pendingCommands.set(key, {
+        _this5.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6565,7 +6576,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this4._rejectPendingCommand(key, error);
+            return _this5._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -6581,19 +6592,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendSoundCommandAndWait",
     value: function _sendSoundCommandAndWait(packet, timeoutMs, description) {
-      var _this5 = this;
+      var _this6 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this5.pendingCommands.get(key);
+          var pending = _this6.pendingCommands.get(key);
           if (!pending) return;
-          _this5._clearPendingCommand(key, pending);
-          _this5.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
+          _this6._clearPendingCommand(key, pending);
+          _this6.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
           // Do not leave a Scratch stack stuck if a single notification
           // was lost after Root had enough time to finish the sound.
           resolve();
         }, timeoutMs);
-        _this5.pendingCommands.set(key, {
+        _this6.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6607,7 +6618,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this5._rejectPendingCommand(key, error);
+            return _this6._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -6632,12 +6643,12 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendMotionStop",
     value: function _sendMotionStop(pendingKey) {
-      var _this6 = this;
+      var _this7 = this;
       try {
         var pendingWrite = this.transport.write(this.protocol.motors(0, 0));
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this6._rejectPendingCommand(pendingKey, error);
+            return _this7._rejectPendingCommand(pendingKey, error);
           });
         }
       } catch (error) {
