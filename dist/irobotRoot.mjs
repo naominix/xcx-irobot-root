@@ -4510,8 +4510,10 @@ var normalizeHeading$1 = function normalizeHeading(heading) {
 };
 var RootSimulator = /*#__PURE__*/function () {
   function RootSimulator(onEvent) {
+    var controls = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     _classCallCheck$1(this, RootSimulator);
     this.onEvent = onEvent;
+    this.controls = controls;
     this.speedMultiplier = 1;
     this._animation = null;
     this._continuousMotion = null;
@@ -4524,6 +4526,8 @@ var RootSimulator = /*#__PURE__*/function () {
     this._dragOffset = null;
     this._activeTouchPointer = null;
     this._collisionPoint = null;
+    this._runButton = null;
+    this._stopButton = null;
     this.reset();
   }
   return _createClass$1(RootSimulator, [{
@@ -4620,6 +4624,27 @@ var RootSimulator = /*#__PURE__*/function () {
       this.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
     }
   }, {
+    key: "runProject",
+    value: function runProject() {
+      if (!this._canControlProject()) return false;
+      this.reset();
+      if (this.controls.onRun) this.controls.onRun();
+      return true;
+    }
+  }, {
+    key: "stopProject",
+    value: function stopProject() {
+      if (!this._canControlProject()) return false;
+      if (this.controls.onStop) this.controls.onStop();
+      this.stop();
+      return true;
+    }
+  }, {
+    key: "_canControlProject",
+    value: function _canControlProject() {
+      return !this.controls.isActive || this.controls.isActive();
+    }
+  }, {
     key: "open",
     value: function open() {
       if (typeof document === 'undefined') return;
@@ -4636,6 +4661,11 @@ var RootSimulator = /*#__PURE__*/function () {
     key: "isOpen",
     value: function isOpen() {
       return Boolean(this._panel && this._panel.style.display !== 'none');
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      this._draw();
     }
   }, {
     key: "setMarker",
@@ -4982,6 +5012,15 @@ var RootSimulator = /*#__PURE__*/function () {
         toolbar.appendChild(button);
         return button;
       };
+      this._runButton = addButton('▶ Run again', function () {
+        return _this9.runProject();
+      });
+      this._stopButton = addButton('■ Stop', function () {
+        return _this9.stopProject();
+      });
+      addButton('↺ Reset', function () {
+        return _this9.reset();
+      });
       addButton('+ Wall', function () {
         return _this9.addObstacle('wall');
       });
@@ -5115,6 +5154,15 @@ var RootSimulator = /*#__PURE__*/function () {
     value: function _draw() {
       var _this0 = this;
       if (!this._context || !this._canvas) return;
+      var controlsEnabled = this._canControlProject();
+      if (this._runButton) {
+        this._runButton.disabled = !controlsEnabled;
+        this._runButton.style.opacity = controlsEnabled ? '1' : '0.45';
+      }
+      if (this._stopButton) {
+        this._stopButton.disabled = !controlsEnabled;
+        this._stopButton.style.opacity = controlsEnabled ? '1' : '0.45';
+      }
       var context = this._context;
       var _this$_canvas = this._canvas,
         width = _this$_canvas.width,
@@ -5488,6 +5536,18 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     this.controlMode = CONTROL_MODE_PHYSICAL;
     this.simulator = new RootSimulator(function (event) {
       return _this._receiveSimulatorEvent(event);
+    }, {
+      isActive: function isActive() {
+        return _this._isSimulatorActive();
+      },
+      onRun: function onRun() {
+        _this.bumperState = 0;
+        _this.touchState = 0;
+        if (typeof _this.runtime.greenFlag === 'function') _this.runtime.greenFlag();
+      },
+      onStop: function onStop() {
+        if (typeof _this.runtime.stopAll === 'function') _this.runtime.stopAll();
+      }
     });
     this.last = {};
     this.lastDetailedEvent = '';
@@ -6030,6 +6090,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         this.simulator.reset();
         this.simulator.open();
       }
+      this.simulator.refresh();
     }
   }, {
     key: "controlTarget",

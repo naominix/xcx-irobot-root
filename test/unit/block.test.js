@@ -24,11 +24,19 @@ import translations from '../../src/vm/extensions/block/translations.json';
 describe('iRobot Root extension', () => {
     const formatMessage = msg => msg.default;
     formatMessage.setup = () => ({locale: 'ja', translations: {ja: {}}});
-    const runtime = {formatMessage, registerPeripheralExtension: jest.fn(), startHats: jest.fn()};
+    const runtime = {
+        formatMessage,
+        registerPeripheralExtension: jest.fn(),
+        startHats: jest.fn(),
+        greenFlag: jest.fn(),
+        stopAll: jest.fn()
+    };
 
     beforeEach(() => {
         runtime.registerPeripheralExtension.mockClear();
         runtime.startHats.mockClear();
+        runtime.greenFlag.mockClear();
+        runtime.stopAll.mockClear();
     });
 
     test('exposes the official Xcratch block class metadata', () => {
@@ -168,6 +176,40 @@ describe('iRobot Root extension', () => {
         expect(block.simulator.speedMultiplier).toBe(4);
         block.simulator.setSpeedMultiplier(3);
         expect(block.simulator.speedMultiplier).toBe(1);
+    });
+
+    test('simulator run again resets Root state, keeps the field, and starts the green flag', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.simulator.setSpeedMultiplier(0.5);
+        block.simulator.addObstacle('block');
+        block.simulator.marker = 1;
+        block.simulator.led = {effect: 1, red: 255, green: 0, blue: 0};
+        block.simulator.pose = {x: 50, y: 80, heading: 20};
+        block.simulator.trail.push({x1: 0, y1: 0, x2: 50, y2: 80});
+
+        expect(block.simulator.runProject()).toBe(true);
+        expect(runtime.greenFlag).toHaveBeenCalledTimes(1);
+        expect(block.simulator.pose).toEqual({x: 0, y: 0, heading: 90});
+        expect(block.simulator.marker).toBe(0);
+        expect(block.simulator.led.effect).toBe(0);
+        expect(block.simulator.trail).toHaveLength(0);
+        expect(block.simulator.obstacles).toHaveLength(1);
+        expect(block.simulator.speedMultiplier).toBe(0.5);
+
+        block.setControlMode({MODE: 'physical'});
+        expect(block.simulator.runProject()).toBe(false);
+        expect(runtime.greenFlag).toHaveBeenCalledTimes(1);
+    });
+
+    test('simulator stop button stops Scratch only while simulator control is active', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        expect(block.simulator.stopProject()).toBe(true);
+        expect(runtime.stopAll).toHaveBeenCalledTimes(1);
+        block.setControlMode({MODE: 'physical'});
+        expect(block.simulator.stopProject()).toBe(false);
+        expect(runtime.stopAll).toHaveBeenCalledTimes(1);
     });
 
     test('updates block and menu labels between Japanese, hiragana Japanese, and English', () => {

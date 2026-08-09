@@ -178,7 +178,17 @@ class IrobotRootBlocks {
         // Simulator fixed explicitly; this default will be reconsidered only
         // after the simulator has completed classroom validation.
         this.controlMode = CONTROL_MODE_PHYSICAL;
-        this.simulator = new RootSimulator(event => this._receiveSimulatorEvent(event));
+        this.simulator = new RootSimulator(event => this._receiveSimulatorEvent(event), {
+            isActive: () => this._isSimulatorActive(),
+            onRun: () => {
+                this.bumperState = 0;
+                this.touchState = 0;
+                if (typeof this.runtime.greenFlag === 'function') this.runtime.greenFlag();
+            },
+            onStop: () => {
+                if (typeof this.runtime.stopAll === 'function') this.runtime.stopAll();
+            }
+        });
         this.last = {};
         this.lastDetailedEvent = '';
         this.currentEvent = null;
@@ -408,6 +418,7 @@ class IrobotRootBlocks {
             this.simulator.reset();
             this.simulator.open();
         }
+        this.simulator.refresh();
     }
     controlTarget () { return this._isSimulatorActive() ? 'Simulator' : 'Physical Root'; }
     openSimulator () { this.simulator.open(); }

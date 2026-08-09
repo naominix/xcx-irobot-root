@@ -16,8 +16,9 @@ const headingRadians = heading => heading * DEG;
 const normalizeHeading = heading => ((heading % 360) + 360) % 360;
 
 class RootSimulator {
-    constructor (onEvent) {
+    constructor (onEvent, controls = {}) {
         this.onEvent = onEvent;
+        this.controls = controls;
         this.speedMultiplier = 1;
         this._animation = null;
         this._continuousMotion = null;
@@ -30,6 +31,8 @@ class RootSimulator {
         this._dragOffset = null;
         this._activeTouchPointer = null;
         this._collisionPoint = null;
+        this._runButton = null;
+        this._stopButton = null;
         this.reset();
     }
 
@@ -96,6 +99,24 @@ class RootSimulator {
         this.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
     }
 
+    runProject () {
+        if (!this._canControlProject()) return false;
+        this.reset();
+        if (this.controls.onRun) this.controls.onRun();
+        return true;
+    }
+
+    stopProject () {
+        if (!this._canControlProject()) return false;
+        if (this.controls.onStop) this.controls.onStop();
+        this.stop();
+        return true;
+    }
+
+    _canControlProject () {
+        return !this.controls.isActive || this.controls.isActive();
+    }
+
     open () {
         if (typeof document === 'undefined') return;
         if (!this._panel) this._createPanel();
@@ -109,6 +130,10 @@ class RootSimulator {
 
     isOpen () {
         return Boolean(this._panel && this._panel.style.display !== 'none');
+    }
+
+    refresh () {
+        this._draw();
     }
 
     setMarker (position) {
@@ -387,6 +412,9 @@ class RootSimulator {
             toolbar.appendChild(button);
             return button;
         };
+        this._runButton = addButton('▶ Run again', () => this.runProject());
+        this._stopButton = addButton('■ Stop', () => this.stopProject());
+        addButton('↺ Reset', () => this.reset());
         addButton('+ Wall', () => this.addObstacle('wall'));
         addButton('+ Block', () => this.addObstacle('block'));
         addButton('Delete', () => this.deleteSelectedObstacle());
@@ -493,6 +521,15 @@ class RootSimulator {
 
     _draw () {
         if (!this._context || !this._canvas) return;
+        const controlsEnabled = this._canControlProject();
+        if (this._runButton) {
+            this._runButton.disabled = !controlsEnabled;
+            this._runButton.style.opacity = controlsEnabled ? '1' : '0.45';
+        }
+        if (this._stopButton) {
+            this._stopButton.disabled = !controlsEnabled;
+            this._stopButton.style.opacity = controlsEnabled ? '1' : '0.45';
+        }
         const context = this._context;
         const {width, height} = this._canvas;
         const scale = SIMULATOR_SCALE;
