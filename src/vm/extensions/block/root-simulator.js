@@ -18,7 +18,7 @@ const normalizeHeading = heading => ((heading % 360) + 360) % 360;
 class RootSimulator {
     constructor (onEvent) {
         this.onEvent = onEvent;
-        this.speedMultiplier = 2;
+        this.speedMultiplier = 1;
         this._animation = null;
         this._continuousMotion = null;
         this._ledAnimationTimer = null;
@@ -90,6 +90,10 @@ class RootSimulator {
         this._selectedObstacle = -1;
         this._setBumpers(false, false);
         this._draw();
+    }
+
+    setSpeedMultiplier (multiplier) {
+        this.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
     }
 
     open () {
@@ -203,8 +207,8 @@ class RootSimulator {
             const now = Date.now();
             const elapsed = Math.min(100, now - previous) / 1000;
             previous = now;
-            const linear = ((leftPower + rightPower) / 2) * 1.2;
-            const angular = ((rightPower - leftPower) * 1.2 / 86) / DEG;
+            const linear = ((leftPower + rightPower) / 2) * 1.2 * this.speedMultiplier;
+            const angular = ((rightPower - leftPower) * 1.2 * this.speedMultiplier / 86) / DEG;
             const nextHeading = normalizeHeading(this.pose.heading - angular * elapsed);
             const radians = headingRadians((this.pose.heading + nextHeading) / 2);
             this._setPose({
@@ -387,6 +391,21 @@ class RootSimulator {
         addButton('+ Block', () => this.addObstacle('block'));
         addButton('Delete', () => this.deleteSelectedObstacle());
         addButton('Clear obstacles', () => this.clearObstacles());
+        const speedLabel = document.createElement('label');
+        speedLabel.textContent = 'Speed ';
+        speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
+        const speedSelect = document.createElement('select');
+        speedSelect.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px;background:white;color:#264c40;font-weight:bold;';
+        for (const speed of [0.25, 0.5, 1, 2, 4]) {
+            const option = document.createElement('option');
+            option.value = String(speed);
+            option.textContent = `${speed}×`;
+            option.selected = speed === this.speedMultiplier;
+            speedSelect.appendChild(option);
+        }
+        speedSelect.onchange = () => this.setSpeedMultiplier(speedSelect.value);
+        speedLabel.appendChild(speedSelect);
+        toolbar.appendChild(speedLabel);
         const help = document.createElement('span');
         help.textContent = 'Drag obstacles · Tap Root sensors';
         help.style.cssText = 'margin-left:auto;color:#42675b;font-size:14px;';

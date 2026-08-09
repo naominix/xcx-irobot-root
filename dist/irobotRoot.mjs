@@ -4512,7 +4512,7 @@ var RootSimulator = /*#__PURE__*/function () {
   function RootSimulator(onEvent) {
     _classCallCheck$1(this, RootSimulator);
     this.onEvent = onEvent;
-    this.speedMultiplier = 2;
+    this.speedMultiplier = 1;
     this._animation = null;
     this._continuousMotion = null;
     this._ledAnimationTimer = null;
@@ -4613,6 +4613,11 @@ var RootSimulator = /*#__PURE__*/function () {
       this._selectedObstacle = -1;
       this._setBumpers(false, false);
       this._draw();
+    }
+  }, {
+    key: "setSpeedMultiplier",
+    value: function setSpeedMultiplier(multiplier) {
+      this.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
     }
   }, {
     key: "open",
@@ -4747,8 +4752,8 @@ var RootSimulator = /*#__PURE__*/function () {
         var now = Date.now();
         var elapsed = Math.min(100, now - previous) / 1000;
         previous = now;
-        var linear = (leftPower + rightPower) / 2 * 1.2;
-        var angular = (rightPower - leftPower) * 1.2 / 86 / DEG;
+        var linear = (leftPower + rightPower) / 2 * 1.2 * _this5.speedMultiplier;
+        var angular = (rightPower - leftPower) * 1.2 * _this5.speedMultiplier / 86 / DEG;
         var nextHeading = normalizeHeading$1(_this5.pose.heading - angular * elapsed);
         var radians = headingRadians((_this5.pose.heading + nextHeading) / 2);
         _this5._setPose({
@@ -4989,6 +4994,24 @@ var RootSimulator = /*#__PURE__*/function () {
       addButton('Clear obstacles', function () {
         return _this9.clearObstacles();
       });
+      var speedLabel = document.createElement('label');
+      speedLabel.textContent = 'Speed ';
+      speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
+      var speedSelect = document.createElement('select');
+      speedSelect.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px;background:white;color:#264c40;font-weight:bold;';
+      for (var _i = 0, _arr = [0.25, 0.5, 1, 2, 4]; _i < _arr.length; _i++) {
+        var speed = _arr[_i];
+        var option = document.createElement('option');
+        option.value = String(speed);
+        option.textContent = "".concat(speed, "\xD7");
+        option.selected = speed === this.speedMultiplier;
+        speedSelect.appendChild(option);
+      }
+      speedSelect.onchange = function () {
+        return _this9.setSpeedMultiplier(speedSelect.value);
+      };
+      speedLabel.appendChild(speedSelect);
+      toolbar.appendChild(speedLabel);
       var help = document.createElement('span');
       help.textContent = 'Drag obstacles · Tap Root sensors';
       help.style.cssText = 'margin-left:auto;color:#42675b;font-size:14px;';
@@ -5222,8 +5245,8 @@ var RootSimulator = /*#__PURE__*/function () {
         y: 14,
         mask: 0x2
       }];
-      for (var _i = 0, _touchSensors = touchSensors; _i < _touchSensors.length; _i++) {
-        var sensor = _touchSensors[_i];
+      for (var _i2 = 0, _touchSensors = touchSensors; _i2 < _touchSensors.length; _i2++) {
+        var sensor = _touchSensors[_i2];
         context.fillStyle = this.last.touchMask & sensor.mask ? '#1976d2' : 'rgba(50,160,210,0.2)';
         context.beginPath();
         context.arc(sensor.x, sensor.y, 7, 0, Math.PI * 2);
@@ -5237,9 +5260,9 @@ var RootSimulator = /*#__PURE__*/function () {
       context.stroke();
       var ledColor = "rgb(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ")");
       if (this.led.effect === 3) {
-        for (var _i2 = 0; _i2 < 4; _i2++) {
-          var angle = (this._ledPhase + _i2 * 3) * Math.PI / 6;
-          context.fillStyle = _i2 === 0 ? ledColor : "rgba(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ",").concat(Math.max(0.15, 0.8 - _i2 * 0.18), ")");
+        for (var _i3 = 0; _i3 < 4; _i3++) {
+          var angle = (this._ledPhase + _i3 * 3) * Math.PI / 6;
+          context.fillStyle = _i3 === 0 ? ledColor : "rgba(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ",").concat(Math.max(0.15, 0.8 - _i3 * 0.18), ")");
           context.beginPath();
           context.arc(Math.cos(angle) * 17, Math.sin(angle) * 17, 5, 0, Math.PI * 2);
           context.fill();

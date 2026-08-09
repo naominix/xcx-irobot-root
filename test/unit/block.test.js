@@ -79,7 +79,7 @@ describe('iRobot Root extension', () => {
             const completion = block.drive({MM: 120});
             expect(block.controlTarget()).toBe('Simulator');
             expect(block.transport.write).not.toHaveBeenCalled();
-            jest.advanceTimersByTime(1000);
+            jest.advanceTimersByTime(2000);
             await completion;
             expect(block.simulator.pose.y).toBeCloseTo(120, 0);
             expect(block.transport.write).not.toHaveBeenCalled();
@@ -97,7 +97,7 @@ describe('iRobot Root extension', () => {
             block.marker({POSITION: '1'});
             block.ledAnimation({EFFECT: '3', RED: 255, GREEN: 20, BLUE: 40});
             const completion = block.drive({MM: 120});
-            jest.advanceTimersByTime(1000);
+            jest.advanceTimersByTime(2000);
             await completion;
             expect(block.simulator.trail.length).toBeGreaterThan(0);
             expect(block.simulator.marker).toBe(1);
@@ -130,7 +130,7 @@ describe('iRobot Root extension', () => {
             block.setControlMode({MODE: 'simulator'});
             block.simulator.obstacles.push({type: 'wall', x: 0, y: 70, width: 120, height: 14});
             const forward = block.drive({MM: 120});
-            jest.advanceTimersByTime(1000);
+            jest.advanceTimersByTime(2000);
             await forward;
             expect(block.simulator.pose.y).toBeLessThan(70);
             expect(block.simulator.last.leftBumper).toBe(true);
@@ -139,7 +139,7 @@ describe('iRobot Root extension', () => {
             expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenBothBumpersPush');
 
             const backward = block.drive({MM: -30});
-            jest.advanceTimersByTime(500);
+            jest.advanceTimersByTime(1000);
             await backward;
             expect(block.simulator.last.leftBumper).toBe(false);
             expect(block.simulator.last.rightBumper).toBe(false);
@@ -157,6 +157,17 @@ describe('iRobot Root extension', () => {
         block.simulator._setTouchMask(0);
         expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenFLTouch');
         expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenFLRelease');
+    });
+
+    test('simulator speed control accepts classroom-friendly multipliers', () => {
+        const block = new blockClass(runtime);
+        expect(block.simulator.speedMultiplier).toBe(1);
+        block.simulator.setSpeedMultiplier(0.25);
+        expect(block.simulator.speedMultiplier).toBe(0.25);
+        block.simulator.setSpeedMultiplier(4);
+        expect(block.simulator.speedMultiplier).toBe(4);
+        block.simulator.setSpeedMultiplier(3);
+        expect(block.simulator.speedMultiplier).toBe(1);
     });
 
     test('updates block and menu labels between Japanese, hiragana Japanese, and English', () => {
