@@ -67,6 +67,7 @@ jobs:
           cp assets/root-icon-selected.png _site/root-icon.png
           cp dist/irobotRoot.mjs _site/irobotRoot.mjs
           cp dist/irobotRoot.mjs.map _site/irobotRoot.mjs.map
+          cp site/sam-root-sample.sb3 _site/sam-root-sample.sb3
           cp projects/example.sb3 _site/example.sb3
           touch _site/.nojekyll
         working-directory: extension
