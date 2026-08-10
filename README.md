@@ -103,6 +103,8 @@ Scratch標準のカラーピッカーでLEDの色を選び、点灯、点滅、�
 
 [root-unicorn-drawing.sb3](projects/root-unicorn-drawing.sb3)は、直進・回転・円弧とマーカー操作を順番に実行してユニコーンを描くサンプルです。変換内容は[サンプルの説明](projects/root-unicorn-drawing.md)を参照してください。
 
+[candy-cane-sample.sb3](projects/candy-cane-sample.sb3)は、SAM Rootの「キャンディーのステッキ」サンプルをScratchのRoot拡張ブロックで再現したプロジェクトです。
+
 ## 開発
 
 Node.js 22以降を推奨します。XcratchのScratch VMソースを隣接ディレクトリへ配置します。
