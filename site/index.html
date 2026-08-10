@@ -46,7 +46,7 @@
     <h1>iRobot Root for Xcratch</h1>
     <p>Root rt0/rt1をScratchのブロックから動かす、Xcratch用Bluetooth拡張機能です。動きや色を目で確かめながら指定でき、日本語・にほんご（ひらがな）・英語、PC/macOSとiPadOSに対応します。</p>
     <div class="actions">
-      <a class="button" href="https://naominix.github.io/xcratch-scrub-test/editor/">Xcratchで開く</a>
+      <a class="button" href="https://naominix.github.io/xcratch-irobot-root/editor/">Root専用Xcratchで開く</a>
       <a class="button secondary" href="https://github.com/naominix/xcx-irobot-root">GitHubと詳しい説明</a>
     </div>
   </header>
@@ -85,10 +85,28 @@
       </div>
     </section>
     <section>
+      <h2>Root専用Xcratchと公式Xcratch</h2>
+      <div class="grid">
+        <div class="card"><h3>Root専用Xcratch</h3><p><a href="https://naominix.github.io/xcratch-irobot-root/editor/">Root専用Xcratch</a> では、モーター出力、移動距離、回転、円弧を図とスライダーで指定できます。数値の直接入力と画面内テンキーも利用できます。</p></div>
+        <div class="card"><h3>公式Xcratch・Scrub</h3><p>公式XcratchとApp Store版Scrubでも、すべてのRoot命令を利用できます。専用モーションピッカーがない環境では、同じブロックがScratch標準の数値欄として表示され、iPadではOSの数字キーボードで入力します。</p></div>
+      </div>
+      <p class="note"><strong>互換性：</strong>専用UIはRoot専用Xcratchで提供する強化機能です。ブロックの命令と数値は共通なので、プロジェクトは公式XcratchとRoot専用Xcratchの間で利用できます。</p>
+    </section>
+    <section>
+      <h2>実機なしで試せるRootシミュレーター</h2>
+      <p class="lead">「制御モードをシミュレーターにする」ブロックを使うと、実機へBLE命令を送らずにRootの動きを専用キャンバス上で確認できます。「Rootシミュレーターを開く」で座標、向き、LED、マーカー状態を表示します。</p>
+      <div class="grid">
+        <div class="card"><h3>動き・描画・LEDを再現</h3><p>直進、回転、円弧、座標ナビ、マーカーの軌跡、LEDの点灯・点滅・回転を確認できます。実行速度は0.25〜4倍から選べ、「もう一度実行」で同じプログラムをすぐ試せます。</p></div>
+        <div class="card"><h3>イベントの練習</h3><p>壁とブロックの障害物を追加して、左右バンパーの衝突イベントを試せます。Rootの4つのタッチ領域をクリックまたはタップすると、タッチセンサーHATも確認できます。</p></div>
+        <div class="card"><h3>実機接続を維持したまま使える</h3><p>シミュレーター固定中は、接続済みのRootへ制御命令やセンサーイベントを送受信しません。BLE接続は維持できるため、実機モードへ戻るときに再接続は不要です。</p></div>
+      </div>
+      <p class="note"><strong>始め方：</strong>「制御モードをシミュレーターにする」→「Rootシミュレーターを開く」→緑の旗、の順で実行します。実機を動かしたいときは制御モードを「実機」に戻してください。</p>
+    </section>
+    <section>
       <h2>はじめかた</h2>
       <ol>
         <li>Rootの電源を入れ、端末の近くへ置きます。</li>
-        <li>上の「Xcratchで開く」を押します。</li>
+        <li>上の「Root専用Xcratchで開く」を押します。公式Xcratchでも拡張機能URLを指定すれば利用できます。</li>
         <li>「Rootに接続する」を実行し、一覧からRootを選びます。</li>
         <li>LEDや音を試してから、低速のモーター命令へ進みます。</li>
       </ol>
