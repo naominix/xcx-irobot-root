@@ -24,11 +24,20 @@ import translations from '../../src/vm/extensions/block/translations.json';
 describe('iRobot Root extension', () => {
     const formatMessage = msg => msg.default;
     formatMessage.setup = () => ({locale: 'ja', translations: {ja: {}}});
-    const runtime = {formatMessage, registerPeripheralExtension: jest.fn(), startHats: jest.fn()};
+    const runtime = {
+        formatMessage,
+        irobotRootMotionPickerSupported: true,
+        registerPeripheralExtension: jest.fn(),
+        startHats: jest.fn(),
+        greenFlag: jest.fn(),
+        stopAll: jest.fn()
+    };
 
     beforeEach(() => {
         runtime.registerPeripheralExtension.mockClear();
         runtime.startHats.mockClear();
+        runtime.greenFlag.mockClear();
+        runtime.stopAll.mockClear();
     });
 
     test('exposes the official Xcratch block class metadata', () => {
@@ -36,6 +45,8 @@ describe('iRobot Root extension', () => {
         expect(block).toBeInstanceOf(blockClass);
         expect(block.getInfo().id).toBe('irobotRoot');
         expect(block.getInfo().blocks.some(item => item.opcode === 'connect')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'setControlMode')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'openSimulator')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'motors').arguments.LEFT.type)
             .toBe('root-motor-left');
         expect(block.getInfo().blocks.find(item => item.opcode === 'turn').arguments.DEGREES.type)
@@ -68,6 +79,154 @@ describe('iRobot Root extension', () => {
         expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot', block.transport);
     });
 
+    test('falls back to standard Scratch number fields when the editor has no motion picker', () => {
+        const fallbackRuntime = Object.assign({}, runtime, {irobotRootMotionPickerSupported: false});
+        const info = new blockClass(fallbackRuntime).getInfo();
+        const findBlock = opcode => info.blocks.find(item => item.opcode === opcode);
+
+        expect(findBlock('motors').arguments.LEFT.type).toBe('number');
+        expect(findBlock('motors').arguments.RIGHT.type).toBe('number');
+        expect(findBlock('drive').arguments.MM.type).toBe('number');
+        expect(findBlock('turn').arguments.DEGREES.type).toBe('number');
+        expect(findBlock('arc').arguments.RADIUS.type).toBe('number');
+        expect(findBlock('arc').arguments.DEGREES.type).toBe('number');
+        expect(info.customFieldTypes).toEqual({});
+    });
+
+    test('runs motion in simulator-fixed mode without writing BLE packets', async () => {
+        jest.useFakeTimers();
+        try {
+            const block = new blockClass(runtime);
+            block.transport.write = jest.fn();
+            block.setControlMode({MODE: 'simulator'});
+            const completion = block.drive({MM: 120});
+            expect(block.controlTarget()).toBe('Simulator');
+            expect(block.transport.write).not.toHaveBeenCalled();
+            jest.advanceTimersByTime(2000);
+            await completion;
+            expect(block.simulator.pose.y).toBeCloseTo(120, 0);
+            expect(block.transport.write).not.toHaveBeenCalled();
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
+    test('keeps simulator marker trails and LED animation state while moving', async () => {
+        jest.useFakeTimers();
+        try {
+            const block = new blockClass(runtime);
+            block.transport.write = jest.fn();
+            block.setControlMode({MODE: 'simulator'});
+            block.marker({POSITION: '1'});
+            block.ledAnimation({EFFECT: '3', RED: 255, GREEN: 20, BLUE: 40});
+            const completion = block.drive({MM: 120});
+            jest.advanceTimersByTime(2000);
+            await completion;
+            expect(block.simulator.trail.length).toBeGreaterThan(0);
+            expect(block.simulator.marker).toBe(1);
+            expect(block.simulator.led).toEqual({effect: 3, red: 255, green: 20, blue: 40});
+            expect(block.simulator._ledPhase).toBeGreaterThan(0);
+            block.simulator.reset();
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
+    test('navigation reset preserves simulator marker and LED state', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.marker({POSITION: '1'});
+        block.ledAnimation({EFFECT: '3', RED: 20, GREEN: 40, BLUE: 255});
+        block.simulator.trail.push({x1: 0, y1: 0, x2: 10, y2: 0});
+        block.resetNavigation();
+        expect(block.simulator.pose).toEqual({x: 0, y: 0, heading: 90});
+        expect(block.simulator.marker).toBe(1);
+        expect(block.simulator.led).toEqual({effect: 3, red: 20, green: 40, blue: 255});
+        expect(block.simulator.trail).toHaveLength(1);
+        block.simulator.reset();
+    });
+
+    test('simulator obstacles stop Root and fire bumper push and release hats', async () => {
+        jest.useFakeTimers();
+        try {
+            const block = new blockClass(runtime);
+            block.setControlMode({MODE: 'simulator'});
+            block.simulator.obstacles.push({type: 'wall', x: 0, y: 70, width: 120, height: 14});
+            const forward = block.drive({MM: 120});
+            jest.advanceTimersByTime(2000);
+            await forward;
+            expect(block.simulator.pose.y).toBeLessThan(70);
+            expect(block.simulator.last.leftBumper).toBe(true);
+            expect(block.simulator.last.rightBumper).toBe(true);
+            expect(block.simulator._collisionPoint).toEqual(expect.objectContaining({x: expect.any(Number), y: expect.any(Number)}));
+            expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenBothBumpersPush');
+
+            const backward = block.drive({MM: -30});
+            jest.advanceTimersByTime(1000);
+            await backward;
+            expect(block.simulator.last.leftBumper).toBe(false);
+            expect(block.simulator.last.rightBumper).toBe(false);
+            expect(block.simulator._collisionPoint).toBeNull();
+            expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenBothBumpersRelease');
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
+    test('simulator touch input fires individual touch and release hats', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.simulator._setTouchMask(0x8);
+        block.simulator._setTouchMask(0);
+        expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenFLTouch');
+        expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenFLRelease');
+    });
+
+    test('simulator speed control accepts classroom-friendly multipliers', () => {
+        const block = new blockClass(runtime);
+        expect(block.simulator.speedMultiplier).toBe(1);
+        block.simulator.setSpeedMultiplier(0.25);
+        expect(block.simulator.speedMultiplier).toBe(0.25);
+        block.simulator.setSpeedMultiplier(4);
+        expect(block.simulator.speedMultiplier).toBe(4);
+        block.simulator.setSpeedMultiplier(3);
+        expect(block.simulator.speedMultiplier).toBe(1);
+    });
+
+    test('simulator run again resets Root state, keeps the field, and starts the green flag', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.simulator.setSpeedMultiplier(0.5);
+        block.simulator.addObstacle('block');
+        block.simulator.marker = 1;
+        block.simulator.led = {effect: 1, red: 255, green: 0, blue: 0};
+        block.simulator.pose = {x: 50, y: 80, heading: 20};
+        block.simulator.trail.push({x1: 0, y1: 0, x2: 50, y2: 80});
+
+        expect(block.simulator.runProject()).toBe(true);
+        expect(runtime.greenFlag).toHaveBeenCalledTimes(1);
+        expect(block.simulator.pose).toEqual({x: 0, y: 0, heading: 90});
+        expect(block.simulator.marker).toBe(0);
+        expect(block.simulator.led.effect).toBe(0);
+        expect(block.simulator.trail).toHaveLength(0);
+        expect(block.simulator.obstacles).toHaveLength(1);
+        expect(block.simulator.speedMultiplier).toBe(0.5);
+
+        block.setControlMode({MODE: 'physical'});
+        expect(block.simulator.runProject()).toBe(false);
+        expect(runtime.greenFlag).toHaveBeenCalledTimes(1);
+    });
+
+    test('simulator stop button stops Scratch only while simulator control is active', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        expect(block.simulator.stopProject()).toBe(true);
+        expect(runtime.stopAll).toHaveBeenCalledTimes(1);
+        block.setControlMode({MODE: 'physical'});
+        expect(block.simulator.stopProject()).toBe(false);
+        expect(runtime.stopAll).toHaveBeenCalledTimes(1);
+    });
+
     test('updates block and menu labels between Japanese, hiragana Japanese, and English', () => {
         const localeSetup = {locale: 'ja', translations: {ja: {}, 'ja-Hira': {}, en: {}}};
         const localizedFormatMessage = message =>
@@ -88,6 +247,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(japaneseInfo, 'sayPhrase').text).toBe('[PHRASE] と言う');
         expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
         expect(japaneseInfo.menus.markerMenu.items[0]).toEqual({text: '上げる', value: '0'});
+        expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ もう一度実行');
+        expect(block.simulator._t('clearObstacles', 'Clear obstacles')).toBe('障害物を全消去');
 
         localeSetup.locale = 'ja-Hira';
         const hiraganaInfo = block.getInfo();
@@ -102,6 +263,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(hiraganaInfo, 'whenFLTouch').text).toBe('FLたっちせんさーにふれたとき');
         expect(hiraganaInfo.menus.markerMenu.items[0]).toEqual({text: 'あげる', value: '0'});
         expect(hiraganaInfo.menus.bumperActionMenu.items[0]).toEqual({text: 'おされた', value: 'PUSH'});
+        expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ もういちどうごかす');
+        expect(block.simulator._t('clearObstacles', 'Clear obstacles')).toBe('しょうがいぶつをぜんぶけす');
         expect(hiraganaInfo.customFieldTypes['root-motor-left'].implementation.labels['ja-Hira'])
             .toBe('ひだりもーたーのしゅつりょく');
 
@@ -117,6 +280,7 @@ describe('iRobot Root extension', () => {
         expect(findBlock(englishInfo, 'sayPhrase').text).toBe('say [PHRASE]');
         expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
         expect(englishInfo.menus.markerMenu.items[0]).toEqual({text: 'up', value: '0'});
+        expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ Run again');
     });
 
     test('keeps the hiragana locale complete and free of kanji and katakana letters', () => {

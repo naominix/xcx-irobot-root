@@ -4,6 +4,7 @@ import Cast from '../../util/cast';
 import translations from './translations.json';
 import blockIcon from './block-icon.png';
 import {RootProtocol, RootTransport} from './root-ble';
+import RootSimulator from './root-simulator';
 
 let formatMessage = message => message.default;
 const setupTranslations = () => {
@@ -32,6 +33,10 @@ const MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 const MOTION_WATCHDOG_SETTLE_MS = 300;
 const MOTION_COMMAND_GAP_MS = 300;
 const ROOT_HALF_TRACK_MM = 43;
+const CONTROL_MODE_AUTO = 'auto';
+const CONTROL_MODE_SIMULATOR = 'simulator';
+const CONTROL_MODE_PHYSICAL = 'physical';
+const ROOT_MOTION_PICKER_CAPABILITY = 'irobotRootMotionPickerSupported';
 let extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 
 const rootMotionField = (mode, options = {}) => ({
@@ -160,6 +165,12 @@ class IrobotRootBlocks {
 
     constructor (runtime) {
         this.runtime = runtime;
+        // A custom Scratch field needs a renderer supplied by the editor GUI.
+        // Official Xcratch and Scrub do not currently expose the Root motion
+        // renderer, so use ordinary Scratch number inputs unless the host
+        // explicitly advertises that capability. This keeps every motion block
+        // editable while preserving the visual picker in enhanced editors.
+        this.supportsRootMotionPicker = Boolean(runtime && runtime[ROOT_MOTION_PICKER_CAPABILITY]);
         if (runtime.formatMessage) formatMessage = runtime.formatMessage;
         this.protocol = new RootProtocol();
         this.pendingCommands = new Map();
@@ -169,6 +180,26 @@ class IrobotRootBlocks {
             packet => this._receive(packet),
             () => this._cancelPendingCommands(new Error('Root connection was reset'))
         );
+        // Preserve the established extension behaviour for existing projects.
+        // New projects can opt into Auto (simulator while disconnected) or
+        // Simulator fixed explicitly; this default will be reconsidered only
+        // after the simulator has completed classroom validation.
+        this.controlMode = CONTROL_MODE_PHYSICAL;
+        this.simulator = new RootSimulator(event => this._receiveSimulatorEvent(event), {
+            isActive: () => this._isSimulatorActive(),
+            translate: (id, defaultText) => {
+                setupTranslations();
+                return translate(`simulator.${id}`, defaultText);
+            },
+            onRun: () => {
+                this.bumperState = 0;
+                this.touchState = 0;
+                if (typeof this.runtime.greenFlag === 'function') this.runtime.greenFlag();
+            },
+            onStop: () => {
+                if (typeof this.runtime.stopAll === 'function') this.runtime.stopAll();
+            }
+        });
         this.last = {};
         this.lastDetailedEvent = '';
         this.currentEvent = null;
@@ -184,6 +215,9 @@ class IrobotRootBlocks {
 
     getInfo () {
         setupTranslations();
+        const motionArgumentType = customType => (
+            this.supportsRootMotionPicker ? customType : ArgumentType.NUMBER
+        );
         return {
             id: IrobotRootBlocks.EXTENSION_ID,
             name: IrobotRootBlocks.EXTENSION_NAME,
@@ -201,22 +235,32 @@ class IrobotRootBlocks {
                     text: translate('block.transportMode', 'Root connection method')},
                 {opcode: 'lastConnectionError', blockType: BlockType.REPORTER,
                     text: translate('block.lastConnectionError', 'last connection error')},
+                {opcode: 'setControlMode', blockType: BlockType.COMMAND,
+                    text: translate('block.setControlMode', 'set control mode to [MODE]'), arguments: {
+                    MODE: {type: ArgumentType.STRING, menu: 'controlModeMenu'}
+                }},
+                {opcode: 'controlTarget', blockType: BlockType.REPORTER,
+                    text: translate('block.controlTarget', 'current control target')},
+                {opcode: 'openSimulator', blockType: BlockType.COMMAND,
+                    text: translate('block.openSimulator', 'open Root simulator')},
+                {opcode: 'resetSimulator', blockType: BlockType.COMMAND,
+                    text: translate('block.resetSimulator', 'reset Root simulator')},
                 '---',
                 {opcode: 'motors', blockType: BlockType.COMMAND,
                     text: translate('block.motors', 'set left motor [LEFT] right motor [RIGHT]'), arguments: {
-                    LEFT: {type: 'root-motor-left', defaultValue: 30},
-                    RIGHT: {type: 'root-motor-right', defaultValue: 30}
+                    LEFT: {type: motionArgumentType('root-motor-left'), defaultValue: 30},
+                    RIGHT: {type: motionArgumentType('root-motor-right'), defaultValue: 30}
                 }},
                 {opcode: 'drive', blockType: BlockType.COMMAND,
                     text: translate('block.drive', 'move [MM] mm'),
-                    arguments: {MM: {type: 'root-distance', defaultValue: 100}}},
+                    arguments: {MM: {type: motionArgumentType('root-distance'), defaultValue: 100}}},
                 {opcode: 'turn', blockType: BlockType.COMMAND,
                     text: translate('block.turn', 'turn [DEGREES] degrees'),
-                    arguments: {DEGREES: {type: 'root-turn-angle', defaultValue: 90}}},
+                    arguments: {DEGREES: {type: motionArgumentType('root-turn-angle'), defaultValue: 90}}},
                 {opcode: 'arc', blockType: BlockType.COMMAND,
                     text: translate('block.arc', 'drive an arc of [DEGREES] degrees with radius [RADIUS] mm'), arguments: {
-                    RADIUS: {type: 'root-arc-radius', defaultValue: 100},
-                    DEGREES: {type: 'root-arc-angle', defaultValue: 90}
+                    RADIUS: {type: motionArgumentType('root-arc-radius'), defaultValue: 100},
+                    DEGREES: {type: motionArgumentType('root-arc-angle'), defaultValue: 90}
                 }},
                 {opcode: 'resetNavigation', blockType: BlockType.COMMAND,
                     text: translate('block.resetNavigation', 'reset navigation position')},
@@ -300,7 +344,7 @@ class IrobotRootBlocks {
                 {opcode: 'detailedEvent', blockType: BlockType.REPORTER,
                     text: translate('block.detailedEvent', 'last detailed event')}
             ],
-            customFieldTypes: ROOT_MOTION_FIELD_TYPES,
+            customFieldTypes: this.supportsRootMotionPicker ? ROOT_MOTION_FIELD_TYPES : {},
             menus: {
                 markerMenu: {acceptReporters: true, items: [
                     {text: translate('menu.marker.up', 'up'), value: '0'},
@@ -353,6 +397,11 @@ class IrobotRootBlocks {
                 touchActionMenu: {items: [
                     {text: translate('menu.action.touch', 'Touch'), value: 'TOUCH'},
                     {text: translate('menu.action.release', 'Release'), value: 'RELEASE'}
+                ]},
+                controlModeMenu: {acceptReporters: true, items: [
+                    {text: translate('menu.controlMode.auto', 'automatic'), value: CONTROL_MODE_AUTO},
+                    {text: translate('menu.controlMode.simulator', 'simulator'), value: CONTROL_MODE_SIMULATOR},
+                    {text: translate('menu.controlMode.physical', 'physical Root'), value: CONTROL_MODE_PHYSICAL}
                 ]}
             }
         };
@@ -360,6 +409,10 @@ class IrobotRootBlocks {
 
     connect () {
         this.navigationPosition = {x: 0, y: 0, heading: 90};
+        if (this.controlMode === CONTROL_MODE_SIMULATOR) {
+            this.simulator.open();
+            return;
+        }
         this.transport.scan();
     }
 
@@ -367,24 +420,50 @@ class IrobotRootBlocks {
     isConnected () { return this.transport.isConnected(); }
     transportMode () { return this.transport.mode; }
     lastConnectionError () { return this.transport.lastError; }
+    setControlMode (args) {
+        const requested = String(args.MODE || CONTROL_MODE_AUTO);
+        const mode = [CONTROL_MODE_AUTO, CONTROL_MODE_SIMULATOR, CONTROL_MODE_PHYSICAL].includes(requested) ?
+            requested : CONTROL_MODE_AUTO;
+        const wasPhysical = !this._isSimulatorActive();
+        this.controlMode = mode;
+        if (this._isSimulatorActive()) {
+            if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
+            this._cancelPendingCommands(new Error('Root control target changed to simulator'));
+            this.simulator.reset();
+            this.simulator.open();
+        }
+        this.simulator.refresh();
+    }
+    controlTarget () { return this._isSimulatorActive() ? 'Simulator' : 'Physical Root'; }
+    openSimulator () { this.simulator.open(); }
+    resetSimulator () { this.simulator.reset(); this.simulator.open(); }
+
+    _isSimulatorActive () {
+        return this.controlMode === CONTROL_MODE_SIMULATOR ||
+            (this.controlMode === CONTROL_MODE_AUTO && !this.transport.isConnected());
+    }
 
     motors (args) {
         this.navigationPosition = null;
+        if (this._isSimulatorActive()) return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
         return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)));
     }
     drive (args) {
         const distance = Cast.toNumber(args.MM);
         this.navigationPosition = null;
+        if (this._isSimulatorActive()) return this.simulator.move(distance);
         return this._sendAndWait(this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
     }
     turn (args) {
         const degrees = Cast.toNumber(args.DEGREES);
+        if (this._isSimulatorActive()) return this.simulator.turn(degrees);
         return this._sendAndWait(this.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees));
     }
     arc (args) {
         const degrees = Cast.toNumber(args.DEGREES);
         const radius = Cast.toNumber(args.RADIUS);
         this.navigationPosition = null;
+        if (this._isSimulatorActive()) return this.simulator.arc(radius, degrees);
         return this._sendAndWait(
             this.protocol.driveArc(degrees * 10, radius),
             arcMotionWatchdogMs(degrees, radius)
@@ -395,6 +474,7 @@ class IrobotRootBlocks {
         // Reset Position / Navigate to Position packets are not accepted by
         // every Root firmware even though they exist in the shared protocol.
         this.navigationPosition = {x: 0, y: 0, heading: 90};
+        if (this._isSimulatorActive()) this.simulator.resetNavigation();
     }
     navigateTo (args) {
         const target = {
@@ -402,6 +482,7 @@ class IrobotRootBlocks {
             y: Math.round(Cast.toNumber(args.Y) * 10)
         };
         const origin = this.navigationPosition || {x: 0, y: 0, heading: 90};
+        if (this._isSimulatorActive()) return this.simulator.navigateTo(target.x, target.y);
         const deltaX = target.x - origin.x;
         const deltaY = target.y - origin.y;
         const distance = Math.round(Math.hypot(deltaX, deltaY));
@@ -433,18 +514,32 @@ class IrobotRootBlocks {
             throw error;
         });
     }
-    stop () { return this._send(this.protocol.packet(0, 3)); }
-    marker (args) { return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)])); }
+    stop () {
+        if (this._isSimulatorActive()) return this.simulator.stop();
+        return this._send(this.protocol.packet(0, 3));
+    }
+    marker (args) {
+        if (this._isSimulatorActive()) return this.simulator.setMarker(args.POSITION);
+        return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]));
+    }
     ledColor (args) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
+        if (this._isSimulatorActive()) return this.simulator.setLed(1, red, green, blue);
         return this._send(this.protocol.led(1, red, green, blue));
     }
     ledAnimationColor (args) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
+        if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
         return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue));
     }
-    led (args) { return this._send(this.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE))); }
+    led (args) {
+        if (this._isSimulatorActive()) return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
+        return this._send(this.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
+    }
     ledAnimation (args) {
+        if (this._isSimulatorActive()) return this.simulator.setLed(
+            Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
+        );
         return this._send(this.protocol.led(
             Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
         ));
@@ -462,6 +557,7 @@ class IrobotRootBlocks {
         // than a browser timer, so BLE latency cannot make the next note
         // interrupt this one just before it actually finishes.
         const durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
+        if (this._isSimulatorActive()) return this.simulator.playNote(frequency, durationMs);
         const packet = this.protocol.note(frequency, durationMs);
         if (durationMs === 0) {
             this._send(packet);
@@ -471,11 +567,17 @@ class IrobotRootBlocks {
     }
 
     _playNoteForPicker (midiNote, category) {
-        if (category !== this.getInfo().name || !this.transport.isConnected()) return;
+        if (category !== this.getInfo().name) return;
+        if (this._isSimulatorActive()) {
+            this.simulator.playNote(midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
+            return;
+        }
+        if (!this.transport.isConnected()) return;
         this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
     }
 
     sayPhrase (args) {
+        if (this._isSimulatorActive()) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
         return this._sendSoundCommandAndWait(
             this.protocol.sayPhrase(Cast.toString(args.PHRASE)),
             SAY_PHRASE_TIMEOUT_MS,
@@ -484,12 +586,16 @@ class IrobotRootBlocks {
     }
 
     refreshSensor (args) {
+        if (this._isSimulatorActive()) return;
         const commands = {battery: [14, 1], light: [13, 1], accel: [16, 1]};
         const command = commands[args.SENSOR];
         return command ? this._send(this.protocol.packet(command[0], command[1])) : undefined;
     }
 
-    sensor (args) { return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE]; }
+    sensor (args) {
+        if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
+        return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
+    }
 
     whenEvent (args) { return String(args.EVENT).toUpperCase() === this.currentEvent; }
 
@@ -502,6 +608,10 @@ class IrobotRootBlocks {
     whenFixedEvent () { return true; }
 
     raw (args) {
+        if (this._isSimulatorActive()) {
+            this.transport.setError(new Error('Raw BLE packets are unavailable in simulator mode'));
+            return;
+        }
         return this._send(this.protocol.packet(Cast.toNumber(args.DEVICE), Cast.toNumber(args.COMMAND), RootProtocol.hexToBytes(args.PAYLOAD)));
     }
 
@@ -733,6 +843,10 @@ class IrobotRootBlocks {
     }
 
     _receive (packet) {
+        // A connected physical Root may keep sending sensor notifications while
+        // the student deliberately works in simulator-fixed mode. Never let
+        // those events launch scripts for the virtual Root.
+        if (this._isSimulatorActive()) return;
         const decoded = this.protocol.decode(packet);
         if (!decoded) return;
         this.last = Object.assign({}, this.last, decoded);
@@ -743,6 +857,15 @@ class IrobotRootBlocks {
         const names = {12: 'BUMPER', 17: 'TOUCH', 20: 'CLIFF', 14: 'BATTERY'};
         const name = names[decoded.device];
         if (name) this._startEventHat('whenEvent', 'currentEvent', name);
+    }
+
+    _receiveSimulatorEvent (event) {
+        if (!this._isSimulatorActive() || !event) return;
+        if (event.type === 'bumper') {
+            this._receiveBumperEvent({leftBumper: event.left, rightBumper: event.right});
+        } else if (event.type === 'touch') {
+            this._receiveTouchEvent({touchMask: event.mask});
+        }
     }
 }
 

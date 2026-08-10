@@ -68,25 +68,25 @@ var entry = {
   translationMap: translations$1
 };
 
-function _arrayLikeToArray$5(r, a) {
+function _arrayLikeToArray$6(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles$1(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$5(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$6(r);
 }
 
 function _iterableToArray$1(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$5(r, a) {
+function _unsupportedIterableToArray$6(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$5(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$6(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$6(r, a) : void 0;
   }
 }
 
@@ -95,7 +95,7 @@ function _nonIterableSpread$1() {
 }
 
 function _toConsumableArray$1(r) {
-  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$5(r) || _nonIterableSpread$1();
+  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$6(r) || _nonIterableSpread$1();
 }
 
 function _classCallCheck$1(a, n) {
@@ -177,7 +177,7 @@ function _nonIterableRest$1() {
 }
 
 function _slicedToArray$1(r, e) {
-  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$5(r, e) || _nonIterableRest$1();
+  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$6(r, e) || _nonIterableRest$1();
 }
 
 function getDefaultExportFromCjs (x) {
@@ -848,6 +848,10 @@ var en = {
 	"irobotRoot.block.isConnected": "Root is connected?",
 	"irobotRoot.block.transportMode": "Root connection method",
 	"irobotRoot.block.lastConnectionError": "last connection error",
+	"irobotRoot.block.setControlMode": "set control mode to [MODE]",
+	"irobotRoot.block.controlTarget": "current control target",
+	"irobotRoot.block.openSimulator": "open Root simulator",
+	"irobotRoot.block.resetSimulator": "reset Root simulator",
 	"irobotRoot.block.motors": "set left motor [LEFT] right motor [RIGHT]",
 	"irobotRoot.block.drive": "move [MM] mm",
 	"irobotRoot.block.turn": "turn [DEGREES] degrees",
@@ -915,7 +919,38 @@ var en = {
 	"irobotRoot.menu.bumper.both": "both",
 	"irobotRoot.menu.action.push": "Push",
 	"irobotRoot.menu.action.release": "Release",
-	"irobotRoot.menu.action.touch": "Touch"
+	"irobotRoot.menu.action.touch": "Touch",
+	"irobotRoot.menu.controlMode.auto": "automatic",
+	"irobotRoot.menu.controlMode.simulator": "simulator",
+	"irobotRoot.menu.controlMode.physical": "physical Root",
+	"irobotRoot.simulator.title": "iRobot Root Simulator",
+	"irobotRoot.simulator.runAgain": "▶ Run again",
+	"irobotRoot.simulator.stop": "■ Stop",
+	"irobotRoot.simulator.reset": "↺ Reset",
+	"irobotRoot.simulator.addWall": "+ Wall",
+	"irobotRoot.simulator.addBlock": "+ Block",
+	"irobotRoot.simulator.delete": "Delete",
+	"irobotRoot.simulator.clearObstacles": "Clear obstacles",
+	"irobotRoot.simulator.speed": "Speed ",
+	"irobotRoot.simulator.help": "Drag obstacles · Tap Root sensors",
+	"irobotRoot.simulator.x": "x",
+	"irobotRoot.simulator.y": "y",
+	"irobotRoot.simulator.heading": "heading",
+	"irobotRoot.simulator.marker": "marker",
+	"irobotRoot.simulator.up": "up",
+	"irobotRoot.simulator.down": "down",
+	"irobotRoot.simulator.eraser": "eraser",
+	"irobotRoot.simulator.off": "off",
+	"irobotRoot.simulator.on": "on",
+	"irobotRoot.simulator.blink": "blink",
+	"irobotRoot.simulator.spin": "spin",
+	"irobotRoot.simulator.none": "none",
+	"irobotRoot.simulator.leftPush": "LEFT PUSH",
+	"irobotRoot.simulator.rightPush": "RIGHT PUSH",
+	"irobotRoot.simulator.bothPush": "BOTH PUSH",
+	"irobotRoot.simulator.bumper": "bumper",
+	"irobotRoot.simulator.touchMask": "touch mask",
+	"irobotRoot.simulator.say": "say"
 };
 var ja = {
 	"irobotRoot.name": "iRobot Root",
@@ -924,6 +959,10 @@ var ja = {
 	"irobotRoot.block.isConnected": "Rootは接続済み",
 	"irobotRoot.block.transportMode": "Rootの通信方式",
 	"irobotRoot.block.lastConnectionError": "最後の接続エラー",
+	"irobotRoot.block.setControlMode": "制御モードを [MODE] にする",
+	"irobotRoot.block.controlTarget": "現在の制御先",
+	"irobotRoot.block.openSimulator": "Rootシミュレーターを開く",
+	"irobotRoot.block.resetSimulator": "Rootシミュレーターをリセットする",
 	"irobotRoot.block.motors": "左モーター [LEFT] 右モーター [RIGHT]",
 	"irobotRoot.block.drive": "[MM] mm進む",
 	"irobotRoot.block.turn": "[DEGREES] 度回る",
@@ -991,7 +1030,38 @@ var ja = {
 	"irobotRoot.menu.bumper.both": "左右同時",
 	"irobotRoot.menu.action.push": "Push",
 	"irobotRoot.menu.action.release": "Release",
-	"irobotRoot.menu.action.touch": "タッチ"
+	"irobotRoot.menu.action.touch": "タッチ",
+	"irobotRoot.menu.controlMode.auto": "自動",
+	"irobotRoot.menu.controlMode.simulator": "シミュレーター",
+	"irobotRoot.menu.controlMode.physical": "実機Root",
+	"irobotRoot.simulator.title": "iRobot Rootシミュレーター",
+	"irobotRoot.simulator.runAgain": "▶ もう一度実行",
+	"irobotRoot.simulator.stop": "■ 停止",
+	"irobotRoot.simulator.reset": "↺ リセット",
+	"irobotRoot.simulator.addWall": "+ 壁",
+	"irobotRoot.simulator.addBlock": "+ 障害物",
+	"irobotRoot.simulator.delete": "削除",
+	"irobotRoot.simulator.clearObstacles": "障害物を全消去",
+	"irobotRoot.simulator.speed": "速度 ",
+	"irobotRoot.simulator.help": "障害物をドラッグ・Rootのセンサーをタップ",
+	"irobotRoot.simulator.x": "x",
+	"irobotRoot.simulator.y": "y",
+	"irobotRoot.simulator.heading": "向き",
+	"irobotRoot.simulator.marker": "マーカー",
+	"irobotRoot.simulator.up": "上げる",
+	"irobotRoot.simulator.down": "下げる",
+	"irobotRoot.simulator.eraser": "消しゴム",
+	"irobotRoot.simulator.off": "消灯",
+	"irobotRoot.simulator.on": "点灯",
+	"irobotRoot.simulator.blink": "点滅",
+	"irobotRoot.simulator.spin": "回転",
+	"irobotRoot.simulator.none": "なし",
+	"irobotRoot.simulator.leftPush": "左 PUSH",
+	"irobotRoot.simulator.rightPush": "右 PUSH",
+	"irobotRoot.simulator.bothPush": "左右 PUSH",
+	"irobotRoot.simulator.bumper": "バンパー",
+	"irobotRoot.simulator.touchMask": "タッチ状態",
+	"irobotRoot.simulator.say": "発話"
 };
 var translations = {
 	en: en,
@@ -1003,6 +1073,10 @@ var translations = {
 	"irobotRoot.block.isConnected": "るーとはつながっている",
 	"irobotRoot.block.transportMode": "るーとのつなぎかた",
 	"irobotRoot.block.lastConnectionError": "さいごのせつぞくのもんだい",
+	"irobotRoot.block.setControlMode": "せいぎょもーどを [MODE] にする",
+	"irobotRoot.block.controlTarget": "いまのせいぎょさき",
+	"irobotRoot.block.openSimulator": "るーとしみゅれーたーをひらく",
+	"irobotRoot.block.resetSimulator": "るーとしみゅれーたーをりせっとする",
 	"irobotRoot.block.motors": "ひだりもーたー [LEFT] みぎもーたー [RIGHT]",
 	"irobotRoot.block.drive": "[MM] mmすすむ",
 	"irobotRoot.block.turn": "[DEGREES] どまわる",
@@ -1070,7 +1144,38 @@ var translations = {
 	"irobotRoot.menu.bumper.both": "さゆうどうじ",
 	"irobotRoot.menu.action.push": "おされた",
 	"irobotRoot.menu.action.release": "はなされた",
-	"irobotRoot.menu.action.touch": "ふれられた"
+	"irobotRoot.menu.action.touch": "ふれられた",
+	"irobotRoot.menu.controlMode.auto": "じどう",
+	"irobotRoot.menu.controlMode.simulator": "しみゅれーたー",
+	"irobotRoot.menu.controlMode.physical": "じっきるーと",
+	"irobotRoot.simulator.title": "iRobot Root しみゅれーたー",
+	"irobotRoot.simulator.runAgain": "▶ もういちどうごかす",
+	"irobotRoot.simulator.stop": "■ とめる",
+	"irobotRoot.simulator.reset": "↺ りせっと",
+	"irobotRoot.simulator.addWall": "+ かべ",
+	"irobotRoot.simulator.addBlock": "+ しょうがいぶつ",
+	"irobotRoot.simulator.delete": "けす",
+	"irobotRoot.simulator.clearObstacles": "しょうがいぶつをぜんぶけす",
+	"irobotRoot.simulator.speed": "はやさ ",
+	"irobotRoot.simulator.help": "しょうがいぶつをうごかす・るーとのせんさーをおす",
+	"irobotRoot.simulator.x": "x",
+	"irobotRoot.simulator.y": "y",
+	"irobotRoot.simulator.heading": "むき",
+	"irobotRoot.simulator.marker": "まーかー",
+	"irobotRoot.simulator.up": "あげる",
+	"irobotRoot.simulator.down": "さげる",
+	"irobotRoot.simulator.eraser": "けしごむ",
+	"irobotRoot.simulator.off": "けす",
+	"irobotRoot.simulator.on": "つける",
+	"irobotRoot.simulator.blink": "てんめつ",
+	"irobotRoot.simulator.spin": "かいてん",
+	"irobotRoot.simulator.none": "なし",
+	"irobotRoot.simulator.leftPush": "ひだり おされた",
+	"irobotRoot.simulator.rightPush": "みぎ おされた",
+	"irobotRoot.simulator.bothPush": "さゆう おされた",
+	"irobotRoot.simulator.bumper": "ばんぱー",
+	"irobotRoot.simulator.touchMask": "たっちのじょうたい",
+	"irobotRoot.simulator.say": "いう"
 }
 };
 
@@ -1310,25 +1415,25 @@ function requireJsonrpc() {
   return jsonrpc;
 }
 
-function _arrayLikeToArray$4(r, a) {
+function _arrayLikeToArray$5(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$4(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$5(r);
 }
 
 function _iterableToArray(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$4(r, a) {
+function _unsupportedIterableToArray$5(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$4(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$5(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0;
   }
 }
 
@@ -1337,7 +1442,7 @@ function _nonIterableSpread() {
 }
 
 function _toConsumableArray(r) {
-  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$4(r) || _nonIterableSpread();
+  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$5(r) || _nonIterableSpread();
 }
 
 function _defineProperty(e, r, t) {
@@ -1402,7 +1507,7 @@ function _nonIterableRest() {
 }
 
 function _slicedToArray(r, e) {
-  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$4(r, e) || _nonIterableRest();
+  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$5(r, e) || _nonIterableRest();
 }
 
 var urlToObj = {};
@@ -1639,9 +1744,9 @@ var errorUtils = {};
 
 var stackTrace = {};
 
-function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
-function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$4(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$4(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$4(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$4(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0; } }
+function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var hasRequiredStackTrace;
 function requireStackTrace() {
   if (hasRequiredStackTrace) return stackTrace;
@@ -1677,7 +1782,7 @@ function requireStackTrace() {
   }
   function toStackFrames(lines, parseLine) {
     var frames = [];
-    var _iterator = _createForOfIteratorHelper$3(lines),
+    var _iterator = _createForOfIteratorHelper$4(lines),
       _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2335,9 +2440,9 @@ function requireInterfaces() {
   return interfaces;
 }
 
-function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
-function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
+function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys$2(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$2(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$2(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var hasRequiredBaseLogger;
@@ -2665,7 +2770,7 @@ function requireBaseLogger() {
       function tokensToCss(tokens) {
         var seen = new Set();
         var cssParts = [];
-        var _iterator = _createForOfIteratorHelper$2(tokens),
+        var _iterator = _createForOfIteratorHelper$3(tokens),
           _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2775,7 +2880,7 @@ function requireBaseLogger() {
         var withoutDrive = drivePrefix ? replaced.slice(drivePrefix.length) : replaced;
         var segments = withoutDrive.split("/");
         var normalizedSegments = [];
-        var _iterator2 = _createForOfIteratorHelper$2(segments),
+        var _iterator2 = _createForOfIteratorHelper$3(segments),
           _step2;
         try {
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -3207,7 +3312,7 @@ function requireBaseLogger() {
             if (typeof source === "string") {
               var _this$settings4;
               var modifiedSource = source;
-              var _iterator3 = _createForOfIteratorHelper$2(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
+              var _iterator3 = _createForOfIteratorHelper$3(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
                 _step3;
               try {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -4055,9 +4160,9 @@ function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t =
 function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
-function _createForOfIteratorHelper$1(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$1(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$1(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
-function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
+function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var ROOT_SERVICE = '48c5d828-ac2a-442d-97a3-0c9822b04979';
 var UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 var RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -4070,12 +4175,12 @@ var ROOT_DISCOVERY_OPTIONS = {
 };
 var SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
 var SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
-var clamp = function clamp(value, min, max) {
+var clamp$1 = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value)));
 };
 var crc8 = function crc8(bytes) {
   var crc = 0;
-  var _iterator = _createForOfIteratorHelper$1(bytes),
+  var _iterator = _createForOfIteratorHelper$2(bytes),
     _step;
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -4102,7 +4207,7 @@ var bytesToHex = function bytesToHex(bytes) {
 // in both Web Bluetooth and Scrub.
 var bytesToBase64 = function bytesToBase64(bytes) {
   var binary = '';
-  var _iterator2 = _createForOfIteratorHelper$1(bytes),
+  var _iterator2 = _createForOfIteratorHelper$2(bytes),
     _step2;
   try {
     for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -4243,7 +4348,7 @@ var RootProtocol = /*#__PURE__*/function () {
   }, {
     key: "motors",
     value: function motors(left, right) {
-      return this.packet(1, 4, this.int32Payload([clamp(left, -100, 100), clamp(right, -100, 100)]));
+      return this.packet(1, 4, this.int32Payload([clamp$1(left, -100, 100), clamp$1(right, -100, 100)]));
     }
   }, {
     key: "driveDistance",
@@ -4266,9 +4371,9 @@ var RootProtocol = /*#__PURE__*/function () {
       var headingDeciDegrees = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
       var payload = new Uint8Array(10);
       var view = new DataView(payload.buffer);
-      view.setInt32(0, Math.round(clamp(xMm, -2147483648, 0x7FFFFFFF)), false);
-      view.setInt32(4, Math.round(clamp(yMm, -2147483648, 0x7FFFFFFF)), false);
-      var heading = Number(headingDeciDegrees) === -1 ? -1 : Math.round(clamp(headingDeciDegrees, 0, 3599));
+      view.setInt32(0, Math.round(clamp$1(xMm, -2147483648, 0x7FFFFFFF)), false);
+      view.setInt32(4, Math.round(clamp$1(yMm, -2147483648, 0x7FFFFFFF)), false);
+      var heading = Number(headingDeciDegrees) === -1 ? -1 : Math.round(clamp$1(headingDeciDegrees, 0, 3599));
       view.setInt16(8, heading, false);
       return this.packet(1, 17, payload);
     }
@@ -4280,15 +4385,15 @@ var RootProtocol = /*#__PURE__*/function () {
   }, {
     key: "led",
     value: function led(state, red, green, blue) {
-      return this.packet(3, 2, [clamp(state, 0, 3), clamp(red, 0, 255), clamp(green, 0, 255), clamp(blue, 0, 255)]);
+      return this.packet(3, 2, [clamp$1(state, 0, 3), clamp$1(red, 0, 255), clamp$1(green, 0, 255), clamp$1(blue, 0, 255)]);
     }
   }, {
     key: "note",
     value: function note(frequency, durationMs) {
       var payload = new Uint8Array(6);
       var view = new DataView(payload.buffer);
-      view.setUint32(0, clamp(frequency, 0, 0xFFFFFFFF), false);
-      view.setUint16(4, clamp(durationMs, 0, 0xFFFF), false);
+      view.setUint32(0, clamp$1(frequency, 0, 0xFFFFFFFF), false);
+      view.setUint16(4, clamp$1(durationMs, 0, 0xFFFF), false);
       return this.packet(5, 0, payload);
     }
   }, {
@@ -4300,7 +4405,7 @@ var RootProtocol = /*#__PURE__*/function () {
       // Protocol payloads are limited to 16 UTF-8 bytes. Add complete
       // Unicode code points only, so truncation never leaves malformed
       // Japanese text or half of an emoji in the packet.
-      var _iterator3 = _createForOfIteratorHelper$1(String(phrase)),
+      var _iterator3 = _createForOfIteratorHelper$2(String(phrase)),
         _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -4463,6 +4568,905 @@ var RootTransport = /*#__PURE__*/function () {
   }]);
 }();
 
+function _createForOfIteratorHelper$1(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$1(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$1(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
+function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+/*
+ * Root's simulator is deliberately independent from Scratch targets, costumes,
+ * and the Pen extension.  This keeps the extension usable from the official
+ * Xcratch editor as a normal external extension.
+ */
+
+var DEG = Math.PI / 180;
+var DEFAULT_HEADING = 90;
+var DEFAULT_SPEED_MM_S = 120;
+var DEFAULT_TURN_DEG_S = 120;
+var SIMULATOR_SCALE = 1.8;
+var ROOT_COLLISION_RADIUS_MM = 24;
+var clamp = function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+};
+var headingRadians = function headingRadians(heading) {
+  return heading * DEG;
+};
+var normalizeHeading$1 = function normalizeHeading(heading) {
+  return (heading % 360 + 360) % 360;
+};
+var RootSimulator = /*#__PURE__*/function () {
+  function RootSimulator(onEvent) {
+    var controls = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    _classCallCheck$1(this, RootSimulator);
+    this.onEvent = onEvent;
+    this.controls = controls;
+    this.speedMultiplier = 1;
+    this._animation = null;
+    this._continuousMotion = null;
+    this._ledAnimationTimer = null;
+    this._ledPhase = 0;
+    this._panel = null;
+    this._canvas = null;
+    this._context = null;
+    this._selectedObstacle = -1;
+    this._dragOffset = null;
+    this._activeTouchPointer = null;
+    this._collisionPoint = null;
+    this._runButton = null;
+    this._stopButton = null;
+    this._localizedElements = [];
+    this.reset();
+  }
+  return _createClass$1(RootSimulator, [{
+    key: "reset",
+    value: function reset() {
+      this.stop();
+      this._stopLedAnimation();
+      this.pose = {
+        x: 0,
+        y: 0,
+        heading: DEFAULT_HEADING
+      };
+      this.marker = 0;
+      this.led = {
+        effect: 0,
+        red: 0,
+        green: 0,
+        blue: 0
+      };
+      this.note = null;
+      this.phrase = '';
+      this.trail = [];
+      if (!this.obstacles) this.obstacles = [];
+      this._selectedObstacle = -1;
+      this._collisionPoint = null;
+      this.last = {
+        batteryPercent: 100,
+        batteryMv: 7400,
+        lightLeft: 0,
+        lightRight: 0,
+        accelX: 0,
+        accelY: 0,
+        accelZ: 1000,
+        leftBumper: false,
+        rightBumper: false,
+        touchMask: 0,
+        cliff: false
+      };
+      this._draw();
+    }
+  }, {
+    key: "resetNavigation",
+    value: function resetNavigation() {
+      this.stop();
+      this._setBumpers(false, false);
+      this.pose = {
+        x: 0,
+        y: 0,
+        heading: DEFAULT_HEADING
+      };
+      this._draw();
+    }
+  }, {
+    key: "addObstacle",
+    value: function addObstacle() {
+      var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'block';
+      var obstacle = type === 'wall' ? {
+        type: 'wall',
+        x: 80,
+        y: 80,
+        width: 120,
+        height: 14
+      } : {
+        type: 'block',
+        x: 80,
+        y: 80,
+        width: 50,
+        height: 50
+      };
+      this.obstacles.push(obstacle);
+      this._selectedObstacle = this.obstacles.length - 1;
+      this._draw();
+      return obstacle;
+    }
+  }, {
+    key: "deleteSelectedObstacle",
+    value: function deleteSelectedObstacle() {
+      if (this._selectedObstacle < 0) return;
+      this.obstacles.splice(this._selectedObstacle, 1);
+      this._selectedObstacle = -1;
+      this._draw();
+    }
+  }, {
+    key: "clearObstacles",
+    value: function clearObstacles() {
+      this.obstacles = [];
+      this._selectedObstacle = -1;
+      this._setBumpers(false, false);
+      this._draw();
+    }
+  }, {
+    key: "setSpeedMultiplier",
+    value: function setSpeedMultiplier(multiplier) {
+      this.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
+    }
+  }, {
+    key: "runProject",
+    value: function runProject() {
+      if (!this._canControlProject()) return false;
+      this.reset();
+      if (this.controls.onRun) this.controls.onRun();
+      return true;
+    }
+  }, {
+    key: "stopProject",
+    value: function stopProject() {
+      if (!this._canControlProject()) return false;
+      if (this.controls.onStop) this.controls.onStop();
+      this.stop();
+      return true;
+    }
+  }, {
+    key: "_canControlProject",
+    value: function _canControlProject() {
+      return !this.controls.isActive || this.controls.isActive();
+    }
+  }, {
+    key: "_t",
+    value: function _t(id, defaultText) {
+      return this.controls.translate ? this.controls.translate(id, defaultText) : defaultText;
+    }
+  }, {
+    key: "_updateTranslations",
+    value: function _updateTranslations() {
+      var _iterator = _createForOfIteratorHelper$1(this._localizedElements),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var item = _step.value;
+          item.element.textContent = this._t(item.id, item.defaultText);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+  }, {
+    key: "open",
+    value: function open() {
+      if (typeof document === 'undefined') return;
+      if (!this._panel) this._createPanel();
+      this._panel.style.display = 'flex';
+      this._draw();
+    }
+  }, {
+    key: "close",
+    value: function close() {
+      if (this._panel) this._panel.style.display = 'none';
+    }
+  }, {
+    key: "isOpen",
+    value: function isOpen() {
+      return Boolean(this._panel && this._panel.style.display !== 'none');
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      this._draw();
+    }
+  }, {
+    key: "setMarker",
+    value: function setMarker(position) {
+      this.marker = clamp(Math.round(Number(position) || 0), 0, 2);
+      this._draw();
+    }
+  }, {
+    key: "setLed",
+    value: function setLed(effect, red, green, blue) {
+      var _this = this;
+      this._stopLedAnimation();
+      this.led = {
+        effect: clamp(Math.round(Number(effect) || 0), 0, 3),
+        red: clamp(Math.round(Number(red) || 0), 0, 255),
+        green: clamp(Math.round(Number(green) || 0), 0, 255),
+        blue: clamp(Math.round(Number(blue) || 0), 0, 255)
+      };
+      this._ledPhase = 0;
+      if (this.led.effect === 2 || this.led.effect === 3) {
+        this._ledAnimationTimer = setInterval(function () {
+          _this._ledPhase = (_this._ledPhase + 1) % 12;
+          _this._draw();
+        }, 100);
+      }
+      this._draw();
+    }
+  }, {
+    key: "playNote",
+    value: function playNote(frequency, durationMs) {
+      this.note = {
+        frequency: frequency,
+        until: Date.now() + durationMs
+      };
+      this._draw();
+      return this._wait(Math.max(0, durationMs));
+    }
+  }, {
+    key: "sayPhrase",
+    value: function sayPhrase(phrase) {
+      this.phrase = String(phrase || '');
+      this._draw();
+      return this._wait(Math.min(30000, Math.max(250, this.phrase.length * 110)));
+    }
+  }, {
+    key: "move",
+    value: function move(distanceMm) {
+      var _this2 = this;
+      var distance = Number(distanceMm) || 0;
+      var start = Object.assign({}, this.pose);
+      var radians = headingRadians(start.heading);
+      var end = {
+        x: start.x + Math.cos(radians) * distance,
+        y: start.y + Math.sin(radians) * distance,
+        heading: start.heading
+      };
+      return this._animate(Math.abs(distance) / DEFAULT_SPEED_MM_S * 1000, function (progress) {
+        _this2._setPose({
+          x: start.x + (end.x - start.x) * progress,
+          y: start.y + (end.y - start.y) * progress,
+          heading: start.heading
+        });
+      });
+    }
+  }, {
+    key: "turn",
+    value: function turn(degrees) {
+      var _this3 = this;
+      var turn = Number(degrees) || 0;
+      var start = Object.assign({}, this.pose);
+      return this._animate(Math.abs(turn) / DEFAULT_TURN_DEG_S * 1000, function (progress) {
+        // Root defines a positive rotation as clockwise.
+        _this3._setPose(Object.assign({}, start, {
+          heading: normalizeHeading$1(start.heading - turn * progress)
+        }));
+      });
+    }
+  }, {
+    key: "arc",
+    value: function arc(radiusMm, degrees) {
+      var _this4 = this;
+      var radius = Number(radiusMm) || 0;
+      var angle = Number(degrees) || 0;
+      if (radius === 0) return this.turn(angle);
+      var start = Object.assign({}, this.pose);
+      var theta = headingRadians(start.heading);
+      // Positive Root angles are clockwise. A positive radius therefore
+      // describes the right-hand circle seen by a Root facing forward.
+      var center = {
+        x: start.x + radius * Math.sin(theta),
+        y: start.y - radius * Math.cos(theta)
+      };
+      var duration = Math.abs(radius * angle * DEG) / DEFAULT_SPEED_MM_S * 1000;
+      return this._animate(duration, function (progress) {
+        var heading = normalizeHeading$1(start.heading - angle * progress);
+        var currentTheta = headingRadians(heading);
+        _this4._setPose({
+          x: center.x - radius * Math.sin(currentTheta),
+          y: center.y + radius * Math.cos(currentTheta),
+          heading: heading
+        });
+      });
+    }
+  }, {
+    key: "motors",
+    value: function motors(left, right) {
+      var _this5 = this;
+      this._stopContinuousMotion();
+      var leftPower = clamp(Number(left) || 0, -100, 100);
+      var rightPower = clamp(Number(right) || 0, -100, 100);
+      if (leftPower === 0 && rightPower === 0) return;
+      var previous = Date.now();
+      this._continuousMotion = setInterval(function () {
+        var now = Date.now();
+        var elapsed = Math.min(100, now - previous) / 1000;
+        previous = now;
+        var linear = (leftPower + rightPower) / 2 * 1.2 * _this5.speedMultiplier;
+        var angular = (rightPower - leftPower) * 1.2 * _this5.speedMultiplier / 86 / DEG;
+        var nextHeading = normalizeHeading$1(_this5.pose.heading - angular * elapsed);
+        var radians = headingRadians((_this5.pose.heading + nextHeading) / 2);
+        _this5._setPose({
+          x: _this5.pose.x + Math.cos(radians) * linear * elapsed,
+          y: _this5.pose.y + Math.sin(radians) * linear * elapsed,
+          heading: nextHeading
+        });
+      }, 16);
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      if (this._animation) {
+        this._animation.cancelled = true;
+        this._animation.resolve();
+        this._animation = null;
+      }
+      this._stopContinuousMotion();
+      this._draw();
+    }
+  }, {
+    key: "navigateTo",
+    value: function navigateTo(xMm, yMm) {
+      var _this6 = this;
+      var deltaX = (Number(xMm) || 0) - this.pose.x;
+      var deltaY = (Number(yMm) || 0) - this.pose.y;
+      var distance = Math.hypot(deltaX, deltaY);
+      if (distance < 0.01) return Promise.resolve();
+      var targetHeading = normalizeHeading$1(Math.atan2(deltaY, deltaX) / DEG);
+      var turn = normalizeHeading$1(this.pose.heading - targetHeading + 180) - 180;
+      return this.turn(turn).then(function () {
+        return _this6.move(distance);
+      });
+    }
+  }, {
+    key: "getSensor",
+    value: function getSensor(key) {
+      return this.last[key] === undefined ? 0 : this.last[key];
+    }
+  }, {
+    key: "_setPose",
+    value: function _setPose(pose) {
+      var previous = this.pose;
+      var deltaX = pose.x - previous.x;
+      var deltaY = pose.y - previous.y;
+      var steps = Math.max(1, Math.ceil(Math.hypot(deltaX, deltaY) / (ROOT_COLLISION_RADIUS_MM / 2)));
+      var accepted = previous;
+      for (var step = 1; step <= steps; step++) {
+        var progress = step / steps;
+        var candidate = {
+          x: previous.x + deltaX * progress,
+          y: previous.y + deltaY * progress,
+          heading: normalizeHeading$1(previous.heading + (pose.heading - previous.heading) * progress)
+        };
+        var collision = this._collisionAt(candidate);
+        if (collision) {
+          this._collisionPoint = {
+            x: collision.x,
+            y: collision.y
+          };
+          this._setBumpers(collision.left, collision.right);
+          if (accepted !== previous) this._commitPose(previous, accepted);
+          this._draw();
+          return false;
+        }
+        accepted = candidate;
+      }
+      this._setBumpers(false, false);
+      this._commitPose(previous, pose);
+      this._draw();
+      return true;
+    }
+  }, {
+    key: "_commitPose",
+    value: function _commitPose(previous, pose) {
+      this.pose = pose;
+      if (this.marker === 1 && (previous.x !== pose.x || previous.y !== pose.y)) {
+        this.trail.push({
+          x1: previous.x,
+          y1: previous.y,
+          x2: pose.x,
+          y2: pose.y
+        });
+      }
+    }
+  }, {
+    key: "_collisionAt",
+    value: function _collisionAt(pose) {
+      var _iterator2 = _createForOfIteratorHelper$1(this.obstacles),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var obstacle = _step2.value;
+          var halfWidth = obstacle.width / 2;
+          var halfHeight = obstacle.height / 2;
+          var closestX = clamp(pose.x, obstacle.x - halfWidth, obstacle.x + halfWidth);
+          var closestY = clamp(pose.y, obstacle.y - halfHeight, obstacle.y + halfHeight);
+          var dx = closestX - pose.x;
+          var dy = closestY - pose.y;
+          if (dx * dx + dy * dy >= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) continue;
+          if (dx === 0 && dy === 0) {
+            dx = obstacle.x - pose.x;
+            dy = obstacle.y - pose.y;
+          }
+          var heading = headingRadians(pose.heading);
+          var rightX = Math.sin(heading);
+          var rightY = -Math.cos(heading);
+          var lateral = dx * rightX + dy * rightY;
+          var centerThreshold = ROOT_COLLISION_RADIUS_MM * 0.22;
+          return {
+            left: lateral <= centerThreshold,
+            right: lateral >= -centerThreshold,
+            x: closestX,
+            y: closestY
+          };
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      return null;
+    }
+  }, {
+    key: "_setBumpers",
+    value: function _setBumpers(left, right) {
+      var nextLeft = Boolean(left);
+      var nextRight = Boolean(right);
+      if (this.last.leftBumper === nextLeft && this.last.rightBumper === nextRight) return;
+      this.last.leftBumper = nextLeft;
+      this.last.rightBumper = nextRight;
+      if (!nextLeft && !nextRight) this._collisionPoint = null;
+      if (this.onEvent) this.onEvent({
+        type: 'bumper',
+        left: nextLeft,
+        right: nextRight
+      });
+    }
+  }, {
+    key: "_setTouchMask",
+    value: function _setTouchMask(mask) {
+      var next = mask & 0xF;
+      if (this.last.touchMask === next) return;
+      this.last.touchMask = next;
+      if (this.onEvent) this.onEvent({
+        type: 'touch',
+        mask: next
+      });
+    }
+  }, {
+    key: "_animate",
+    value: function _animate(durationMs, update) {
+      var _this7 = this;
+      this.stop();
+      var duration = Math.max(0, durationMs / this.speedMultiplier);
+      if (duration === 0) {
+        update(1);
+        return Promise.resolve();
+      }
+      return new Promise(function (resolve) {
+        var animation = {
+          cancelled: false,
+          resolve: resolve
+        };
+        _this7._animation = animation;
+        var start = Date.now();
+        var _frame = function frame() {
+          if (animation.cancelled) return;
+          var progress = Math.min(1, (Date.now() - start) / duration);
+          update(progress);
+          if (progress < 1) {
+            animation.frame = setTimeout(_frame, 16);
+          } else {
+            _this7._animation = null;
+            resolve();
+          }
+        };
+        _frame();
+      });
+    }
+  }, {
+    key: "_wait",
+    value: function _wait(durationMs) {
+      var _this8 = this;
+      return new Promise(function (resolve) {
+        return setTimeout(resolve, durationMs / _this8.speedMultiplier);
+      });
+    }
+  }, {
+    key: "_stopContinuousMotion",
+    value: function _stopContinuousMotion() {
+      if (this._continuousMotion) clearInterval(this._continuousMotion);
+      this._continuousMotion = null;
+    }
+  }, {
+    key: "_stopLedAnimation",
+    value: function _stopLedAnimation() {
+      if (this._ledAnimationTimer) clearInterval(this._ledAnimationTimer);
+      this._ledAnimationTimer = null;
+      this._ledPhase = 0;
+    }
+  }, {
+    key: "_createPanel",
+    value: function _createPanel() {
+      var _this9 = this;
+      var panel = document.createElement('div');
+      panel.setAttribute('data-irobot-root-simulator', '');
+      panel.style.cssText = 'position:fixed;z-index:10000;inset:4vh 4vw;background:#f7fbf9;border:3px solid #39846c;border-radius:18px;box-shadow:0 14px 40px #0008;display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;';
+      var header = document.createElement('div');
+      header.style.cssText = 'padding:12px 18px;background:#39846c;color:white;font-size:20px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;';
+      var title = document.createElement('span');
+      header.appendChild(title);
+      this._localizedElements.push({
+        element: title,
+        id: 'title',
+        defaultText: 'iRobot Root Simulator'
+      });
+      var close = document.createElement('button');
+      close.textContent = '×';
+      close.style.cssText = 'border:0;border-radius:50%;width:34px;height:34px;background:#286754;color:white;font-size:27px;line-height:28px;';
+      close.onclick = function () {
+        return _this9.close();
+      };
+      header.appendChild(close);
+      var toolbar = document.createElement('div');
+      toolbar.style.cssText = 'padding:8px 12px;background:#e8f4f0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;';
+      var addButton = function addButton(id, label, action) {
+        var button = document.createElement('button');
+        button.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px 12px;background:white;color:#264c40;font-weight:bold;cursor:pointer;';
+        button.onclick = action;
+        toolbar.appendChild(button);
+        _this9._localizedElements.push({
+          element: button,
+          id: id,
+          defaultText: label
+        });
+        return button;
+      };
+      this._runButton = addButton('runAgain', '▶ Run again', function () {
+        return _this9.runProject();
+      });
+      this._stopButton = addButton('stop', '■ Stop', function () {
+        return _this9.stopProject();
+      });
+      addButton('reset', '↺ Reset', function () {
+        return _this9.reset();
+      });
+      addButton('addWall', '+ Wall', function () {
+        return _this9.addObstacle('wall');
+      });
+      addButton('addBlock', '+ Block', function () {
+        return _this9.addObstacle('block');
+      });
+      addButton('delete', 'Delete', function () {
+        return _this9.deleteSelectedObstacle();
+      });
+      addButton('clearObstacles', 'Clear obstacles', function () {
+        return _this9.clearObstacles();
+      });
+      var speedLabel = document.createElement('label');
+      speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
+      var speedText = document.createElement('span');
+      speedLabel.appendChild(speedText);
+      this._localizedElements.push({
+        element: speedText,
+        id: 'speed',
+        defaultText: 'Speed '
+      });
+      var speedSelect = document.createElement('select');
+      speedSelect.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px;background:white;color:#264c40;font-weight:bold;';
+      for (var _i = 0, _arr = [0.25, 0.5, 1, 2, 4]; _i < _arr.length; _i++) {
+        var speed = _arr[_i];
+        var option = document.createElement('option');
+        option.value = String(speed);
+        option.textContent = "".concat(speed, "\xD7");
+        option.selected = speed === this.speedMultiplier;
+        speedSelect.appendChild(option);
+      }
+      speedSelect.onchange = function () {
+        return _this9.setSpeedMultiplier(speedSelect.value);
+      };
+      speedLabel.appendChild(speedSelect);
+      toolbar.appendChild(speedLabel);
+      var help = document.createElement('span');
+      help.style.cssText = 'margin-left:auto;color:#42675b;font-size:14px;';
+      toolbar.appendChild(help);
+      this._localizedElements.push({
+        element: help,
+        id: 'help',
+        defaultText: 'Drag obstacles · Tap Root sensors'
+      });
+      var canvas = document.createElement('canvas');
+      canvas.width = 1000;
+      canvas.height = 680;
+      canvas.style.cssText = 'width:100%;height:calc(100% - 108px);touch-action:none;background:#fff;';
+      canvas.addEventListener('pointerdown', function (event) {
+        return _this9._pointerDown(event);
+      });
+      canvas.addEventListener('pointermove', function (event) {
+        return _this9._pointerMove(event);
+      });
+      canvas.addEventListener('pointerup', function (event) {
+        return _this9._pointerUp(event);
+      });
+      canvas.addEventListener('pointercancel', function (event) {
+        return _this9._pointerUp(event);
+      });
+      panel.tabIndex = 0;
+      panel.addEventListener('keydown', function (event) {
+        if (event.key === 'Backspace' || event.key === 'Delete') _this9.deleteSelectedObstacle();
+      });
+      panel.appendChild(header);
+      panel.appendChild(toolbar);
+      panel.appendChild(canvas);
+      document.body.appendChild(panel);
+      this._panel = panel;
+      this._canvas = canvas;
+      this._context = canvas.getContext('2d');
+      this._updateTranslations();
+    }
+  }, {
+    key: "_eventWorld",
+    value: function _eventWorld(event) {
+      var bounds = this._canvas.getBoundingClientRect();
+      var canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
+      var canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+      return {
+        x: (canvasX - this._canvas.width / 2) / SIMULATOR_SCALE,
+        y: (this._canvas.height / 2 - canvasY) / SIMULATOR_SCALE
+      };
+    }
+  }, {
+    key: "_pointerDown",
+    value: function _pointerDown(event) {
+      var point = this._eventWorld(event);
+      var dx = point.x - this.pose.x;
+      var dy = point.y - this.pose.y;
+      if (dx * dx + dy * dy <= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) {
+        var heading = headingRadians(this.pose.heading);
+        var forward = dx * Math.cos(heading) + dy * Math.sin(heading);
+        var right = dx * Math.sin(heading) - dy * Math.cos(heading);
+        var mask = forward >= 0 ? right < 0 ? 0x8 : 0x4 : right < 0 ? 0x1 : 0x2;
+        this._activeTouchPointer = event.pointerId;
+        this._setTouchMask(mask);
+        this._canvas.setPointerCapture(event.pointerId);
+        this._draw();
+        return;
+      }
+      this._selectedObstacle = -1;
+      for (var index = this.obstacles.length - 1; index >= 0; index--) {
+        var obstacle = this.obstacles[index];
+        if (Math.abs(point.x - obstacle.x) <= obstacle.width / 2 && Math.abs(point.y - obstacle.y) <= obstacle.height / 2) {
+          this._selectedObstacle = index;
+          this._dragOffset = {
+            x: point.x - obstacle.x,
+            y: point.y - obstacle.y
+          };
+          this._canvas.setPointerCapture(event.pointerId);
+          break;
+        }
+      }
+      this._draw();
+    }
+  }, {
+    key: "_pointerMove",
+    value: function _pointerMove(event) {
+      if (!this._dragOffset || this._selectedObstacle < 0) return;
+      var point = this._eventWorld(event);
+      var obstacle = this.obstacles[this._selectedObstacle];
+      obstacle.x = point.x - this._dragOffset.x;
+      obstacle.y = point.y - this._dragOffset.y;
+      this._draw();
+    }
+  }, {
+    key: "_pointerUp",
+    value: function _pointerUp(event) {
+      if (this._activeTouchPointer === event.pointerId) {
+        this._activeTouchPointer = null;
+        this._setTouchMask(0);
+      }
+      this._dragOffset = null;
+      if (this._canvas.hasPointerCapture && this._canvas.hasPointerCapture(event.pointerId)) {
+        this._canvas.releasePointerCapture(event.pointerId);
+      }
+      this._draw();
+    }
+  }, {
+    key: "_draw",
+    value: function _draw() {
+      var _this0 = this;
+      if (!this._context || !this._canvas) return;
+      this._updateTranslations();
+      var controlsEnabled = this._canControlProject();
+      if (this._runButton) {
+        this._runButton.disabled = !controlsEnabled;
+        this._runButton.style.opacity = controlsEnabled ? '1' : '0.45';
+      }
+      if (this._stopButton) {
+        this._stopButton.disabled = !controlsEnabled;
+        this._stopButton.style.opacity = controlsEnabled ? '1' : '0.45';
+      }
+      var context = this._context;
+      var _this$_canvas = this._canvas,
+        width = _this$_canvas.width,
+        height = _this$_canvas.height;
+      var scale = SIMULATOR_SCALE;
+      var point = function point(_ref) {
+        var x = _ref.x,
+          y = _ref.y;
+        return {
+          x: width / 2 + x * scale,
+          y: height / 2 - y * scale
+        };
+      };
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = '#fcfdfd';
+      context.fillRect(0, 0, width, height);
+      context.strokeStyle = '#e0ebe7';
+      context.lineWidth = 1;
+      for (var x = width / 2 % (50 * scale); x < width; x += 50 * scale) {
+        context.beginPath();
+        context.moveTo(x, 0);
+        context.lineTo(x, height);
+        context.stroke();
+      }
+      for (var y = height / 2 % (50 * scale); y < height; y += 50 * scale) {
+        context.beginPath();
+        context.moveTo(0, y);
+        context.lineTo(width, y);
+        context.stroke();
+      }
+      this.obstacles.forEach(function (obstacle, index) {
+        var center = point(obstacle);
+        var obstacleWidth = obstacle.width * scale;
+        var obstacleHeight = obstacle.height * scale;
+        context.fillStyle = obstacle.type === 'wall' ? '#71828a' : '#d9864d';
+        context.strokeStyle = index === _this0._selectedObstacle ? '#f2c94c' : '#3d4d54';
+        context.lineWidth = index === _this0._selectedObstacle ? 5 : 3;
+        context.beginPath();
+        context.rect(center.x - obstacleWidth / 2, center.y - obstacleHeight / 2, obstacleWidth, obstacleHeight);
+        context.fill();
+        context.stroke();
+      });
+      if (this._collisionPoint) {
+        var collisionPoint = point(this._collisionPoint);
+        context.strokeStyle = '#ef3e36';
+        context.fillStyle = 'rgba(239,62,54,0.25)';
+        context.lineWidth = 4;
+        context.beginPath();
+        context.arc(collisionPoint.x, collisionPoint.y, 12, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        context.beginPath();
+        context.moveTo(collisionPoint.x - 8, collisionPoint.y - 8);
+        context.lineTo(collisionPoint.x + 8, collisionPoint.y + 8);
+        context.moveTo(collisionPoint.x + 8, collisionPoint.y - 8);
+        context.lineTo(collisionPoint.x - 8, collisionPoint.y + 8);
+        context.stroke();
+      }
+      context.strokeStyle = this.marker === 2 ? '#fff' : '#22a6a6';
+      context.lineWidth = 4;
+      context.lineCap = 'round';
+      var _iterator3 = _createForOfIteratorHelper$1(this.trail),
+        _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var segment = _step3.value;
+          var _a = point({
+            x: segment.x1,
+            y: segment.y1
+          });
+          var b = point({
+            x: segment.x2,
+            y: segment.y2
+          });
+          context.beginPath();
+          context.moveTo(_a.x, _a.y);
+          context.lineTo(b.x, b.y);
+          context.stroke();
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+      var p = point(this.pose);
+      context.save();
+      context.translate(p.x, p.y);
+      context.rotate((90 - this.pose.heading) * DEG);
+      context.fillStyle = '#fff';
+      context.strokeStyle = '#29343a';
+      context.lineWidth = 5;
+      context.beginPath();
+      for (var i = 0; i < 6; i++) {
+        var a = -Math.PI / 2 + i * Math.PI / 3;
+        var _x = Math.cos(a) * 36;
+        var _y = Math.sin(a) * 36;
+        i ? context.lineTo(_x, _y) : context.moveTo(_x, _y);
+      }
+      context.closePath();
+      context.fill();
+      context.stroke();
+      context.lineCap = 'round';
+      context.lineWidth = 8;
+      context.strokeStyle = this.last.leftBumper ? '#ef3e36' : '#9ba9af';
+      context.beginPath();
+      context.moveTo(-2, -35);
+      context.lineTo(-29, -18);
+      context.stroke();
+      context.strokeStyle = this.last.rightBumper ? '#ef3e36' : '#9ba9af';
+      context.beginPath();
+      context.moveTo(2, -35);
+      context.lineTo(29, -18);
+      context.stroke();
+      var touchSensors = [{
+        x: -13,
+        y: -14,
+        mask: 0x8
+      }, {
+        x: 13,
+        y: -14,
+        mask: 0x4
+      }, {
+        x: -13,
+        y: 14,
+        mask: 0x1
+      }, {
+        x: 13,
+        y: 14,
+        mask: 0x2
+      }];
+      for (var _i2 = 0, _touchSensors = touchSensors; _i2 < _touchSensors.length; _i2++) {
+        var sensor = _touchSensors[_i2];
+        context.fillStyle = this.last.touchMask & sensor.mask ? '#1976d2' : 'rgba(50,160,210,0.2)';
+        context.beginPath();
+        context.arc(sensor.x, sensor.y, 7, 0, Math.PI * 2);
+        context.fill();
+      }
+      context.strokeStyle = '#29343a';
+      context.lineWidth = 7;
+      context.beginPath();
+      context.moveTo(0, -22);
+      context.lineTo(0, 21);
+      context.stroke();
+      var ledColor = "rgb(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ")");
+      if (this.led.effect === 3) {
+        for (var _i3 = 0; _i3 < 4; _i3++) {
+          var angle = (this._ledPhase + _i3 * 3) * Math.PI / 6;
+          context.fillStyle = _i3 === 0 ? ledColor : "rgba(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ",").concat(Math.max(0.15, 0.8 - _i3 * 0.18), ")");
+          context.beginPath();
+          context.arc(Math.cos(angle) * 17, Math.sin(angle) * 17, 5, 0, Math.PI * 2);
+          context.fill();
+        }
+      } else if (this.led.effect !== 2 || this._ledPhase < 6) {
+        context.fillStyle = ledColor;
+        context.beginPath();
+        context.arc(0, 0, 9, 0, Math.PI * 2);
+        context.fill();
+      }
+      context.fillStyle = '#f2d941';
+      context.beginPath();
+      context.arc(0, -27, 6, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+      context.fillStyle = '#26353a';
+      context.font = '18px Arial';
+      context.fillText("".concat(this._t('x', 'x'), ": ").concat(this.pose.x.toFixed(1), " mm   ").concat(this._t('y', 'y'), ": ").concat(this.pose.y.toFixed(1), " mm   ").concat(this._t('heading', 'heading'), ": ").concat(this.pose.heading.toFixed(1), "\xB0"), 18, 30);
+      var markerStates = [this._t('up', 'up'), this._t('down', 'down'), this._t('eraser', 'eraser')];
+      var ledStates = [this._t('off', 'off'), this._t('on', 'on'), this._t('blink', 'blink'), this._t('spin', 'spin')];
+      context.fillText("".concat(this._t('marker', 'marker'), ": ").concat(markerStates[this.marker], "   LED: ").concat(ledStates[this.led.effect], " rgb(").concat(this.led.red, ", ").concat(this.led.green, ", ").concat(this.led.blue, ")"), 18, 57);
+      var bumper = this.last.leftBumper && this.last.rightBumper ? this._t('bothPush', 'BOTH PUSH') : this.last.leftBumper ? this._t('leftPush', 'LEFT PUSH') : this.last.rightBumper ? this._t('rightPush', 'RIGHT PUSH') : this._t('none', 'none');
+      context.fillText("".concat(this._t('bumper', 'bumper'), ": ").concat(bumper, "   ").concat(this._t('touchMask', 'touch mask'), ": ").concat(this.last.touchMask.toString(2).padStart(4, '0')), 18, 84);
+      if (this.phrase) context.fillText("".concat(this._t('say', 'say'), ": ").concat(this.phrase), 18, 111);
+    }
+  }]);
+}();
+
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -4479,7 +5483,7 @@ var setupTranslations = function setupTranslations() {
   if (!localeSetup.translations[locale]) localeSetup.translations[locale] = {};
   Object.assign(localeSetup.translations[locale], localizedMessages);
 };
-var translate = function translate(id, defaultText, description) {
+var _translate = function translate(id, defaultText, description) {
   return formatMessage({
     id: "irobotRoot.".concat(id),
     default: defaultText,
@@ -4495,6 +5499,10 @@ var MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 var MOTION_WATCHDOG_SETTLE_MS = 300;
 var MOTION_COMMAND_GAP_MS = 300;
 var ROOT_HALF_TRACK_MM = 43;
+var CONTROL_MODE_AUTO = 'auto';
+var CONTROL_MODE_SIMULATOR = 'simulator';
+var CONTROL_MODE_PHYSICAL = 'physical';
+var ROOT_MOTION_PICKER_CAPABILITY = 'irobotRootMotionPickerSupported';
 var extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 var rootMotionField = function rootMotionField(mode) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -4618,7 +5626,7 @@ var fixedEventHats = function fixedEventHats() {
       opcode: opcode,
       func: 'whenFixedEvent',
       blockType: BlockType.HAT,
-      text: translate(id, defaultText),
+      text: _translate(id, defaultText),
       isEdgeActivated: false
     };
   });
@@ -4644,6 +5652,12 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     var _this = this;
     _classCallCheck$1(this, IrobotRootBlocks);
     this.runtime = runtime;
+    // A custom Scratch field needs a renderer supplied by the editor GUI.
+    // Official Xcratch and Scrub do not currently expose the Root motion
+    // renderer, so use ordinary Scratch number inputs unless the host
+    // explicitly advertises that capability. This keeps every motion block
+    // editable while preserving the visual picker in enhanced editors.
+    this.supportsRootMotionPicker = Boolean(runtime && runtime[ROOT_MOTION_PICKER_CAPABILITY]);
     if (runtime.formatMessage) formatMessage = runtime.formatMessage;
     this.protocol = new RootProtocol();
     this.pendingCommands = new Map();
@@ -4651,6 +5665,30 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       return _this._receive(packet);
     }, function () {
       return _this._cancelPendingCommands(new Error('Root connection was reset'));
+    });
+    // Preserve the established extension behaviour for existing projects.
+    // New projects can opt into Auto (simulator while disconnected) or
+    // Simulator fixed explicitly; this default will be reconsidered only
+    // after the simulator has completed classroom validation.
+    this.controlMode = CONTROL_MODE_PHYSICAL;
+    this.simulator = new RootSimulator(function (event) {
+      return _this._receiveSimulatorEvent(event);
+    }, {
+      isActive: function isActive() {
+        return _this._isSimulatorActive();
+      },
+      translate: function translate(id, defaultText) {
+        setupTranslations();
+        return _translate("simulator.".concat(id), defaultText);
+      },
+      onRun: function onRun() {
+        _this.bumperState = 0;
+        _this.touchState = 0;
+        if (typeof _this.runtime.greenFlag === 'function') _this.runtime.greenFlag();
+      },
+      onStop: function onStop() {
+        if (typeof _this.runtime.stopAll === 'function') _this.runtime.stopAll();
+      }
     });
     this.last = {};
     this.lastDetailedEvent = '';
@@ -4671,7 +5709,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   return _createClass$1(IrobotRootBlocks, [{
     key: "getInfo",
     value: function getInfo() {
+      var _this2 = this;
       setupTranslations();
+      var motionArgumentType = function motionArgumentType(customType) {
+        return _this2.supportsRootMotionPicker ? customType : ArgumentType.NUMBER;
+      };
       return {
         id: IrobotRootBlocks.EXTENSION_ID,
         name: IrobotRootBlocks.EXTENSION_NAME,
@@ -4681,79 +5723,101 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         blocks: [{
           opcode: 'connect',
           blockType: BlockType.COMMAND,
-          text: translate('block.connect', 'connect to Root')
+          text: _translate('block.connect', 'connect to Root')
         }, {
           opcode: 'disconnect',
           blockType: BlockType.COMMAND,
-          text: translate('block.disconnect', 'disconnect Root')
+          text: _translate('block.disconnect', 'disconnect Root')
         }, {
           opcode: 'isConnected',
           blockType: BlockType.BOOLEAN,
-          text: translate('block.isConnected', 'Root is connected?')
+          text: _translate('block.isConnected', 'Root is connected?')
         }, {
           opcode: 'transportMode',
           blockType: BlockType.REPORTER,
-          text: translate('block.transportMode', 'Root connection method')
+          text: _translate('block.transportMode', 'Root connection method')
         }, {
           opcode: 'lastConnectionError',
           blockType: BlockType.REPORTER,
-          text: translate('block.lastConnectionError', 'last connection error')
+          text: _translate('block.lastConnectionError', 'last connection error')
+        }, {
+          opcode: 'setControlMode',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.setControlMode', 'set control mode to [MODE]'),
+          arguments: {
+            MODE: {
+              type: ArgumentType.STRING,
+              menu: 'controlModeMenu'
+            }
+          }
+        }, {
+          opcode: 'controlTarget',
+          blockType: BlockType.REPORTER,
+          text: _translate('block.controlTarget', 'current control target')
+        }, {
+          opcode: 'openSimulator',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.openSimulator', 'open Root simulator')
+        }, {
+          opcode: 'resetSimulator',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.resetSimulator', 'reset Root simulator')
         }, '---', {
           opcode: 'motors',
           blockType: BlockType.COMMAND,
-          text: translate('block.motors', 'set left motor [LEFT] right motor [RIGHT]'),
+          text: _translate('block.motors', 'set left motor [LEFT] right motor [RIGHT]'),
           arguments: {
             LEFT: {
-              type: 'root-motor-left',
+              type: motionArgumentType('root-motor-left'),
               defaultValue: 30
             },
             RIGHT: {
-              type: 'root-motor-right',
+              type: motionArgumentType('root-motor-right'),
               defaultValue: 30
             }
           }
         }, {
           opcode: 'drive',
           blockType: BlockType.COMMAND,
-          text: translate('block.drive', 'move [MM] mm'),
+          text: _translate('block.drive', 'move [MM] mm'),
           arguments: {
             MM: {
-              type: 'root-distance',
+              type: motionArgumentType('root-distance'),
               defaultValue: 100
             }
           }
         }, {
           opcode: 'turn',
           blockType: BlockType.COMMAND,
-          text: translate('block.turn', 'turn [DEGREES] degrees'),
+          text: _translate('block.turn', 'turn [DEGREES] degrees'),
           arguments: {
             DEGREES: {
-              type: 'root-turn-angle',
+              type: motionArgumentType('root-turn-angle'),
               defaultValue: 90
             }
           }
         }, {
           opcode: 'arc',
           blockType: BlockType.COMMAND,
-          text: translate('block.arc', 'drive an arc of [DEGREES] degrees with radius [RADIUS] mm'),
+          text: _translate('block.arc', 'drive an arc of [DEGREES] degrees with radius [RADIUS] mm'),
           arguments: {
             RADIUS: {
-              type: 'root-arc-radius',
+              type: motionArgumentType('root-arc-radius'),
               defaultValue: 100
             },
             DEGREES: {
-              type: 'root-arc-angle',
+              type: motionArgumentType('root-arc-angle'),
               defaultValue: 90
             }
           }
         }, {
           opcode: 'resetNavigation',
           blockType: BlockType.COMMAND,
-          text: translate('block.resetNavigation', 'reset navigation position')
+          text: _translate('block.resetNavigation', 'reset navigation position')
         }, {
           opcode: 'navigateTo',
           blockType: BlockType.COMMAND,
-          text: translate('block.navigateTo', 'navigate to x [X] y [Y] cm'),
+          text: _translate('block.navigateTo', 'navigate to x [X] y [Y] cm'),
           arguments: {
             X: {
               type: ArgumentType.NUMBER,
@@ -4767,11 +5831,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'stop',
           blockType: BlockType.COMMAND,
-          text: translate('block.stop', 'stop Root')
+          text: _translate('block.stop', 'stop Root')
         }, {
           opcode: 'marker',
           blockType: BlockType.COMMAND,
-          text: translate('block.marker', 'set marker [POSITION]'),
+          text: _translate('block.marker', 'set marker [POSITION]'),
           arguments: {
             POSITION: {
               type: ArgumentType.STRING,
@@ -4781,7 +5845,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'ledColor',
           blockType: BlockType.COMMAND,
-          text: translate('block.ledColor', 'set LED to [COLOR]'),
+          text: _translate('block.ledColor', 'set LED to [COLOR]'),
           arguments: {
             COLOR: {
               type: ArgumentType.COLOR,
@@ -4791,7 +5855,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'ledAnimationColor',
           blockType: BlockType.COMMAND,
-          text: translate('block.ledAnimationColor', 'set LED [EFFECT] to [COLOR]'),
+          text: _translate('block.ledAnimationColor', 'set LED [EFFECT] to [COLOR]'),
           arguments: {
             EFFECT: {
               type: ArgumentType.STRING,
@@ -4805,7 +5869,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'led',
           blockType: BlockType.COMMAND,
-          text: translate('block.led', 'set LED red [RED] green [GREEN] blue [BLUE]'),
+          text: _translate('block.led', 'set LED red [RED] green [GREEN] blue [BLUE]'),
           arguments: {
             RED: {
               type: ArgumentType.NUMBER,
@@ -4823,7 +5887,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'ledAnimation',
           blockType: BlockType.COMMAND,
-          text: translate('block.ledAnimation', 'set LED [EFFECT] red [RED] green [GREEN] blue [BLUE]'),
+          text: _translate('block.ledAnimation', 'set LED [EFFECT] red [RED] green [GREEN] blue [BLUE]'),
           arguments: {
             EFFECT: {
               type: ArgumentType.STRING,
@@ -4845,7 +5909,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'playNote',
           blockType: BlockType.COMMAND,
-          text: translate('block.playNote', 'play note [NOTE] for [MS] ms'),
+          text: _translate('block.playNote', 'play note [NOTE] for [MS] ms'),
           arguments: {
             NOTE: {
               type: ArgumentType.NOTE,
@@ -4859,7 +5923,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'note',
           blockType: BlockType.COMMAND,
-          text: translate('block.note', 'play frequency [HZ] Hz for [MS] ms'),
+          text: _translate('block.note', 'play frequency [HZ] Hz for [MS] ms'),
           arguments: {
             HZ: {
               type: ArgumentType.NUMBER,
@@ -4873,7 +5937,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'sayPhrase',
           blockType: BlockType.COMMAND,
-          text: translate('block.sayPhrase', 'say [PHRASE]'),
+          text: _translate('block.sayPhrase', 'say [PHRASE]'),
           arguments: {
             PHRASE: {
               type: ArgumentType.STRING,
@@ -4883,7 +5947,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, '---', {
           opcode: 'refreshSensor',
           blockType: BlockType.COMMAND,
-          text: translate('block.refreshSensor', 'read [SENSOR]'),
+          text: _translate('block.refreshSensor', 'read [SENSOR]'),
           arguments: {
             SENSOR: {
               type: ArgumentType.STRING,
@@ -4893,7 +5957,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'sensor',
           blockType: BlockType.REPORTER,
-          text: translate('block.sensor', '[VALUE] value'),
+          text: _translate('block.sensor', '[VALUE] value'),
           arguments: {
             VALUE: {
               type: ArgumentType.STRING,
@@ -4903,7 +5967,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenEvent',
           blockType: BlockType.HAT,
-          text: translate('block.whenEvent', 'when [EVENT] changes'),
+          text: _translate('block.whenEvent', 'when [EVENT] changes'),
           isEdgeActivated: false,
           arguments: {
             EVENT: {
@@ -4914,7 +5978,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenBumper',
           blockType: BlockType.HAT,
-          text: translate('block.whenBumper', 'when [BUMPER] bumper is [ACTION]'),
+          text: _translate('block.whenBumper', 'when [BUMPER] bumper is [ACTION]'),
           isEdgeActivated: false,
           arguments: {
             BUMPER: {
@@ -4929,7 +5993,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenTouchSensor',
           blockType: BlockType.HAT,
-          text: translate('block.whenTouchSensor', 'when [SENSOR] touch sensor is [ACTION]'),
+          text: _translate('block.whenTouchSensor', 'when [SENSOR] touch sensor is [ACTION]'),
           isEdgeActivated: false,
           arguments: {
             SENSOR: {
@@ -4944,7 +6008,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }].concat(_toConsumableArray$1(fixedEventHats()), ['---', {
           opcode: 'raw',
           blockType: BlockType.COMMAND,
-          text: translate('block.raw', 'device [DEVICE] command [COMMAND] payload [PAYLOAD]'),
+          text: _translate('block.raw', 'device [DEVICE] command [COMMAND] payload [PAYLOAD]'),
           arguments: {
             DEVICE: {
               type: ArgumentType.NUMBER,
@@ -4962,125 +6026,125 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'lastPacket',
           blockType: BlockType.REPORTER,
-          text: translate('block.lastPacket', 'last received packet')
+          text: _translate('block.lastPacket', 'last received packet')
         }, {
           opcode: 'detailedEvent',
           blockType: BlockType.REPORTER,
-          text: translate('block.detailedEvent', 'last detailed event')
+          text: _translate('block.detailedEvent', 'last detailed event')
         }]),
-        customFieldTypes: ROOT_MOTION_FIELD_TYPES,
+        customFieldTypes: this.supportsRootMotionPicker ? ROOT_MOTION_FIELD_TYPES : {},
         menus: {
           markerMenu: {
             acceptReporters: true,
             items: [{
-              text: translate('menu.marker.up', 'up'),
+              text: _translate('menu.marker.up', 'up'),
               value: '0'
             }, {
-              text: translate('menu.marker.down', 'down'),
+              text: _translate('menu.marker.down', 'down'),
               value: '1'
             }, {
-              text: translate('menu.marker.eraser', 'eraser'),
+              text: _translate('menu.marker.eraser', 'eraser'),
               value: '2'
             }]
           },
           sensorMenu: {
             items: [{
-              text: translate('menu.sensor.battery', 'battery'),
+              text: _translate('menu.sensor.battery', 'battery'),
               value: 'battery'
             }, {
-              text: translate('menu.sensor.light', 'light'),
+              text: _translate('menu.sensor.light', 'light'),
               value: 'light'
             }, {
-              text: translate('menu.sensor.accel', 'accelerometer'),
+              text: _translate('menu.sensor.accel', 'accelerometer'),
               value: 'accel'
             }]
           },
           ledEffectMenu: {
             acceptReporters: true,
             items: [{
-              text: translate('menu.led.off', 'off'),
+              text: _translate('menu.led.off', 'off'),
               value: '0'
             }, {
-              text: translate('menu.led.on', 'on'),
+              text: _translate('menu.led.on', 'on'),
               value: '1'
             }, {
-              text: translate('menu.led.blink', 'blink'),
+              text: _translate('menu.led.blink', 'blink'),
               value: '2'
             }, {
-              text: translate('menu.led.spin', 'spin'),
+              text: _translate('menu.led.spin', 'spin'),
               value: '3'
             }]
           },
           valueMenu: {
             acceptReporters: true,
             items: [{
-              text: translate('menu.value.batteryPercent', 'battery level (%)'),
+              text: _translate('menu.value.batteryPercent', 'battery level (%)'),
               value: 'batteryPercent'
             }, {
-              text: translate('menu.value.batteryMv', 'battery voltage (mV)'),
+              text: _translate('menu.value.batteryMv', 'battery voltage (mV)'),
               value: 'batteryMv'
             }, {
-              text: translate('menu.value.lightLeft', 'left light level'),
+              text: _translate('menu.value.lightLeft', 'left light level'),
               value: 'lightLeft'
             }, {
-              text: translate('menu.value.lightRight', 'right light level'),
+              text: _translate('menu.value.lightRight', 'right light level'),
               value: 'lightRight'
             }, {
-              text: translate('menu.value.accelX', 'acceleration X'),
+              text: _translate('menu.value.accelX', 'acceleration X'),
               value: 'accelX'
             }, {
-              text: translate('menu.value.accelY', 'acceleration Y'),
+              text: _translate('menu.value.accelY', 'acceleration Y'),
               value: 'accelY'
             }, {
-              text: translate('menu.value.accelZ', 'acceleration Z'),
+              text: _translate('menu.value.accelZ', 'acceleration Z'),
               value: 'accelZ'
             }, {
-              text: translate('menu.value.leftBumper', 'left bumper'),
+              text: _translate('menu.value.leftBumper', 'left bumper'),
               value: 'leftBumper'
             }, {
-              text: translate('menu.value.rightBumper', 'right bumper'),
+              text: _translate('menu.value.rightBumper', 'right bumper'),
               value: 'rightBumper'
             }, {
-              text: translate('menu.value.touchMask', 'touch sensor mask'),
+              text: _translate('menu.value.touchMask', 'touch sensor mask'),
               value: 'touchMask'
             }, {
-              text: translate('menu.value.cliff', 'cliff sensor'),
+              text: _translate('menu.value.cliff', 'cliff sensor'),
               value: 'cliff'
             }]
           },
           eventMenu: {
             items: [{
-              text: translate('menu.event.bumper', 'bumper'),
+              text: _translate('menu.event.bumper', 'bumper'),
               value: 'bumper'
             }, {
-              text: translate('menu.event.touch', 'touch'),
+              text: _translate('menu.event.touch', 'touch'),
               value: 'touch'
             }, {
-              text: translate('menu.event.cliff', 'cliff sensor'),
+              text: _translate('menu.event.cliff', 'cliff sensor'),
               value: 'cliff'
             }, {
-              text: translate('menu.event.battery', 'battery'),
+              text: _translate('menu.event.battery', 'battery'),
               value: 'battery'
             }]
           },
           bumperMenu: {
             items: [{
-              text: translate('menu.bumper.left', 'left'),
+              text: _translate('menu.bumper.left', 'left'),
               value: 'LEFT'
             }, {
-              text: translate('menu.bumper.right', 'right'),
+              text: _translate('menu.bumper.right', 'right'),
               value: 'RIGHT'
             }, {
-              text: translate('menu.bumper.both', 'both'),
+              text: _translate('menu.bumper.both', 'both'),
               value: 'BOTH'
             }]
           },
           bumperActionMenu: {
             items: [{
-              text: translate('menu.action.push', 'Push'),
+              text: _translate('menu.action.push', 'Push'),
               value: 'PUSH'
             }, {
-              text: translate('menu.action.release', 'Release'),
+              text: _translate('menu.action.release', 'Release'),
               value: 'RELEASE'
             }]
           },
@@ -5101,11 +6165,24 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           },
           touchActionMenu: {
             items: [{
-              text: translate('menu.action.touch', 'Touch'),
+              text: _translate('menu.action.touch', 'Touch'),
               value: 'TOUCH'
             }, {
-              text: translate('menu.action.release', 'Release'),
+              text: _translate('menu.action.release', 'Release'),
               value: 'RELEASE'
+            }]
+          },
+          controlModeMenu: {
+            acceptReporters: true,
+            items: [{
+              text: _translate('menu.controlMode.auto', 'automatic'),
+              value: CONTROL_MODE_AUTO
+            }, {
+              text: _translate('menu.controlMode.simulator', 'simulator'),
+              value: CONTROL_MODE_SIMULATOR
+            }, {
+              text: _translate('menu.controlMode.physical', 'physical Root'),
+              value: CONTROL_MODE_PHYSICAL
             }]
           }
         }
@@ -5119,6 +6196,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
+      if (this.controlMode === CONTROL_MODE_SIMULATOR) {
+        this.simulator.open();
+        return;
+      }
       this.transport.scan();
     }
   }, {
@@ -5142,9 +6223,46 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       return this.transport.lastError;
     }
   }, {
+    key: "setControlMode",
+    value: function setControlMode(args) {
+      var requested = String(args.MODE || CONTROL_MODE_AUTO);
+      var mode = [CONTROL_MODE_AUTO, CONTROL_MODE_SIMULATOR, CONTROL_MODE_PHYSICAL].includes(requested) ? requested : CONTROL_MODE_AUTO;
+      var wasPhysical = !this._isSimulatorActive();
+      this.controlMode = mode;
+      if (this._isSimulatorActive()) {
+        if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
+        this._cancelPendingCommands(new Error('Root control target changed to simulator'));
+        this.simulator.reset();
+        this.simulator.open();
+      }
+      this.simulator.refresh();
+    }
+  }, {
+    key: "controlTarget",
+    value: function controlTarget() {
+      return this._isSimulatorActive() ? 'Simulator' : 'Physical Root';
+    }
+  }, {
+    key: "openSimulator",
+    value: function openSimulator() {
+      this.simulator.open();
+    }
+  }, {
+    key: "resetSimulator",
+    value: function resetSimulator() {
+      this.simulator.reset();
+      this.simulator.open();
+    }
+  }, {
+    key: "_isSimulatorActive",
+    value: function _isSimulatorActive() {
+      return this.controlMode === CONTROL_MODE_SIMULATOR || this.controlMode === CONTROL_MODE_AUTO && !this.transport.isConnected();
+    }
+  }, {
     key: "motors",
     value: function motors(args) {
       this.navigationPosition = null;
+      if (this._isSimulatorActive()) return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
       return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)));
     }
   }, {
@@ -5152,12 +6270,14 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function drive(args) {
       var distance = Cast.toNumber(args.MM);
       this.navigationPosition = null;
+      if (this._isSimulatorActive()) return this.simulator.move(distance);
       return this._sendAndWait(this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
     }
   }, {
     key: "turn",
     value: function turn(args) {
       var degrees = Cast.toNumber(args.DEGREES);
+      if (this._isSimulatorActive()) return this.simulator.turn(degrees);
       return this._sendAndWait(this.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees));
     }
   }, {
@@ -5166,6 +6286,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var degrees = Cast.toNumber(args.DEGREES);
       var radius = Cast.toNumber(args.RADIUS);
       this.navigationPosition = null;
+      if (this._isSimulatorActive()) return this.simulator.arc(radius, degrees);
       return this._sendAndWait(this.protocol.driveArc(degrees * 10, radius), arcMotionWatchdogMs(degrees, radius));
     }
   }, {
@@ -5179,11 +6300,12 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
+      if (this._isSimulatorActive()) this.simulator.resetNavigation();
     }
   }, {
     key: "navigateTo",
     value: function navigateTo(args) {
-      var _this2 = this;
+      var _this3 = this;
       var target = {
         x: Math.round(Cast.toNumber(args.X) * 10),
         y: Math.round(Cast.toNumber(args.Y) * 10)
@@ -5193,6 +6315,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
+      if (this._isSimulatorActive()) return this.simulator.navigateTo(target.x, target.y);
       var deltaX = target.x - origin.x;
       var deltaY = target.y - origin.y;
       var distance = Math.round(Math.hypot(deltaX, deltaY));
@@ -5215,26 +6338,28 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         });
       }) : rotation;
       return settledRotation.then(function () {
-        return _this2._sendAndWait(_this2.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
+        return _this3._sendAndWait(_this3.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
       }).then(function () {
-        _this2.navigationPosition = {
+        _this3.navigationPosition = {
           x: target.x,
           y: target.y,
           heading: targetHeading
         };
       }).catch(function (error) {
-        _this2.navigationPosition = null;
+        _this3.navigationPosition = null;
         throw error;
       });
     }
   }, {
     key: "stop",
     value: function stop() {
+      if (this._isSimulatorActive()) return this.simulator.stop();
       return this._send(this.protocol.packet(0, 3));
     }
   }, {
     key: "marker",
     value: function marker(args) {
+      if (this._isSimulatorActive()) return this.simulator.setMarker(args.POSITION);
       return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]));
     }
   }, {
@@ -5245,6 +6370,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         red = _Cast$toRgbColorList2[0],
         green = _Cast$toRgbColorList2[1],
         blue = _Cast$toRgbColorList2[2];
+      if (this._isSimulatorActive()) return this.simulator.setLed(1, red, green, blue);
       return this._send(this.protocol.led(1, red, green, blue));
     }
   }, {
@@ -5255,16 +6381,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         red = _Cast$toRgbColorList4[0],
         green = _Cast$toRgbColorList4[1],
         blue = _Cast$toRgbColorList4[2];
+      if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
       return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue));
     }
   }, {
     key: "led",
     value: function led(args) {
+      if (this._isSimulatorActive()) return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
       return this._send(this.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
     }
   }, {
     key: "ledAnimation",
     value: function ledAnimation(args) {
+      if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
       return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
     }
   }, {
@@ -5286,6 +6415,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // than a browser timer, so BLE latency cannot make the next note
       // interrupt this one just before it actually finishes.
       var durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
+      if (this._isSimulatorActive()) return this.simulator.playNote(frequency, durationMs);
       var packet = this.protocol.note(frequency, durationMs);
       if (durationMs === 0) {
         this._send(packet);
@@ -5296,17 +6426,24 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_playNoteForPicker",
     value: function _playNoteForPicker(midiNote, category) {
-      if (category !== this.getInfo().name || !this.transport.isConnected()) return;
+      if (category !== this.getInfo().name) return;
+      if (this._isSimulatorActive()) {
+        this.simulator.playNote(midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
+        return;
+      }
+      if (!this.transport.isConnected()) return;
       this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
     }
   }, {
     key: "sayPhrase",
     value: function sayPhrase(args) {
+      if (this._isSimulatorActive()) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
       return this._sendSoundCommandAndWait(this.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase');
     }
   }, {
     key: "refreshSensor",
     value: function refreshSensor(args) {
+      if (this._isSimulatorActive()) return;
       var commands = {
         battery: [14, 1],
         light: [13, 1],
@@ -5318,6 +6455,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "sensor",
     value: function sensor(args) {
+      if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
       return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
     }
   }, {
@@ -5346,6 +6484,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "raw",
     value: function raw(args) {
+      if (this._isSimulatorActive()) {
+        this.transport.setError(new Error('Raw BLE packets are unavailable in simulator mode'));
+        return;
+      }
       return this._send(this.protocol.packet(Cast.toNumber(args.DEVICE), Cast.toNumber(args.COMMAND), RootProtocol.hexToBytes(args.PAYLOAD)));
     }
   }, {
@@ -5361,7 +6503,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_send",
     value: function _send(packet) {
-      var _this3 = this;
+      var _this4 = this;
       // Hardware writes are fire-and-forget from Scratch's point of view.
       // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
       // after CoreBluetooth accepted the bytes; returning that promise would
@@ -5370,7 +6512,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this3.transport.setError(error);
+            return _this4.transport.setError(error);
           });
         }
       } catch (error) {
@@ -5385,19 +6527,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendAndWait",
     value: function _sendAndWait(packet, motionWatchdogMs) {
-      var _this4 = this;
+      var _this5 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this4.pendingCommands.get(key);
+          var pending = _this5.pendingCommands.get(key);
           if (!pending) return;
-          _this4._clearPendingCommand(key, pending);
+          _this5._clearPendingCommand(key, pending);
           var error = new Error("Root command timed out (command ".concat(packet[1], ", packet ").concat(packet[2], ")"));
-          _this4.transport.setError(error);
+          _this5.transport.setError(error);
           reject(error);
         }, COMMAND_FINISH_TIMEOUT_MS);
         var watchdog = setTimeout(function () {
-          var pending = _this4.pendingCommands.get(key);
+          var pending = _this5.pendingCommands.get(key);
           if (!pending || pending.settling) return;
           pending.settling = true;
 
@@ -5408,15 +6550,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           // interrupted movement also produces its matching Finished
           // response. Resolve after a short BLE settling interval even if
           // old firmware omits that response.
-          _this4._sendMotionStop(key);
+          _this5._sendMotionStop(key);
           pending.settle = setTimeout(function () {
-            if (_this4.pendingCommands.get(key) !== pending) return;
-            _this4._clearPendingCommand(key, pending);
-            _this4.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
+            if (_this5.pendingCommands.get(key) !== pending) return;
+            _this5._clearPendingCommand(key, pending);
+            _this5.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
             resolve();
           }, MOTION_WATCHDOG_SETTLE_MS);
         }, motionWatchdogMs);
-        _this4.pendingCommands.set(key, {
+        _this5.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -5434,7 +6576,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this4._rejectPendingCommand(key, error);
+            return _this5._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -5450,19 +6592,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendSoundCommandAndWait",
     value: function _sendSoundCommandAndWait(packet, timeoutMs, description) {
-      var _this5 = this;
+      var _this6 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this5.pendingCommands.get(key);
+          var pending = _this6.pendingCommands.get(key);
           if (!pending) return;
-          _this5._clearPendingCommand(key, pending);
-          _this5.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
+          _this6._clearPendingCommand(key, pending);
+          _this6.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
           // Do not leave a Scratch stack stuck if a single notification
           // was lost after Root had enough time to finish the sound.
           resolve();
         }, timeoutMs);
-        _this5.pendingCommands.set(key, {
+        _this6.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -5476,7 +6618,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this5._rejectPendingCommand(key, error);
+            return _this6._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -5501,12 +6643,12 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendMotionStop",
     value: function _sendMotionStop(pendingKey) {
-      var _this6 = this;
+      var _this7 = this;
       try {
         var pendingWrite = this.transport.write(this.protocol.motors(0, 0));
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this6._rejectPendingCommand(pendingKey, error);
+            return _this7._rejectPendingCommand(pendingKey, error);
           });
         }
       } catch (error) {
@@ -5644,6 +6786,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_receive",
     value: function _receive(packet) {
+      // A connected physical Root may keep sending sensor notifications while
+      // the student deliberately works in simulator-fixed mode. Never let
+      // those events launch scripts for the virtual Root.
+      if (this._isSimulatorActive()) return;
       var decoded = this.protocol.decode(packet);
       if (!decoded) return;
       this.last = Object.assign({}, this.last, decoded);
@@ -5659,6 +6805,21 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       };
       var name = names[decoded.device];
       if (name) this._startEventHat('whenEvent', 'currentEvent', name);
+    }
+  }, {
+    key: "_receiveSimulatorEvent",
+    value: function _receiveSimulatorEvent(event) {
+      if (!this._isSimulatorActive() || !event) return;
+      if (event.type === 'bumper') {
+        this._receiveBumperEvent({
+          leftBumper: event.left,
+          rightBumper: event.right
+        });
+      } else if (event.type === 'touch') {
+        this._receiveTouchEvent({
+          touchMask: event.mask
+        });
+      }
     }
   }], [{
     key: "formatMessage",
