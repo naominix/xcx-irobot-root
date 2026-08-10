@@ -100,6 +100,16 @@
         <div class="card"><h3>イベントの練習</h3><p>壁とブロックの障害物を追加して、左右バンパーの衝突イベントを試せます。Rootの4つのタッチ領域をクリックまたはタップすると、タッチセンサーHATも確認できます。</p></div>
         <div class="card"><h3>実機接続を維持したまま使える</h3><p>シミュレーター固定中は、接続済みのRootへ制御命令やセンサーイベントを送受信しません。BLE接続は維持できるため、実機モードへ戻るときに再接続は不要です。</p></div>
       </div>
+      <div class="showcase simulator-showcase">
+        <figure class="shot">
+          <img src="screenshots/simulator-program.svg" alt="緑の旗、シミュレーター、マーカー、青い回転LED、ナビ移動を並べたScratchプログラム">
+          <figcaption><strong>例1：シミュレーターで三角形を描くプログラム</strong>緑の旗から、制御モードをシミュレーターに切り替え、マーカーを下げ、青い回転LEDを点灯します。「ナビをリセットする」で原点を決め、（10, 10）→（0, 10）→（0, 0）cmを順番に移動してからマーカーを上げます。</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="screenshots/simulator-result.svg" alt="シミュレーターで実行後、青いLEDを点灯して三角形の軌跡を描いたRoot">
+          <figcaption><strong>例2：プログラム実行後のシミュレーター</strong>実行後はRootの座標・向き・マーカー・LED状態を確認できます。マーカーを下げた区間は軌跡として残り、LEDの回転色も画面上で再現されます。「もう一度実行」で同じプログラムを再生できます。</figcaption>
+        </figure>
+      </div>
       <p class="note"><strong>始め方：</strong>「制御モードをシミュレーターにする」→「Rootシミュレーターを開く」→緑の旗、の順で実行します。実機を動かしたいときは制御モードを「実機」に戻してください。</p>
     </section>
     <section>

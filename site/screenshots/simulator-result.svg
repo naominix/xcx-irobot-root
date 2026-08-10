@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Rootシミュレーターの実行結果</title>
+  <desc id="desc">青い回転LEDを点灯し、マーカーで三角形の軌跡を描いたRoot</desc>
+  <rect width="1200" height="760" fill="#edf7f4"/>
+  <rect x="0" y="0" width="1200" height="64" fill="#4c8d73"/>
+  <text x="28" y="41" fill="white" font-family="Arial, sans-serif" font-size="25" font-weight="700">iRobot Root Simulator</text>
+  <text x="970" y="40" fill="#e1fff1" font-family="Arial, sans-serif" font-size="17">実行速度 1×　↻ もう一度実行</text>
+  <rect x="18" y="82" width="1164" height="656" rx="12" fill="#fff" stroke="#cfe1d9" stroke-width="3"/>
+  <g stroke="#e4eee9" stroke-width="2">
+    <path d="M80 82v656M180 82v656M280 82v656M380 82v656M480 82v656M580 82v656M680 82v656M780 82v656M880 82v656M980 82v656M1080 82v656"/>
+    <path d="M18 182h1164M18 282h1164M18 382h1164M18 482h1164M18 582h1164M18 682h1164"/>
+  </g>
+  <text x="44" y="124" fill="#25333a" font-family="Arial, sans-serif" font-size="20" font-weight="700">x: 0.0 cm　 y: 0.0 cm　 heading: 270°</text>
+  <text x="44" y="153" fill="#34765f" font-family="Arial, sans-serif" font-size="18">marker: up　 LED: spin rgb(45, 125, 255)</text>
+  <!-- trajectory -->
+  <path d="M590 540 L590 300 L850 300 L590 540" fill="none" stroke="#3b9b79" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M590 540 L590 300" stroke="#8ee1c0" stroke-width="3" stroke-dasharray="8 10"/>
+  <!-- Root -->
+  <g transform="translate(590 540)">
+    <polygon points="0,-48 42,-24 42,24 0,48 -42,24 -42,-24" fill="#fafafa" stroke="#26343b" stroke-width="6"/>
+    <path d="M0,-35V35M-35,0H35" stroke="#26343b" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="15" fill="#49a76e" stroke="#1f5e42" stroke-width="3"/>
+    <circle cx="29" cy="-19" r="8" fill="#2d7dff" stroke="white" stroke-width="3"/><circle cx="29" cy="19" r="8" fill="#2d7dff" stroke="white" stroke-width="3"/>
+    <circle cx="0" cy="-37" r="10" fill="#2d7dff" stroke="white" stroke-width="3"/>
+    <circle cx="0" cy="37" r="10" fill="#f8d94d"/>
+  </g>
+  <rect x="890" y="625" width="252" height="64" rx="15" fill="#e9f7f0" stroke="#b8dfcd"/>
+  <text x="910" y="652" fill="#31755d" font-family="Arial, sans-serif" font-size="17" font-weight="700">マーカー軌跡 3 区間</text>
+  <text x="910" y="676" fill="#596775" font-family="Arial, sans-serif" font-size="15">LED回転・ナビ完了</text>
+</svg>
