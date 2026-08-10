@@ -20,6 +20,9 @@ class RootSimulator {
         this.onEvent = onEvent;
         this.controls = controls;
         this.speedMultiplier = 1;
+        // Display zoom only changes the viewport.  Root coordinates, collision
+        // geometry, and motion timing remain in millimetres.
+        this.viewZoom = 1;
         this._animation = null;
         this._continuousMotion = null;
         this._ledAnimationTimer = null;
@@ -98,6 +101,14 @@ class RootSimulator {
 
     setSpeedMultiplier (multiplier) {
         this.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
+    }
+
+    setViewZoom (zoom) {
+        const next = clamp(Number(zoom) || 1, 0.5, 2.5);
+        this.viewZoom = Math.round(next * 4) / 4;
+        if (this._zoomValue) this._zoomValue.textContent = `${Math.round(this.viewZoom * 100)}%`;
+        this._draw();
+        return this.viewZoom;
     }
 
     runProject () {
@@ -449,6 +460,32 @@ class RootSimulator {
         speedSelect.onchange = () => this.setSpeedMultiplier(speedSelect.value);
         speedLabel.appendChild(speedSelect);
         toolbar.appendChild(speedLabel);
+        const zoomLabel = document.createElement('label');
+        zoomLabel.style.cssText = 'color:#264c40;font-weight:bold;display:flex;align-items:center;gap:4px;';
+        const zoomText = document.createElement('span');
+        zoomLabel.appendChild(zoomText);
+        this._localizedElements.push({element: zoomText, id: 'zoom', defaultText: 'Canvas '});
+        const zoomOut = document.createElement('button');
+        zoomOut.type = 'button';
+        zoomOut.textContent = '−';
+        zoomOut.title = 'Zoom out';
+        zoomOut.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:4px 9px;background:white;color:#264c40;font-weight:bold;cursor:pointer;font-size:18px;line-height:18px;';
+        zoomOut.onclick = () => this.setViewZoom(this.viewZoom - 0.25);
+        toolbar.appendChild(zoomLabel);
+        toolbar.appendChild(zoomOut);
+        const zoomValue = document.createElement('button');
+        zoomValue.type = 'button';
+        zoomValue.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px 9px;background:white;color:#264c40;font-weight:bold;cursor:pointer;min-width:52px;';
+        zoomValue.onclick = () => this.setViewZoom(1);
+        this._zoomValue = zoomValue;
+        toolbar.appendChild(zoomValue);
+        const zoomIn = document.createElement('button');
+        zoomIn.type = 'button';
+        zoomIn.textContent = '+';
+        zoomIn.title = 'Zoom in';
+        zoomIn.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:4px 9px;background:white;color:#264c40;font-weight:bold;cursor:pointer;font-size:18px;line-height:18px;';
+        zoomIn.onclick = () => this.setViewZoom(this.viewZoom + 0.25);
+        toolbar.appendChild(zoomIn);
         const help = document.createElement('span');
         help.style.cssText = 'margin-left:auto;color:#42675b;font-size:14px;';
         toolbar.appendChild(help);
@@ -476,6 +513,7 @@ class RootSimulator {
         this._panel = panel;
         this._canvas = canvas;
         this._context = canvas.getContext('2d');
+        this.setViewZoom(this.viewZoom);
         this._updateTranslations();
     }
 
@@ -484,8 +522,8 @@ class RootSimulator {
         const canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
         const canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
         return {
-            x: (canvasX - this._canvas.width / 2) / SIMULATOR_SCALE,
-            y: (this._canvas.height / 2 - canvasY) / SIMULATOR_SCALE
+            x: (canvasX - this._canvas.width / 2) / (SIMULATOR_SCALE * this.viewZoom),
+            y: (this._canvas.height / 2 - canvasY) / (SIMULATOR_SCALE * this.viewZoom)
         };
     }
 
@@ -553,7 +591,7 @@ class RootSimulator {
         }
         const context = this._context;
         const {width, height} = this._canvas;
-        const scale = SIMULATOR_SCALE;
+        const scale = SIMULATOR_SCALE * this.viewZoom;
         const point = ({x, y}) => ({x: width / 2 + x * scale, y: height / 2 - y * scale});
         context.clearRect(0, 0, width, height);
         context.fillStyle = '#fcfdfd'; context.fillRect(0, 0, width, height);

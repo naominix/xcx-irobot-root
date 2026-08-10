@@ -4599,6 +4599,9 @@ var RootSimulator = /*#__PURE__*/function () {
     this.onEvent = onEvent;
     this.controls = controls;
     this.speedMultiplier = 1;
+    // Display zoom only changes the viewport.  Root coordinates, collision
+    // geometry, and motion timing remain in millimetres.
+    this.viewZoom = 1;
     this._animation = null;
     this._continuousMotion = null;
     this._ledAnimationTimer = null;
@@ -4707,6 +4710,15 @@ var RootSimulator = /*#__PURE__*/function () {
     key: "setSpeedMultiplier",
     value: function setSpeedMultiplier(multiplier) {
       this.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
+    }
+  }, {
+    key: "setViewZoom",
+    value: function setViewZoom(zoom) {
+      var next = clamp(Number(zoom) || 1, 0.5, 2.5);
+      this.viewZoom = Math.round(next * 4) / 4;
+      if (this._zoomValue) this._zoomValue.textContent = "".concat(Math.round(this.viewZoom * 100), "%");
+      this._draw();
+      return this.viewZoom;
     }
   }, {
     key: "runProject",
@@ -5173,6 +5185,42 @@ var RootSimulator = /*#__PURE__*/function () {
       };
       speedLabel.appendChild(speedSelect);
       toolbar.appendChild(speedLabel);
+      var zoomLabel = document.createElement('label');
+      zoomLabel.style.cssText = 'color:#264c40;font-weight:bold;display:flex;align-items:center;gap:4px;';
+      var zoomText = document.createElement('span');
+      zoomLabel.appendChild(zoomText);
+      this._localizedElements.push({
+        element: zoomText,
+        id: 'zoom',
+        defaultText: 'Canvas '
+      });
+      var zoomOut = document.createElement('button');
+      zoomOut.type = 'button';
+      zoomOut.textContent = '−';
+      zoomOut.title = 'Zoom out';
+      zoomOut.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:4px 9px;background:white;color:#264c40;font-weight:bold;cursor:pointer;font-size:18px;line-height:18px;';
+      zoomOut.onclick = function () {
+        return _this9.setViewZoom(_this9.viewZoom - 0.25);
+      };
+      toolbar.appendChild(zoomLabel);
+      toolbar.appendChild(zoomOut);
+      var zoomValue = document.createElement('button');
+      zoomValue.type = 'button';
+      zoomValue.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px 9px;background:white;color:#264c40;font-weight:bold;cursor:pointer;min-width:52px;';
+      zoomValue.onclick = function () {
+        return _this9.setViewZoom(1);
+      };
+      this._zoomValue = zoomValue;
+      toolbar.appendChild(zoomValue);
+      var zoomIn = document.createElement('button');
+      zoomIn.type = 'button';
+      zoomIn.textContent = '+';
+      zoomIn.title = 'Zoom in';
+      zoomIn.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:4px 9px;background:white;color:#264c40;font-weight:bold;cursor:pointer;font-size:18px;line-height:18px;';
+      zoomIn.onclick = function () {
+        return _this9.setViewZoom(_this9.viewZoom + 0.25);
+      };
+      toolbar.appendChild(zoomIn);
       var help = document.createElement('span');
       help.style.cssText = 'margin-left:auto;color:#42675b;font-size:14px;';
       toolbar.appendChild(help);
@@ -5208,6 +5256,7 @@ var RootSimulator = /*#__PURE__*/function () {
       this._panel = panel;
       this._canvas = canvas;
       this._context = canvas.getContext('2d');
+      this.setViewZoom(this.viewZoom);
       this._updateTranslations();
     }
   }, {
@@ -5217,8 +5266,8 @@ var RootSimulator = /*#__PURE__*/function () {
       var canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
       var canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
       return {
-        x: (canvasX - this._canvas.width / 2) / SIMULATOR_SCALE,
-        y: (this._canvas.height / 2 - canvasY) / SIMULATOR_SCALE
+        x: (canvasX - this._canvas.width / 2) / (SIMULATOR_SCALE * this.viewZoom),
+        y: (this._canvas.height / 2 - canvasY) / (SIMULATOR_SCALE * this.viewZoom)
       };
     }
   }, {
@@ -5295,7 +5344,7 @@ var RootSimulator = /*#__PURE__*/function () {
       var _this$_canvas = this._canvas,
         width = _this$_canvas.width,
         height = _this$_canvas.height;
-      var scale = SIMULATOR_SCALE;
+      var scale = SIMULATOR_SCALE * this.viewZoom;
       var point = function point(_ref) {
         var x = _ref.x,
           y = _ref.y;

@@ -193,6 +193,16 @@ describe('iRobot Root extension', () => {
         expect(block.simulator.speedMultiplier).toBe(1);
     });
 
+    test('simulator view zoom changes display scale without changing Root coordinates', () => {
+        const block = new blockClass(runtime);
+        block.simulator.pose = {x: 120, y: -45, heading: 30};
+        expect(block.simulator.viewZoom).toBe(1);
+        expect(block.simulator.setViewZoom(0.5)).toBe(0.5);
+        expect(block.simulator.pose).toEqual({x: 120, y: -45, heading: 30});
+        expect(block.simulator.setViewZoom(3)).toBe(2.5);
+        expect(block.simulator.setViewZoom(0.1)).toBe(0.5);
+    });
+
     test('simulator run again resets Root state, keeps the field, and starts the green flag', () => {
         const block = new blockClass(runtime);
         block.setControlMode({MODE: 'simulator'});
