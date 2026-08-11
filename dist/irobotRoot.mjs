@@ -4583,6 +4583,9 @@ var DEFAULT_SPEED_MM_S = 120;
 var DEFAULT_TURN_DEG_S = 120;
 var SIMULATOR_SCALE = 1.8;
 var ROOT_COLLISION_RADIUS_MM = 24;
+// Keep Root and its touch target practical on touch screens when the world is
+// zoomed out. At 100% this matches the physical 24 mm collision radius.
+var ROOT_TOUCH_HIT_RADIUS_PX = 44;
 var clamp = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 };
@@ -4714,7 +4717,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "setViewZoom",
     value: function setViewZoom(zoom) {
-      var next = clamp(Number(zoom) || 1, 0.5, 2.5);
+      var next = clamp(Number(zoom) || 1, 0.25, 2.5);
       this.viewZoom = Math.round(next * 4) / 4;
       if (this._zoomValue) this._zoomValue.textContent = "".concat(Math.round(this.viewZoom * 100), "%");
       this._draw();
@@ -5274,9 +5277,17 @@ var RootSimulator = /*#__PURE__*/function () {
     key: "_pointerDown",
     value: function _pointerDown(event) {
       var point = this._eventWorld(event);
+      var bounds = this._canvas.getBoundingClientRect();
+      var canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
+      var canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+      var scale = SIMULATOR_SCALE * this.viewZoom;
+      var rootCanvasX = this._canvas.width / 2 + this.pose.x * scale;
+      var rootCanvasY = this._canvas.height / 2 - this.pose.y * scale;
+      var rootDxPx = canvasX - rootCanvasX;
+      var rootDyPx = canvasY - rootCanvasY;
       var dx = point.x - this.pose.x;
       var dy = point.y - this.pose.y;
-      if (dx * dx + dy * dy <= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) {
+      if (rootDxPx * rootDxPx + rootDyPx * rootDyPx <= ROOT_TOUCH_HIT_RADIUS_PX * ROOT_TOUCH_HIT_RADIUS_PX) {
         var heading = headingRadians(this.pose.heading);
         var forward = dx * Math.cos(heading) + dy * Math.sin(heading);
         var right = dx * Math.sin(heading) - dy * Math.cos(heading);

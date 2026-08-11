@@ -200,7 +200,7 @@ describe('iRobot Root extension', () => {
         expect(block.simulator.setViewZoom(0.5)).toBe(0.5);
         expect(block.simulator.pose).toEqual({x: 120, y: -45, heading: 30});
         expect(block.simulator.setViewZoom(3)).toBe(2.5);
-        expect(block.simulator.setViewZoom(0.1)).toBe(0.5);
+        expect(block.simulator.setViewZoom(0.1)).toBe(0.25);
     });
 
     test('simulator run again resets Root state, keeps the field, and starts the green flag', () => {
