@@ -5852,9 +5852,10 @@ var DEG = Math.PI / 180;
 var SCALE = 1.8;
 var ROBOT_RADIUS = 24;
 var TOUCH_RADIUS = 44;
-// A Root body has a 24 mm collision radius. Keep virtual Roots comfortably
-// apart on creation, while retaining Root 1 at the familiar world origin.
-var INITIAL_ROOT_SPACING_MM = 160;
+// Keep separate drawing programs from intersecting at startup, not merely the
+// 24 mm robot bodies. 600 mm lets two large sample drawings run in parallel;
+// the default 50% canvas view keeps the first three Roots visible together.
+var INITIAL_ROOT_SPACING_MM = 600;
 var clamp = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 };
@@ -6022,9 +6023,29 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
   }, {
     key: "_initialPose",
     value: function _initialPose(id) {
-      return {
+      var positions = [{
+        x: 0,
+        y: 0
+      }, {
+        x: INITIAL_ROOT_SPACING_MM,
+        y: 0
+      }, {
+        x: -INITIAL_ROOT_SPACING_MM,
+        y: 0
+      }, {
+        x: 0,
+        y: INITIAL_ROOT_SPACING_MM
+      }, {
+        x: 0,
+        y: -INITIAL_ROOT_SPACING_MM
+      }];
+      var position = positions[Number(id) - 1] || {
         x: (Number(id) - 1) * INITIAL_ROOT_SPACING_MM,
-        y: 0,
+        y: 0
+      };
+      return {
+        x: position.x,
+        y: position.y,
         heading: 90
       };
     }

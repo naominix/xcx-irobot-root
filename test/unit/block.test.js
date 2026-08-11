@@ -154,11 +154,11 @@ describe('iRobot Root extension', () => {
         block.addRoot();
 
         expect(block.simulator.robots.get(1).pose).toEqual({x: 0, y: 0, heading: 90});
-        expect(block.simulator.robots.get(2).pose).toEqual({x: 160, y: 0, heading: 90});
+        expect(block.simulator.robots.get(2).pose).toEqual({x: 600, y: 0, heading: 90});
 
         block.simulator.robots.get(2).pose = {x: 10, y: 20, heading: 180};
         block.simulator.resetRoot(2);
-        expect(block.simulator.robots.get(2).pose).toEqual({x: 160, y: 0, heading: 90});
+        expect(block.simulator.robots.get(2).pose).toEqual({x: 600, y: 0, heading: 90});
     });
 
     test('reuses a disconnected Root slot when scanning again', () => {
