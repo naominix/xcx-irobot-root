@@ -119,6 +119,35 @@ describe('iRobot Root extension', () => {
         ]);
     });
 
+    test('keeps multi-root simulator pose and LED state independent in one world', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        block.setControlMode({MODE: 'simulator'});
+        block.selectRoot({ROOT: '1'});
+        block.led({RED: 0, GREEN: 0, BLUE: 255});
+        block.simulator.pose = {x: 20, y: 30, heading: 90};
+        block.selectRoot({ROOT: String(rootB.id)});
+        block.led({RED: 255, GREEN: 80, BLUE: 0});
+        block.simulator.pose = {x: -40, y: 10, heading: 180};
+
+        expect(block.simulator.robots.get(1).pose).toEqual({x: 20, y: 30, heading: 90});
+        expect(block.simulator.robots.get(1).led).toEqual({effect: 1, red: 0, green: 0, blue: 255});
+        expect(block.simulator.robots.get(2).pose).toEqual({x: -40, y: 10, heading: 180});
+        expect(block.simulator.robots.get(2).led).toEqual({effect: 1, red: 255, green: 80, blue: 0});
+    });
+
+    test('adds virtual Roots from the simulator mode without starting a BLE scan', () => {
+        const block = new blockClass(runtime);
+        const scan = jest.spyOn(block.transport, 'scan');
+        block.setControlMode({MODE: 'simulator'});
+        expect(block.addRoot()).toBe('Root 2');
+        expect(block.getRootMenu()).toEqual([
+            {text: 'Root 1', value: '1'}, {text: 'Root 2', value: '2'}
+        ]);
+        expect(block.simulator.robots.has(2)).toBe(true);
+        expect(scan).not.toHaveBeenCalled();
+    });
+
     test('reuses a disconnected Root slot when scanning again', () => {
         const block = new blockClass(runtime);
         const rootA = block.rootManager.getSession(1);

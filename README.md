@@ -105,6 +105,8 @@ Scratch標準のカラーピッカーでLEDの色を選び、点灯、点滅、�
 
 この機能は技術検証用であり、`main`には未統合です。GitHub Pagesや公式配布物にはデプロイしていません。Web Bluetooth、Scratch Link、ScrubでのRoot実機2台同時接続は、環境ごとに以下の手順で人間による実機検証が必要です。
 
+複数Root版を公開する場合は、単体制御版とは別リポジトリ・別GitHub Pages URLで運用します。共有ワールド型の複数台シミュレーターと配布サイトの構成は[複数Root版サイトの計画](docs/MULTI_ROOT.md)を参照してください。単体制御版の公開URLや配布ファイルは変更しません。
+
 1. `multi-root`ブランチのリポジトリで依存関係をインストールし、`npm run build`を実行します。
 2. 別途チェックアウトしたXcratchで、`npm --prefix packages/scratch-gui run start -- --port 8601`を実行し、開発サーバーのルート `https://localhost:8601/` を開きます。`/editor/`はGitHub Pages等の公開構成用で、webpack-dev-serverでは使用しません（Xcratchの構成により起動コマンド／URLが異なる場合があります）。
 3. `dist/`をHTTPSで配信できるローカルサーバーから `irobotRoot.mjs` をExtension Loaderで読み込みます。例えば `npm run build`後に `python3 -m http.server 8700 --directory dist` を実行し、`http://localhost:8700/irobotRoot.mjs` を指定します。localhostはWeb Bluetoothのsecure contextとして扱われます。

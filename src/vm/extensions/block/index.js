@@ -5,7 +5,7 @@ import translations from './translations.json';
 import blockIcon from './block-icon.png';
 import {RootProtocol} from './root-ble';
 import {RootManager} from './root-manager';
-import RootSimulator from './root-simulator';
+import RootSimulatorWorld from './root-simulator-world';
 
 let formatMessage = message => message.default;
 const setupTranslations = () => {
@@ -186,7 +186,7 @@ class IrobotRootBlocks {
         // Simulator fixed explicitly; this default will be reconsidered only
         // after the simulator has completed classroom validation.
         this.controlMode = CONTROL_MODE_PHYSICAL;
-        this.simulator = new RootSimulator(event => this._receiveSimulatorEvent(event), {
+        this.simulator = new RootSimulatorWorld((event, sessionId) => this._receiveSimulatorEvent(event, sessionId), {
             isActive: () => this._isSimulatorActive(),
             translate: (id, defaultText) => {
                 setupTranslations();
@@ -456,11 +456,21 @@ class IrobotRootBlocks {
         this.rootManager.scan();
     }
 
-    addRoot () { this.rootManager.scan(); }
+    addRoot () {
+        if (this.controlMode === CONTROL_MODE_SIMULATOR) {
+            const session = this.rootManager.createSession();
+            this.rootManager.setActiveSession(session.id);
+            this.simulator.setActiveRoot(session.id);
+            this.simulator.open();
+            return session.displayName;
+        }
+        this.rootManager.scan();
+    }
     disconnect (args, util) { this.rootManager.disconnect(this._activeSession(util).id); }
     resetRootConnections () { this.rootManager.resetConnections(); }
     selectRoot (args, util) {
-        this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
+        const session = this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
+        this.simulator.setActiveRoot(session.id);
     }
     activeRoot (args, util) { return this._activeSession(util).displayName; }
     getRootMenu () { return this.rootManager.getMenu(); }
@@ -498,7 +508,7 @@ class IrobotRootBlocks {
         const session = this._activeSession(util);
         session.navigationPosition = null;
         if (this._isSimulatorActive(util, session)) {
-            return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
+            return this.simulator.motors(session.id, Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
         }
         return this._send(session.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)), session);
     }
@@ -506,13 +516,13 @@ class IrobotRootBlocks {
         const distance = Cast.toNumber(args.MM);
         const session = this._activeSession(util);
         session.navigationPosition = null;
-        if (this._isSimulatorActive(util, session)) return this.simulator.move(distance);
+        if (this._isSimulatorActive(util, session)) return this.simulator.move(session.id, distance);
         return this._sendAndWait(session.protocol.driveDistance(distance), linearMotionWatchdogMs(distance), session);
     }
     turn (args, util) {
         const degrees = Cast.toNumber(args.DEGREES);
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.turn(degrees);
+        if (this._isSimulatorActive(util, session)) return this.simulator.turn(session.id, degrees);
         return this._sendAndWait(session.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees), session);
     }
     arc (args, util) {
@@ -520,7 +530,7 @@ class IrobotRootBlocks {
         const radius = Cast.toNumber(args.RADIUS);
         const session = this._activeSession(util);
         session.navigationPosition = null;
-        if (this._isSimulatorActive(util, session)) return this.simulator.arc(radius, degrees);
+        if (this._isSimulatorActive(util, session)) return this.simulator.arc(session.id, radius, degrees);
         return this._sendAndWait(
             session.protocol.driveArc(degrees * 10, radius),
             arcMotionWatchdogMs(degrees, radius), session
@@ -532,7 +542,7 @@ class IrobotRootBlocks {
         // every Root firmware even though they exist in the shared protocol.
         const session = this._activeSession(util);
         session.navigationPosition = {x: 0, y: 0, heading: 90};
-        if (this._isSimulatorActive(util, session)) this.simulator.resetNavigation();
+        if (this._isSimulatorActive(util, session)) this.simulator.resetNavigation(session.id);
     }
     navigateTo (args, util) {
         const target = {
@@ -541,7 +551,7 @@ class IrobotRootBlocks {
         };
         const session = this._activeSession(util);
         const origin = session.navigationPosition || {x: 0, y: 0, heading: 90};
-        if (this._isSimulatorActive(util, session)) return this.simulator.navigateTo(target.x, target.y);
+        if (this._isSimulatorActive(util, session)) return this.simulator.navigateTo(session.id, target.x, target.y);
         const deltaX = target.x - origin.x;
         const deltaY = target.y - origin.y;
         const distance = Math.round(Math.hypot(deltaX, deltaY));
@@ -575,37 +585,37 @@ class IrobotRootBlocks {
     }
     stop (args, util) {
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.stop();
+        if (this._isSimulatorActive(util, session)) return this.simulator.stop(session.id);
         return this._send(session.protocol.packet(0, 3), session);
     }
     marker (args, util) {
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.setMarker(args.POSITION);
+        if (this._isSimulatorActive(util, session)) return this.simulator.setMarker(session.id, args.POSITION);
         return this._send(session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]), session);
     }
     ledColor (args, util) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(1, red, green, blue);
+        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(session.id, 1, red, green, blue);
         return this._send(session.protocol.led(1, red, green, blue), session);
     }
     ledAnimationColor (args, util) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
+        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(session.id, Cast.toNumber(args.EFFECT), red, green, blue);
         return this._send(session.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue), session);
     }
     led (args, util) {
         const session = this._activeSession(util);
         if (this._isSimulatorActive(util, session)) {
-            return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
+            return this.simulator.setLed(session.id, 1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
         }
         return this._send(session.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)), session);
     }
     ledAnimation (args, util) {
         const session = this._activeSession(util);
         if (this._isSimulatorActive(util, session)) return this.simulator.setLed(
-            Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
+            session.id, Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
         );
         return this._send(session.protocol.led(
             Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
@@ -625,7 +635,7 @@ class IrobotRootBlocks {
         // interrupt this one just before it actually finishes.
         const durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.playNote(frequency, durationMs);
+        if (this._isSimulatorActive(util, session)) return this.simulator.playNote(session.id, frequency, durationMs);
         const packet = session.protocol.note(frequency, durationMs);
         if (durationMs === 0) {
             this._send(packet, session);
@@ -637,7 +647,7 @@ class IrobotRootBlocks {
     _playNoteForPicker (midiNote, category) {
         if (category !== this.getInfo().name) return;
         if (this._isSimulatorActive()) {
-            this.simulator.playNote(midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
+            this.simulator.playNote(this._activeSession().id, midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
             return;
         }
         if (!this.transport.isConnected()) return;
@@ -646,7 +656,7 @@ class IrobotRootBlocks {
 
     sayPhrase (args, util) {
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
+        if (this._isSimulatorActive(util, session)) return this.simulator.sayPhrase(session.id, Cast.toString(args.PHRASE));
         return this._sendSoundCommandAndWait(
             session.protocol.sayPhrase(Cast.toString(args.PHRASE)),
             SAY_PHRASE_TIMEOUT_MS,
@@ -664,7 +674,7 @@ class IrobotRootBlocks {
 
     sensor (args, util) {
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.getSensor(args.VALUE);
+        if (this._isSimulatorActive(util, session)) return this.simulator.getSensor(session.id, args.VALUE);
         return session.last[args.VALUE] === undefined ? 0 : session.last[args.VALUE];
     }
 
@@ -946,12 +956,13 @@ class IrobotRootBlocks {
         if (name) this._startEventHat('whenEvent', 'currentEvent', name, session);
     }
 
-    _receiveSimulatorEvent (event) {
-        if (!this._isSimulatorActive() || !event) return;
+    _receiveSimulatorEvent (event, sessionId = this.rootManager.activeSessionId) {
+        const session = this.rootManager.getSession(sessionId) || this._activeSession();
+        if (!this._isSimulatorActive(null, session) || !event) return;
         if (event.type === 'bumper') {
-            this._receiveBumperEvent({leftBumper: event.left, rightBumper: event.right});
+            this._receiveBumperEvent({leftBumper: event.left, rightBumper: event.right}, session);
         } else if (event.type === 'touch') {
-            this._receiveTouchEvent({touchMask: event.mask});
+            this._receiveTouchEvent({touchMask: event.mask}, session);
         }
     }
 }

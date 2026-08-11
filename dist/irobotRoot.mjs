@@ -68,25 +68,25 @@ var entry = {
   translationMap: translations$1
 };
 
-function _arrayLikeToArray$7(r, a) {
+function _arrayLikeToArray$8(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles$1(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$7(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$8(r);
 }
 
 function _iterableToArray$1(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$7(r, a) {
+function _unsupportedIterableToArray$8(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$7(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$8(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$7(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$8(r, a) : void 0;
   }
 }
 
@@ -95,7 +95,7 @@ function _nonIterableSpread$1() {
 }
 
 function _toConsumableArray$1(r) {
-  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$7(r) || _nonIterableSpread$1();
+  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$8(r) || _nonIterableSpread$1();
 }
 
 function _classCallCheck$1(a, n) {
@@ -177,7 +177,7 @@ function _nonIterableRest$1() {
 }
 
 function _slicedToArray$1(r, e) {
-  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$7(r, e) || _nonIterableRest$1();
+  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$8(r, e) || _nonIterableRest$1();
 }
 
 function getDefaultExportFromCjs (x) {
@@ -1427,25 +1427,25 @@ function requireJsonrpc() {
   return jsonrpc;
 }
 
-function _arrayLikeToArray$6(r, a) {
+function _arrayLikeToArray$7(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$6(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$7(r);
 }
 
 function _iterableToArray(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$6(r, a) {
+function _unsupportedIterableToArray$7(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$6(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$7(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$6(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$7(r, a) : void 0;
   }
 }
 
@@ -1454,7 +1454,7 @@ function _nonIterableSpread() {
 }
 
 function _toConsumableArray(r) {
-  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$6(r) || _nonIterableSpread();
+  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$7(r) || _nonIterableSpread();
 }
 
 function _defineProperty(e, r, t) {
@@ -1519,7 +1519,7 @@ function _nonIterableRest() {
 }
 
 function _slicedToArray(r, e) {
-  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$6(r, e) || _nonIterableRest();
+  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$7(r, e) || _nonIterableRest();
 }
 
 var urlToObj = {};
@@ -1756,9 +1756,9 @@ var errorUtils = {};
 
 var stackTrace = {};
 
-function _createForOfIteratorHelper$5(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$5(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$5(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$5(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0; } }
-function _arrayLikeToArray$5(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$6(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$6(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$6(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$6(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$6(r, a) : void 0; } }
+function _arrayLikeToArray$6(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var hasRequiredStackTrace;
 function requireStackTrace() {
   if (hasRequiredStackTrace) return stackTrace;
@@ -1794,7 +1794,7 @@ function requireStackTrace() {
   }
   function toStackFrames(lines, parseLine) {
     var frames = [];
-    var _iterator = _createForOfIteratorHelper$5(lines),
+    var _iterator = _createForOfIteratorHelper$6(lines),
       _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2452,9 +2452,9 @@ function requireInterfaces() {
   return interfaces;
 }
 
-function _createForOfIteratorHelper$4(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$4(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$4(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$4(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0; } }
-function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$5(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$5(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$5(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$5(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0; } }
+function _arrayLikeToArray$5(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys$2(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$2(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$2(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var hasRequiredBaseLogger;
@@ -2782,7 +2782,7 @@ function requireBaseLogger() {
       function tokensToCss(tokens) {
         var seen = new Set();
         var cssParts = [];
-        var _iterator = _createForOfIteratorHelper$4(tokens),
+        var _iterator = _createForOfIteratorHelper$5(tokens),
           _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2892,7 +2892,7 @@ function requireBaseLogger() {
         var withoutDrive = drivePrefix ? replaced.slice(drivePrefix.length) : replaced;
         var segments = withoutDrive.split("/");
         var normalizedSegments = [];
-        var _iterator2 = _createForOfIteratorHelper$4(segments),
+        var _iterator2 = _createForOfIteratorHelper$5(segments),
           _step2;
         try {
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -3324,7 +3324,7 @@ function requireBaseLogger() {
             if (typeof source === "string") {
               var _this$settings4;
               var modifiedSource = source;
-              var _iterator3 = _createForOfIteratorHelper$4(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
+              var _iterator3 = _createForOfIteratorHelper$5(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
                 _step3;
               try {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -4172,9 +4172,9 @@ function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t =
 function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
-function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
-function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$4(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$4(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$4(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$4(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0; } }
+function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var ROOT_SERVICE = '48c5d828-ac2a-442d-97a3-0c9822b04979';
 var UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 var RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -4192,12 +4192,12 @@ var SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
 // accepted the packet. Keep the transport-level ordering without making the
 // Scratch command wait on that promise forever.
 var UART_WRITE_GAP_MS = 60;
-var clamp$1 = function clamp(value, min, max) {
+var clamp$2 = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value)));
 };
 var crc8 = function crc8(bytes) {
   var crc = 0;
-  var _iterator = _createForOfIteratorHelper$3(bytes),
+  var _iterator = _createForOfIteratorHelper$4(bytes),
     _step;
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -4224,7 +4224,7 @@ var bytesToHex = function bytesToHex(bytes) {
 // in both Web Bluetooth and Scrub.
 var bytesToBase64 = function bytesToBase64(bytes) {
   var binary = '';
-  var _iterator2 = _createForOfIteratorHelper$3(bytes),
+  var _iterator2 = _createForOfIteratorHelper$4(bytes),
     _step2;
   try {
     for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -4365,7 +4365,7 @@ var RootProtocol = /*#__PURE__*/function () {
   }, {
     key: "motors",
     value: function motors(left, right) {
-      return this.packet(1, 4, this.int32Payload([clamp$1(left, -100, 100), clamp$1(right, -100, 100)]));
+      return this.packet(1, 4, this.int32Payload([clamp$2(left, -100, 100), clamp$2(right, -100, 100)]));
     }
   }, {
     key: "driveDistance",
@@ -4388,9 +4388,9 @@ var RootProtocol = /*#__PURE__*/function () {
       var headingDeciDegrees = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
       var payload = new Uint8Array(10);
       var view = new DataView(payload.buffer);
-      view.setInt32(0, Math.round(clamp$1(xMm, -2147483648, 0x7FFFFFFF)), false);
-      view.setInt32(4, Math.round(clamp$1(yMm, -2147483648, 0x7FFFFFFF)), false);
-      var heading = Number(headingDeciDegrees) === -1 ? -1 : Math.round(clamp$1(headingDeciDegrees, 0, 3599));
+      view.setInt32(0, Math.round(clamp$2(xMm, -2147483648, 0x7FFFFFFF)), false);
+      view.setInt32(4, Math.round(clamp$2(yMm, -2147483648, 0x7FFFFFFF)), false);
+      var heading = Number(headingDeciDegrees) === -1 ? -1 : Math.round(clamp$2(headingDeciDegrees, 0, 3599));
       view.setInt16(8, heading, false);
       return this.packet(1, 17, payload);
     }
@@ -4402,15 +4402,15 @@ var RootProtocol = /*#__PURE__*/function () {
   }, {
     key: "led",
     value: function led(state, red, green, blue) {
-      return this.packet(3, 2, [clamp$1(state, 0, 3), clamp$1(red, 0, 255), clamp$1(green, 0, 255), clamp$1(blue, 0, 255)]);
+      return this.packet(3, 2, [clamp$2(state, 0, 3), clamp$2(red, 0, 255), clamp$2(green, 0, 255), clamp$2(blue, 0, 255)]);
     }
   }, {
     key: "note",
     value: function note(frequency, durationMs) {
       var payload = new Uint8Array(6);
       var view = new DataView(payload.buffer);
-      view.setUint32(0, clamp$1(frequency, 0, 0xFFFFFFFF), false);
-      view.setUint16(4, clamp$1(durationMs, 0, 0xFFFF), false);
+      view.setUint32(0, clamp$2(frequency, 0, 0xFFFFFFFF), false);
+      view.setUint16(4, clamp$2(durationMs, 0, 0xFFFF), false);
       return this.packet(5, 0, payload);
     }
   }, {
@@ -4422,7 +4422,7 @@ var RootProtocol = /*#__PURE__*/function () {
       // Protocol payloads are limited to 16 UTF-8 bytes. Add complete
       // Unicode code points only, so truncation never leaves malformed
       // Japanese text or half of an emoji in the packet.
-      var _iterator3 = _createForOfIteratorHelper$3(String(phrase)),
+      var _iterator3 = _createForOfIteratorHelper$4(String(phrase)),
         _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -4642,9 +4642,9 @@ var RootTransport = /*#__PURE__*/function () {
   }]);
 }();
 
-function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
-function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
+function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 /**
  * State and transport for one physical Root. Keeping this state together is
@@ -4816,7 +4816,7 @@ var RootManager = /*#__PURE__*/function () {
       // Disconnect every session before clearing state. RootTransport.reset
       // invokes the extension callback, allowing pending Scratch commands to
       // be cancelled rather than left waiting for a completion packet.
-      var _iterator = _createForOfIteratorHelper$2(sessions),
+      var _iterator = _createForOfIteratorHelper$3(sessions),
         _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -4828,7 +4828,7 @@ var RootManager = /*#__PURE__*/function () {
       } finally {
         _iterator.f();
       }
-      var _iterator2 = _createForOfIteratorHelper$2(sessions),
+      var _iterator2 = _createForOfIteratorHelper$3(sessions),
         _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -4886,16 +4886,16 @@ var RootManager = /*#__PURE__*/function () {
   }]);
 }();
 
-function _createForOfIteratorHelper$1(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$1(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$1(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
-function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
+function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 /*
  * Root's simulator is deliberately independent from Scratch targets, costumes,
  * and the Pen extension.  This keeps the extension usable from the official
  * Xcratch editor as a normal external extension.
  */
 
-var DEG = Math.PI / 180;
+var DEG$1 = Math.PI / 180;
 var DEFAULT_HEADING = 90;
 var DEFAULT_SPEED_MM_S = 120;
 var DEFAULT_TURN_DEG_S = 120;
@@ -4904,11 +4904,11 @@ var ROOT_COLLISION_RADIUS_MM = 24;
 // Keep Root and its touch target practical on touch screens when the world is
 // zoomed out. At 100% this matches the physical 24 mm collision radius.
 var ROOT_TOUCH_HIT_RADIUS_PX = 44;
-var clamp = function clamp(value, min, max) {
+var clamp$1 = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 };
-var headingRadians = function headingRadians(heading) {
-  return heading * DEG;
+var headingRadians$1 = function headingRadians(heading) {
+  return heading * DEG$1;
 };
 var normalizeHeading$1 = function normalizeHeading(heading) {
   return (heading % 360 + 360) % 360;
@@ -5035,7 +5035,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "setViewZoom",
     value: function setViewZoom(zoom) {
-      var next = clamp(Number(zoom) || 1, 0.25, 2.5);
+      var next = clamp$1(Number(zoom) || 1, 0.25, 2.5);
       this.viewZoom = Math.round(next * 4) / 4;
       if (this._zoomValue) this._zoomValue.textContent = "".concat(Math.round(this.viewZoom * 100), "%");
       this._draw();
@@ -5070,7 +5070,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "_updateTranslations",
     value: function _updateTranslations() {
-      var _iterator = _createForOfIteratorHelper$1(this._localizedElements),
+      var _iterator = _createForOfIteratorHelper$2(this._localizedElements),
         _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -5109,7 +5109,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "setMarker",
     value: function setMarker(position) {
-      this.marker = clamp(Math.round(Number(position) || 0), 0, 2);
+      this.marker = clamp$1(Math.round(Number(position) || 0), 0, 2);
       this._draw();
     }
   }, {
@@ -5118,10 +5118,10 @@ var RootSimulator = /*#__PURE__*/function () {
       var _this = this;
       this._stopLedAnimation();
       this.led = {
-        effect: clamp(Math.round(Number(effect) || 0), 0, 3),
-        red: clamp(Math.round(Number(red) || 0), 0, 255),
-        green: clamp(Math.round(Number(green) || 0), 0, 255),
-        blue: clamp(Math.round(Number(blue) || 0), 0, 255)
+        effect: clamp$1(Math.round(Number(effect) || 0), 0, 3),
+        red: clamp$1(Math.round(Number(red) || 0), 0, 255),
+        green: clamp$1(Math.round(Number(green) || 0), 0, 255),
+        blue: clamp$1(Math.round(Number(blue) || 0), 0, 255)
       };
       this._ledPhase = 0;
       if (this.led.effect === 2 || this.led.effect === 3) {
@@ -5155,7 +5155,7 @@ var RootSimulator = /*#__PURE__*/function () {
       var _this2 = this;
       var distance = Number(distanceMm) || 0;
       var start = Object.assign({}, this.pose);
-      var radians = headingRadians(start.heading);
+      var radians = headingRadians$1(start.heading);
       var end = {
         x: start.x + Math.cos(radians) * distance,
         y: start.y + Math.sin(radians) * distance,
@@ -5190,17 +5190,17 @@ var RootSimulator = /*#__PURE__*/function () {
       var angle = Number(degrees) || 0;
       if (radius === 0) return this.turn(angle);
       var start = Object.assign({}, this.pose);
-      var theta = headingRadians(start.heading);
+      var theta = headingRadians$1(start.heading);
       // Positive Root angles are clockwise. A positive radius therefore
       // describes the right-hand circle seen by a Root facing forward.
       var center = {
         x: start.x + radius * Math.sin(theta),
         y: start.y - radius * Math.cos(theta)
       };
-      var duration = Math.abs(radius * angle * DEG) / DEFAULT_SPEED_MM_S * 1000;
+      var duration = Math.abs(radius * angle * DEG$1) / DEFAULT_SPEED_MM_S * 1000;
       return this._animate(duration, function (progress) {
         var heading = normalizeHeading$1(start.heading - angle * progress);
-        var currentTheta = headingRadians(heading);
+        var currentTheta = headingRadians$1(heading);
         _this4._setPose({
           x: center.x - radius * Math.sin(currentTheta),
           y: center.y + radius * Math.cos(currentTheta),
@@ -5213,8 +5213,8 @@ var RootSimulator = /*#__PURE__*/function () {
     value: function motors(left, right) {
       var _this5 = this;
       this._stopContinuousMotion();
-      var leftPower = clamp(Number(left) || 0, -100, 100);
-      var rightPower = clamp(Number(right) || 0, -100, 100);
+      var leftPower = clamp$1(Number(left) || 0, -100, 100);
+      var rightPower = clamp$1(Number(right) || 0, -100, 100);
       if (leftPower === 0 && rightPower === 0) return;
       var previous = Date.now();
       this._continuousMotion = setInterval(function () {
@@ -5222,9 +5222,9 @@ var RootSimulator = /*#__PURE__*/function () {
         var elapsed = Math.min(100, now - previous) / 1000;
         previous = now;
         var linear = (leftPower + rightPower) / 2 * 1.2 * _this5.speedMultiplier;
-        var angular = (rightPower - leftPower) * 1.2 * _this5.speedMultiplier / 86 / DEG;
+        var angular = (rightPower - leftPower) * 1.2 * _this5.speedMultiplier / 86 / DEG$1;
         var nextHeading = normalizeHeading$1(_this5.pose.heading - angular * elapsed);
-        var radians = headingRadians((_this5.pose.heading + nextHeading) / 2);
+        var radians = headingRadians$1((_this5.pose.heading + nextHeading) / 2);
         _this5._setPose({
           x: _this5.pose.x + Math.cos(radians) * linear * elapsed,
           y: _this5.pose.y + Math.sin(radians) * linear * elapsed,
@@ -5251,7 +5251,7 @@ var RootSimulator = /*#__PURE__*/function () {
       var deltaY = (Number(yMm) || 0) - this.pose.y;
       var distance = Math.hypot(deltaX, deltaY);
       if (distance < 0.01) return Promise.resolve();
-      var targetHeading = normalizeHeading$1(Math.atan2(deltaY, deltaX) / DEG);
+      var targetHeading = normalizeHeading$1(Math.atan2(deltaY, deltaX) / DEG$1);
       var turn = normalizeHeading$1(this.pose.heading - targetHeading + 180) - 180;
       return this.turn(turn).then(function () {
         return _this6.move(distance);
@@ -5311,15 +5311,15 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "_collisionAt",
     value: function _collisionAt(pose) {
-      var _iterator2 = _createForOfIteratorHelper$1(this.obstacles),
+      var _iterator2 = _createForOfIteratorHelper$2(this.obstacles),
         _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
           var obstacle = _step2.value;
           var halfWidth = obstacle.width / 2;
           var halfHeight = obstacle.height / 2;
-          var closestX = clamp(pose.x, obstacle.x - halfWidth, obstacle.x + halfWidth);
-          var closestY = clamp(pose.y, obstacle.y - halfHeight, obstacle.y + halfHeight);
+          var closestX = clamp$1(pose.x, obstacle.x - halfWidth, obstacle.x + halfWidth);
+          var closestY = clamp$1(pose.y, obstacle.y - halfHeight, obstacle.y + halfHeight);
           var dx = closestX - pose.x;
           var dy = closestY - pose.y;
           if (dx * dx + dy * dy >= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) continue;
@@ -5327,7 +5327,7 @@ var RootSimulator = /*#__PURE__*/function () {
             dx = obstacle.x - pose.x;
             dy = obstacle.y - pose.y;
           }
-          var heading = headingRadians(pose.heading);
+          var heading = headingRadians$1(pose.heading);
           var rightX = Math.sin(heading);
           var rightY = -Math.cos(heading);
           var lateral = dx * rightX + dy * rightY;
@@ -5606,7 +5606,7 @@ var RootSimulator = /*#__PURE__*/function () {
       var dx = point.x - this.pose.x;
       var dy = point.y - this.pose.y;
       if (rootDxPx * rootDxPx + rootDyPx * rootDyPx <= ROOT_TOUCH_HIT_RADIUS_PX * ROOT_TOUCH_HIT_RADIUS_PX) {
-        var heading = headingRadians(this.pose.heading);
+        var heading = headingRadians$1(this.pose.heading);
         var forward = dx * Math.cos(heading) + dy * Math.sin(heading);
         var right = dx * Math.sin(heading) - dy * Math.cos(heading);
         var mask = forward >= 0 ? right < 0 ? 0x8 : 0x4 : right < 0 ? 0x1 : 0x2;
@@ -5730,7 +5730,7 @@ var RootSimulator = /*#__PURE__*/function () {
       context.strokeStyle = this.marker === 2 ? '#fff' : '#22a6a6';
       context.lineWidth = 4;
       context.lineCap = 'round';
-      var _iterator3 = _createForOfIteratorHelper$1(this.trail),
+      var _iterator3 = _createForOfIteratorHelper$2(this.trail),
         _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -5756,7 +5756,7 @@ var RootSimulator = /*#__PURE__*/function () {
       var p = point(this.pose);
       context.save();
       context.translate(p.x, p.y);
-      context.rotate((90 - this.pose.heading) * DEG);
+      context.rotate((90 - this.pose.heading) * DEG$1);
       context.fillStyle = '#fff';
       context.strokeStyle = '#29343a';
       context.lineWidth = 5;
@@ -5841,6 +5841,698 @@ var RootSimulator = /*#__PURE__*/function () {
       var bumper = this.last.leftBumper && this.last.rightBumper ? this._t('bothPush', 'BOTH PUSH') : this.last.leftBumper ? this._t('leftPush', 'LEFT PUSH') : this.last.rightBumper ? this._t('rightPush', 'RIGHT PUSH') : this._t('none', 'none');
       context.fillText("".concat(this._t('bumper', 'bumper'), ": ").concat(bumper, "   ").concat(this._t('touchMask', 'touch mask'), ": ").concat(this.last.touchMask.toString(2).padStart(4, '0')), 18, 84);
       if (this.phrase) context.fillText("".concat(this._t('say', 'say'), ": ").concat(this.phrase), 18, 111);
+    }
+  }]);
+}();
+
+function _createForOfIteratorHelper$1(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$1(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$1(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
+function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+var DEG = Math.PI / 180;
+var SCALE = 1.8;
+var ROBOT_RADIUS = 24;
+var TOUCH_RADIUS = 44;
+var clamp = function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+};
+var headingRadians = function headingRadians(heading) {
+  return heading * DEG;
+};
+
+/**
+ * A shared simulator world for the multi-root build. Each RootSimulator child
+ * owns one robot's pose, sensors, LED and motion timers; this class owns the
+ * single canvas and shared obstacles.
+ */
+var RootSimulatorWorld = /*#__PURE__*/function () {
+  function RootSimulatorWorld(onEvent) {
+    var _this = this;
+    var controls = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    _classCallCheck$1(this, RootSimulatorWorld);
+    this.onEvent = onEvent;
+    this.controls = controls;
+    this.robots = new Map();
+    this.obstacles = [];
+    this.activeId = 1;
+    this.host = new RootSimulator(null, controls);
+    this.host._draw = function () {
+      return _this._draw();
+    };
+    this.host._pointerDown = function (event) {
+      return _this._pointerDown(event);
+    };
+    this.host._pointerMove = function (event) {
+      return _this._pointerMove(event);
+    };
+    this.host._pointerUp = function (event) {
+      return _this._pointerUp(event);
+    };
+    this.host.obstacles = this.obstacles;
+    this.host.reset = function () {
+      return _this.reset();
+    };
+    this.host.addObstacle = function (type) {
+      return _this.addObstacle(type);
+    };
+    this.host.deleteSelectedObstacle = function () {
+      return _this.deleteSelectedObstacle();
+    };
+    this.host.clearObstacles = function () {
+      return _this.clearObstacles();
+    };
+    this.host.runProject = function () {
+      return _this.runProject();
+    };
+    this.host.stopProject = function () {
+      return _this.stopProject();
+    };
+    this.host.setViewZoom = function (zoom) {
+      return _this.setViewZoom(zoom);
+    };
+    this.host.setSpeedMultiplier = function (multiplier) {
+      return _this.setSpeedMultiplier(multiplier);
+    };
+    this.ensureRobot(1);
+  }
+
+  // Compatibility facade: existing tests and single-root projects may read
+  // the former simulator properties directly. They now refer to the active
+  // virtual Root while multi-root commands use an explicit session id.
+  return _createClass$1(RootSimulatorWorld, [{
+    key: "_activeRobot",
+    value: function _activeRobot() {
+      return this.ensureRobot(this.activeId);
+    }
+  }, {
+    key: "pose",
+    get: function get() {
+      return this._activeRobot().pose;
+    },
+    set: function set(value) {
+      this._activeRobot().pose = value;
+      this._draw();
+    }
+  }, {
+    key: "marker",
+    get: function get() {
+      return this._activeRobot().marker;
+    },
+    set: function set(value) {
+      this._activeRobot().marker = value;
+      this._draw();
+    }
+  }, {
+    key: "led",
+    get: function get() {
+      return this._activeRobot().led;
+    },
+    set: function set(value) {
+      this._activeRobot().led = value;
+      this._draw();
+    }
+  }, {
+    key: "trail",
+    get: function get() {
+      return this._activeRobot().trail;
+    }
+  }, {
+    key: "last",
+    get: function get() {
+      return this._activeRobot().last;
+    }
+  }, {
+    key: "_ledPhase",
+    get: function get() {
+      return this._activeRobot()._ledPhase;
+    }
+  }, {
+    key: "_collisionPoint",
+    get: function get() {
+      return this._activeRobot()._collisionPoint;
+    }
+  }, {
+    key: "speedMultiplier",
+    get: function get() {
+      return this.host.speedMultiplier;
+    }
+  }, {
+    key: "viewZoom",
+    get: function get() {
+      return this.host.viewZoom;
+    }
+  }, {
+    key: "_t",
+    value: function _t(id, defaultText) {
+      return this.host._t(id, defaultText);
+    }
+  }, {
+    key: "_setTouchMask",
+    value: function _setTouchMask(mask) {
+      return this._activeRobot()._setTouchMask(mask);
+    }
+  }, {
+    key: "ensureRobot",
+    value: function ensureRobot(id) {
+      var _this2 = this;
+      var key = Number(id) || 1;
+      if (!this.robots.has(key)) {
+        var robot = new RootSimulator(function (event) {
+          return _this2.onEvent && _this2.onEvent(event, key);
+        }, {
+          isActive: function isActive() {
+            return _this2.controls.isActive ? _this2.controls.isActive() : true;
+          },
+          translate: this.controls.translate
+        });
+        robot.obstacles = this.obstacles;
+        robot._draw = function () {
+          return _this2._draw();
+        };
+        robot._collisionAt = function (pose) {
+          return _this2._collisionAt(key, pose, robot);
+        };
+        this.robots.set(key, robot);
+      }
+      return this.robots.get(key);
+    }
+  }, {
+    key: "open",
+    value: function open() {
+      this.host.open();
+      this._draw();
+    }
+  }, {
+    key: "close",
+    value: function close() {
+      this.host.close();
+    }
+  }, {
+    key: "isOpen",
+    value: function isOpen() {
+      return this.host.isOpen();
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      this._draw();
+    }
+  }, {
+    key: "setActiveRoot",
+    value: function setActiveRoot(id) {
+      this.activeId = Number(id) || 1;
+      this.ensureRobot(this.activeId);
+      this._draw();
+    }
+  }, {
+    key: "setSpeedMultiplier",
+    value: function setSpeedMultiplier(multiplier) {
+      this.host.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
+      var _iterator = _createForOfIteratorHelper$1(this.robots.values()),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var robot = _step.value;
+          robot.speedMultiplier = this.host.speedMultiplier;
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      this._draw();
+    }
+  }, {
+    key: "setViewZoom",
+    value: function setViewZoom(zoom) {
+      this.host.viewZoom = Math.round(clamp(Number(zoom) || 1, 0.25, 2.5) * 4) / 4;
+      if (this.host._zoomValue) this.host._zoomValue.textContent = "".concat(Math.round(this.host.viewZoom * 100), "%");
+      this._draw();
+      return this.host.viewZoom;
+    }
+  }, {
+    key: "reset",
+    value: function reset() {
+      var _iterator2 = _createForOfIteratorHelper$1(this.robots.values()),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var robot = _step2.value;
+          robot.reset();
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      this._draw();
+    }
+  }, {
+    key: "resetRoot",
+    value: function resetRoot(id) {
+      this.ensureRobot(id).reset();
+      this._draw();
+    }
+  }, {
+    key: "resetNavigation",
+    value: function resetNavigation(id) {
+      this.ensureRobot(id).resetNavigation();
+      this._draw();
+    }
+  }, {
+    key: "motors",
+    value: function motors(id, left, right) {
+      return this.ensureRobot(id).motors(left, right);
+    }
+  }, {
+    key: "move",
+    value: function move(id, distance) {
+      return this.ensureRobot(id).move(distance);
+    }
+  }, {
+    key: "turn",
+    value: function turn(id, degrees) {
+      return this.ensureRobot(id).turn(degrees);
+    }
+  }, {
+    key: "arc",
+    value: function arc(id, radius, degrees) {
+      return this.ensureRobot(id).arc(radius, degrees);
+    }
+  }, {
+    key: "navigateTo",
+    value: function navigateTo(id, x, y) {
+      return this.ensureRobot(id).navigateTo(x, y);
+    }
+  }, {
+    key: "stop",
+    value: function stop(id) {
+      return this.ensureRobot(id).stop();
+    }
+  }, {
+    key: "setMarker",
+    value: function setMarker(id, position) {
+      return this.ensureRobot(id).setMarker(position);
+    }
+  }, {
+    key: "setLed",
+    value: function setLed(id, effect, red, green, blue) {
+      return this.ensureRobot(id).setLed(effect, red, green, blue);
+    }
+  }, {
+    key: "playNote",
+    value: function playNote(id, frequency, duration) {
+      return this.ensureRobot(id).playNote(frequency, duration);
+    }
+  }, {
+    key: "sayPhrase",
+    value: function sayPhrase(id, phrase) {
+      return this.ensureRobot(id).sayPhrase(phrase);
+    }
+  }, {
+    key: "getSensor",
+    value: function getSensor(id, key) {
+      return this.ensureRobot(id).getSensor(key);
+    }
+  }, {
+    key: "runProject",
+    value: function runProject() {
+      if (this.host.controls.isActive && !this.host.controls.isActive()) return false;
+      this.reset();
+      if (this.host.controls.onRun) this.host.controls.onRun();
+      return true;
+    }
+  }, {
+    key: "stopProject",
+    value: function stopProject() {
+      if (this.host.controls.isActive && !this.host.controls.isActive()) return false;
+      if (this.host.controls.onStop) this.host.controls.onStop();
+      var _iterator3 = _createForOfIteratorHelper$1(this.robots.values()),
+        _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var robot = _step3.value;
+          robot.stop();
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+      return true;
+    }
+  }, {
+    key: "addObstacle",
+    value: function addObstacle(type) {
+      var obstacle = type === 'wall' ? {
+        type: 'wall',
+        x: 80,
+        y: 80,
+        width: 120,
+        height: 14
+      } : {
+        type: 'block',
+        x: 80,
+        y: 80,
+        width: 50,
+        height: 50
+      };
+      this.obstacles.push(obstacle);
+      this.host._selectedObstacle = this.obstacles.length - 1;
+      this._draw();
+      return obstacle;
+    }
+  }, {
+    key: "deleteSelectedObstacle",
+    value: function deleteSelectedObstacle() {
+      var index = this.host._selectedObstacle;
+      if (index < 0) return;
+      this.obstacles.splice(index, 1);
+      this.host._selectedObstacle = -1;
+      this._draw();
+    }
+  }, {
+    key: "clearObstacles",
+    value: function clearObstacles() {
+      this.obstacles.length = 0;
+      this.host._selectedObstacle = -1;
+      var _iterator4 = _createForOfIteratorHelper$1(this.robots.values()),
+        _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var robot = _step4.value;
+          robot._setBumpers(false, false);
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+      this._draw();
+    }
+  }, {
+    key: "_collisionAt",
+    value: function _collisionAt(id, pose, robot) {
+      var obstacleCollision = RootSimulator.prototype._collisionAt.call(robot, pose);
+      if (obstacleCollision) return obstacleCollision;
+      var _iterator5 = _createForOfIteratorHelper$1(this.robots),
+        _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+          var _step5$value = _slicedToArray$1(_step5.value, 2),
+            otherId = _step5$value[0],
+            other = _step5$value[1];
+          if (otherId === id) continue;
+          var dx = other.pose.x - pose.x;
+          var dy = other.pose.y - pose.y;
+          if (dx * dx + dy * dy >= Math.pow(ROBOT_RADIUS * 2, 2)) continue;
+          var heading = headingRadians(pose.heading);
+          var lateral = dx * Math.sin(heading) - dy * Math.cos(heading);
+          return {
+            left: lateral <= 0,
+            right: lateral >= 0,
+            x: other.pose.x,
+            y: other.pose.y
+          };
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
+      }
+      return null;
+    }
+  }, {
+    key: "_eventWorld",
+    value: function _eventWorld(event) {
+      return this.host._eventWorld(event);
+    }
+  }, {
+    key: "_pointerDown",
+    value: function _pointerDown(event) {
+      if (!this.host._canvas) return;
+      var point = this._eventWorld(event);
+      var bounds = this.host._canvas.getBoundingClientRect();
+      var cx = (event.clientX - bounds.left) * this.host._canvas.width / bounds.width;
+      var cy = (event.clientY - bounds.top) * this.host._canvas.height / bounds.height;
+      var scale = SCALE * this.host.viewZoom;
+      var nearest = null;
+      var _iterator6 = _createForOfIteratorHelper$1(this.robots),
+        _step6;
+      try {
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+          var _step6$value = _slicedToArray$1(_step6.value, 2),
+            id = _step6$value[0],
+            _robot = _step6$value[1];
+          var rx = this.host._canvas.width / 2 + _robot.pose.x * scale;
+          var ry = this.host._canvas.height / 2 - _robot.pose.y * scale;
+          var distance = Math.pow(cx - rx, 2) + Math.pow(cy - ry, 2);
+          if (distance <= Math.pow(TOUCH_RADIUS, 2) && (!nearest || distance < nearest.distance)) nearest = {
+            id: id,
+            robot: _robot,
+            distance: distance
+          };
+        }
+      } catch (err) {
+        _iterator6.e(err);
+      } finally {
+        _iterator6.f();
+      }
+      if (nearest) {
+        this.activeId = nearest.id;
+        var robot = nearest.robot;
+        var dx = point.x - robot.pose.x;
+        var dy = point.y - robot.pose.y;
+        var heading = headingRadians(robot.pose.heading);
+        var forward = dx * Math.cos(heading) + dy * Math.sin(heading);
+        var right = dx * Math.sin(heading) - dy * Math.cos(heading);
+        robot._activeTouchPointer = event.pointerId;
+        robot._setTouchMask(forward >= 0 ? right < 0 ? 0x8 : 0x4 : right < 0 ? 0x1 : 0x2);
+        this.host._canvas.setPointerCapture(event.pointerId);
+        this._draw();
+        return;
+      }
+      this.host._selectedObstacle = -1;
+      for (var index = this.obstacles.length - 1; index >= 0; index--) {
+        var obstacle = this.obstacles[index];
+        if (Math.abs(point.x - obstacle.x) <= obstacle.width / 2 && Math.abs(point.y - obstacle.y) <= obstacle.height / 2) {
+          this.host._selectedObstacle = index;
+          this.host._dragOffset = {
+            x: point.x - obstacle.x,
+            y: point.y - obstacle.y
+          };
+          this.host._canvas.setPointerCapture(event.pointerId);
+          break;
+        }
+      }
+      this._draw();
+    }
+  }, {
+    key: "_pointerMove",
+    value: function _pointerMove(event) {
+      if (!this.host._dragOffset || this.host._selectedObstacle < 0) return;
+      var point = this._eventWorld(event);
+      var obstacle = this.obstacles[this.host._selectedObstacle];
+      obstacle.x = point.x - this.host._dragOffset.x;
+      obstacle.y = point.y - this.host._dragOffset.y;
+      this._draw();
+    }
+  }, {
+    key: "_pointerUp",
+    value: function _pointerUp(event) {
+      var _iterator7 = _createForOfIteratorHelper$1(this.robots.values()),
+        _step7;
+      try {
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+          var robot = _step7.value;
+          if (robot._activeTouchPointer === event.pointerId) {
+            robot._activeTouchPointer = null;
+            robot._setTouchMask(0);
+          }
+        }
+      } catch (err) {
+        _iterator7.e(err);
+      } finally {
+        _iterator7.f();
+      }
+      this.host._dragOffset = null;
+      if (this.host._canvas && this.host._canvas.hasPointerCapture && this.host._canvas.hasPointerCapture(event.pointerId)) {
+        this.host._canvas.releasePointerCapture(event.pointerId);
+      }
+      this._draw();
+    }
+  }, {
+    key: "_drawRobot",
+    value: function _drawRobot(context, robot, point, scale) {
+      var p = point(robot.pose);
+      context.save();
+      context.translate(p.x, p.y);
+      context.rotate((90 - robot.pose.heading) * DEG);
+      context.fillStyle = '#fff';
+      context.strokeStyle = '#29343a';
+      context.lineWidth = 5;
+      context.beginPath();
+      for (var i = 0; i < 6; i++) {
+        var a = -Math.PI / 2 + i * Math.PI / 3;
+        var x = Math.cos(a) * 36;
+        var y = Math.sin(a) * 36;
+        i ? context.lineTo(x, y) : context.moveTo(x, y);
+      }
+      context.closePath();
+      context.fill();
+      context.stroke();
+      context.lineCap = 'round';
+      context.lineWidth = 8;
+      context.strokeStyle = robot.last.leftBumper ? '#ef3e36' : '#9ba9af';
+      context.beginPath();
+      context.moveTo(-2, -35);
+      context.lineTo(-29, -18);
+      context.stroke();
+      context.strokeStyle = robot.last.rightBumper ? '#ef3e36' : '#9ba9af';
+      context.beginPath();
+      context.moveTo(2, -35);
+      context.lineTo(29, -18);
+      context.stroke();
+      for (var _i = 0, _arr = [{
+          x: -13,
+          y: -14,
+          mask: 8
+        }, {
+          x: 13,
+          y: -14,
+          mask: 4
+        }, {
+          x: -13,
+          y: 14,
+          mask: 1
+        }, {
+          x: 13,
+          y: 14,
+          mask: 2
+        }]; _i < _arr.length; _i++) {
+        var sensor = _arr[_i];
+        context.fillStyle = robot.last.touchMask & sensor.mask ? '#1976d2' : 'rgba(50,160,210,0.2)';
+        context.beginPath();
+        context.arc(sensor.x, sensor.y, 7, 0, Math.PI * 2);
+        context.fill();
+      }
+      context.strokeStyle = '#29343a';
+      context.lineWidth = 7;
+      context.beginPath();
+      context.moveTo(0, -22);
+      context.lineTo(0, 21);
+      context.stroke();
+      var color = "rgb(".concat(robot.led.red, ",").concat(robot.led.green, ",").concat(robot.led.blue, ")");
+      if (robot.led.effect === 3) {
+        for (var _i2 = 0; _i2 < 4; _i2++) {
+          var angle = (robot._ledPhase + _i2 * 3) * Math.PI / 6;
+          context.fillStyle = _i2 === 0 ? color : "rgba(".concat(robot.led.red, ",").concat(robot.led.green, ",").concat(robot.led.blue, ",").concat(Math.max(0.15, 0.8 - _i2 * 0.18), ")");
+          context.beginPath();
+          context.arc(Math.cos(angle) * 17, Math.sin(angle) * 17, 5, 0, Math.PI * 2);
+          context.fill();
+        }
+      } else if (robot.led.effect !== 2 || robot._ledPhase < 6) {
+        context.fillStyle = color;
+        context.beginPath();
+        context.arc(0, 0, 9, 0, Math.PI * 2);
+        context.fill();
+      }
+      context.fillStyle = '#f2d941';
+      context.beginPath();
+      context.arc(0, -27, 6, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+    }
+  }, {
+    key: "_draw",
+    value: function _draw() {
+      var _this3 = this;
+      if (!this.host._context || !this.host._canvas) return;
+      var context = this.host._context;
+      var _this$host$_canvas = this.host._canvas,
+        width = _this$host$_canvas.width,
+        height = _this$host$_canvas.height;
+      var scale = SCALE * this.host.viewZoom;
+      var point = function point(_ref) {
+        var x = _ref.x,
+          y = _ref.y;
+        return {
+          x: width / 2 + x * scale,
+          y: height / 2 - y * scale
+        };
+      };
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = '#fcfdfd';
+      context.fillRect(0, 0, width, height);
+      context.strokeStyle = '#e0ebe7';
+      context.lineWidth = 1;
+      for (var x = width / 2 % (50 * scale); x < width; x += 50 * scale) {
+        context.beginPath();
+        context.moveTo(x, 0);
+        context.lineTo(x, height);
+        context.stroke();
+      }
+      for (var y = height / 2 % (50 * scale); y < height; y += 50 * scale) {
+        context.beginPath();
+        context.moveTo(0, y);
+        context.lineTo(width, y);
+        context.stroke();
+      }
+      this.obstacles.forEach(function (obstacle, index) {
+        var center = point(obstacle);
+        context.fillStyle = obstacle.type === 'wall' ? '#71828a' : '#d9864d';
+        context.strokeStyle = index === _this3.host._selectedObstacle ? '#f2c94c' : '#3d4d54';
+        context.lineWidth = index === _this3.host._selectedObstacle ? 5 : 3;
+        context.beginPath();
+        context.rect(center.x - obstacle.width * scale / 2, center.y - obstacle.height * scale / 2, obstacle.width * scale, obstacle.height * scale);
+        context.fill();
+        context.stroke();
+      });
+      var _iterator8 = _createForOfIteratorHelper$1(this.robots),
+        _step8;
+      try {
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+          var _step8$value = _slicedToArray$1(_step8.value, 2),
+            id = _step8$value[0],
+            robot = _step8$value[1];
+          context.strokeStyle = robot.marker === 2 ? '#fff' : id === this.activeId ? '#22a6a6' : '#8a9bd0';
+          context.lineWidth = 4;
+          context.lineCap = 'round';
+          var _iterator9 = _createForOfIteratorHelper$1(robot.trail),
+            _step9;
+          try {
+            for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+              var segment = _step9.value;
+              var a = point(segment);
+              var b = point({
+                x: segment.x2,
+                y: segment.y2
+              });
+              context.beginPath();
+              context.moveTo(a.x, a.y);
+              context.lineTo(b.x, b.y);
+              context.stroke();
+            }
+          } catch (err) {
+            _iterator9.e(err);
+          } finally {
+            _iterator9.f();
+          }
+          this._drawRobot(context, robot, point, scale);
+          var p = point(robot.pose);
+          context.fillStyle = id === this.activeId ? '#26353a' : '#52646c';
+          context.font = 'bold 16px Arial';
+          context.fillText("Root ".concat(id), p.x + 38, p.y - 28);
+        }
+      } catch (err) {
+        _iterator8.e(err);
+      } finally {
+        _iterator8.f();
+      }
+      var active = this.ensureRobot(this.activeId);
+      context.fillStyle = '#26353a';
+      context.font = '18px Arial';
+      context.fillText("Root ".concat(this.activeId, " \xB7 ").concat(this.host._t('x', 'x'), ": ").concat(active.pose.x.toFixed(1), " mm   ").concat(this.host._t('y', 'y'), ": ").concat(active.pose.y.toFixed(1), " mm   ").concat(this.host._t('heading', 'heading'), ": ").concat(active.pose.heading.toFixed(1), "\xB0"), 18, 30);
+      context.fillText("".concat(this.host._t('marker', 'marker'), ": ").concat(active.marker, "   LED: rgb(").concat(active.led.red, ", ").concat(active.led.green, ", ").concat(active.led.blue, ")"), 18, 57);
     }
   }]);
 }();
@@ -6057,8 +6749,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     // Simulator fixed explicitly; this default will be reconsidered only
     // after the simulator has completed classroom validation.
     this.controlMode = CONTROL_MODE_PHYSICAL;
-    this.simulator = new RootSimulator(function (event) {
-      return _this._receiveSimulatorEvent(event);
+    this.simulator = new RootSimulatorWorld(function (event, sessionId) {
+      return _this._receiveSimulatorEvent(event, sessionId);
     }, {
       isActive: function isActive() {
         return _this._isSimulatorActive();
@@ -6696,6 +7388,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "addRoot",
     value: function addRoot() {
+      if (this.controlMode === CONTROL_MODE_SIMULATOR) {
+        var session = this.rootManager.createSession();
+        this.rootManager.setActiveSession(session.id);
+        this.simulator.setActiveRoot(session.id);
+        this.simulator.open();
+        return session.displayName;
+      }
       this.rootManager.scan();
     }
   }, {
@@ -6711,7 +7410,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "selectRoot",
     value: function selectRoot(args, util) {
-      this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
+      var session = this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
+      this.simulator.setActiveRoot(session.id);
     }
   }, {
     key: "activeRoot",
@@ -6782,7 +7482,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var session = this._activeSession(util);
       session.navigationPosition = null;
       if (this._isSimulatorActive(util, session)) {
-        return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
+        return this.simulator.motors(session.id, Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
       }
       return this._send(session.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)), session);
     }
@@ -6792,7 +7492,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var distance = Cast.toNumber(args.MM);
       var session = this._activeSession(util);
       session.navigationPosition = null;
-      if (this._isSimulatorActive(util, session)) return this.simulator.move(distance);
+      if (this._isSimulatorActive(util, session)) return this.simulator.move(session.id, distance);
       return this._sendAndWait(session.protocol.driveDistance(distance), linearMotionWatchdogMs(distance), session);
     }
   }, {
@@ -6800,7 +7500,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function turn(args, util) {
       var degrees = Cast.toNumber(args.DEGREES);
       var session = this._activeSession(util);
-      if (this._isSimulatorActive(util, session)) return this.simulator.turn(degrees);
+      if (this._isSimulatorActive(util, session)) return this.simulator.turn(session.id, degrees);
       return this._sendAndWait(session.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees), session);
     }
   }, {
@@ -6810,7 +7510,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var radius = Cast.toNumber(args.RADIUS);
       var session = this._activeSession(util);
       session.navigationPosition = null;
-      if (this._isSimulatorActive(util, session)) return this.simulator.arc(radius, degrees);
+      if (this._isSimulatorActive(util, session)) return this.simulator.arc(session.id, radius, degrees);
       return this._sendAndWait(session.protocol.driveArc(degrees * 10, radius), arcMotionWatchdogMs(degrees, radius), session);
     }
   }, {
@@ -6825,7 +7525,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
-      if (this._isSimulatorActive(util, session)) this.simulator.resetNavigation();
+      if (this._isSimulatorActive(util, session)) this.simulator.resetNavigation(session.id);
     }
   }, {
     key: "navigateTo",
@@ -6841,7 +7541,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
-      if (this._isSimulatorActive(util, session)) return this.simulator.navigateTo(target.x, target.y);
+      if (this._isSimulatorActive(util, session)) return this.simulator.navigateTo(session.id, target.x, target.y);
       var deltaX = target.x - origin.x;
       var deltaY = target.y - origin.y;
       var distance = Math.round(Math.hypot(deltaX, deltaY));
@@ -6880,14 +7580,14 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     key: "stop",
     value: function stop(args, util) {
       var session = this._activeSession(util);
-      if (this._isSimulatorActive(util, session)) return this.simulator.stop();
+      if (this._isSimulatorActive(util, session)) return this.simulator.stop(session.id);
       return this._send(session.protocol.packet(0, 3), session);
     }
   }, {
     key: "marker",
     value: function marker(args, util) {
       var session = this._activeSession(util);
-      if (this._isSimulatorActive(util, session)) return this.simulator.setMarker(args.POSITION);
+      if (this._isSimulatorActive(util, session)) return this.simulator.setMarker(session.id, args.POSITION);
       return this._send(session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]), session);
     }
   }, {
@@ -6899,7 +7599,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         green = _Cast$toRgbColorList2[1],
         blue = _Cast$toRgbColorList2[2];
       var session = this._activeSession(util);
-      if (this._isSimulatorActive(util, session)) return this.simulator.setLed(1, red, green, blue);
+      if (this._isSimulatorActive(util, session)) return this.simulator.setLed(session.id, 1, red, green, blue);
       return this._send(session.protocol.led(1, red, green, blue), session);
     }
   }, {
@@ -6911,7 +7611,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         green = _Cast$toRgbColorList4[1],
         blue = _Cast$toRgbColorList4[2];
       var session = this._activeSession(util);
-      if (this._isSimulatorActive(util, session)) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
+      if (this._isSimulatorActive(util, session)) return this.simulator.setLed(session.id, Cast.toNumber(args.EFFECT), red, green, blue);
       return this._send(session.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue), session);
     }
   }, {
@@ -6919,7 +7619,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function led(args, util) {
       var session = this._activeSession(util);
       if (this._isSimulatorActive(util, session)) {
-        return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
+        return this.simulator.setLed(session.id, 1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
       }
       return this._send(session.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)), session);
     }
@@ -6927,7 +7627,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     key: "ledAnimation",
     value: function ledAnimation(args, util) {
       var session = this._activeSession(util);
-      if (this._isSimulatorActive(util, session)) return this.simulator.setLed(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
+      if (this._isSimulatorActive(util, session)) return this.simulator.setLed(session.id, Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
       return this._send(session.protocol.led(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)), session);
     }
   }, {
@@ -6950,7 +7650,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // interrupt this one just before it actually finishes.
       var durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
       var session = this._activeSession(util);
-      if (this._isSimulatorActive(util, session)) return this.simulator.playNote(frequency, durationMs);
+      if (this._isSimulatorActive(util, session)) return this.simulator.playNote(session.id, frequency, durationMs);
       var packet = session.protocol.note(frequency, durationMs);
       if (durationMs === 0) {
         this._send(packet, session);
@@ -6963,7 +7663,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function _playNoteForPicker(midiNote, category) {
       if (category !== this.getInfo().name) return;
       if (this._isSimulatorActive()) {
-        this.simulator.playNote(midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
+        this.simulator.playNote(this._activeSession().id, midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
         return;
       }
       if (!this.transport.isConnected()) return;
@@ -6973,7 +7673,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     key: "sayPhrase",
     value: function sayPhrase(args, util) {
       var session = this._activeSession(util);
-      if (this._isSimulatorActive(util, session)) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
+      if (this._isSimulatorActive(util, session)) return this.simulator.sayPhrase(session.id, Cast.toString(args.PHRASE));
       return this._sendSoundCommandAndWait(session.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase', session);
     }
   }, {
@@ -6993,7 +7693,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     key: "sensor",
     value: function sensor(args, util) {
       var session = this._activeSession(util);
-      if (this._isSimulatorActive(util, session)) return this.simulator.getSensor(args.VALUE);
+      if (this._isSimulatorActive(util, session)) return this.simulator.getSensor(session.id, args.VALUE);
       return session.last[args.VALUE] === undefined ? 0 : session.last[args.VALUE];
     }
   }, {
@@ -7373,16 +8073,18 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_receiveSimulatorEvent",
     value: function _receiveSimulatorEvent(event) {
-      if (!this._isSimulatorActive() || !event) return;
+      var sessionId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.rootManager.activeSessionId;
+      var session = this.rootManager.getSession(sessionId) || this._activeSession();
+      if (!this._isSimulatorActive(null, session) || !event) return;
       if (event.type === 'bumper') {
         this._receiveBumperEvent({
           leftBumper: event.left,
           rightBumper: event.right
-        });
+        }, session);
       } else if (event.type === 'touch') {
         this._receiveTouchEvent({
           touchMask: event.mask
-        });
+        }, session);
       }
     }
   }], [{
