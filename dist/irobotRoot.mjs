@@ -4650,6 +4650,10 @@ var RootSession = /*#__PURE__*/function () {
     this.manager = manager;
     this.id = id;
     this.peripheralId = null;
+    // null means the adapter has not reported a lifecycle transition yet;
+    // explicit false prevents a stale adapter/socket state from making a
+    // disconnected slot look occupied during the next scan.
+    this.connectionState = null;
     this.displayName = "Root ".concat(id);
     this.protocol = new RootProtocol();
     this.pendingCommands = new Map();
@@ -4674,7 +4678,10 @@ var RootSession = /*#__PURE__*/function () {
   return _createClass$1(RootSession, [{
     key: "isConnected",
     value: function isConnected() {
-      return this.transport.isConnected();
+      if (this.connectionState === false) return false;
+      var connected = this.transport.isConnected();
+      if (connected) this.connectionState = true;
+      return connected;
     }
   }]);
 }();
@@ -4770,7 +4777,10 @@ var RootManager = /*#__PURE__*/function () {
     key: "disconnect",
     value: function disconnect() {
       var sessionId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.activeSessionId;
-      this.getSession(sessionId).transport.disconnect();
+      var session = this.getSession(sessionId);
+      if (!session) return;
+      session.connectionState = false;
+      session.transport.disconnect();
     }
   }, {
     key: "isConnected",
@@ -4793,6 +4803,7 @@ var RootManager = /*#__PURE__*/function () {
   }, {
     key: "onConnected",
     value: function onConnected(session) {
+      session.connectionState = true;
       session.displayName = "Root ".concat(session.id);
       this.pendingScanSessionId = null;
       this.activeSessionId = session.id;
@@ -4801,6 +4812,7 @@ var RootManager = /*#__PURE__*/function () {
   }, {
     key: "onReset",
     value: function onReset(session) {
+      session.connectionState = false;
       if (this.pendingScanSessionId === session.id) this.pendingScanSessionId = null;
       if (this.callbacks.onReset) this.callbacks.onReset(session);
     }

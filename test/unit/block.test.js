@@ -137,6 +137,24 @@ describe('iRobot Root extension', () => {
         ]);
     });
 
+    test('marks an explicitly disconnected slot reusable even if the adapter reports stale state', () => {
+        const block = new blockClass(runtime);
+        const rootA = block.rootManager.getSession(1);
+        rootA.transport.ble = {isConnected: () => true, disconnect: jest.fn()};
+        rootA.transport.disconnect = jest.fn(() => {
+            // Simulate a bridge that has not updated its connection flag yet.
+            rootA.transport.ble.isConnected = () => true;
+        });
+        rootA.transport.scan = jest.fn();
+        block.rootManager.activeSessionId = rootA.id;
+
+        block.rootManager.disconnect(rootA.id);
+        block.rootManager.scan();
+
+        expect(rootA.transport.scan).toHaveBeenCalledTimes(1);
+        expect(rootA.connectionState).toBe(false);
+    });
+
     test('keeps a selected Root bound to each parallel Scratch thread', async () => {
         const block = new blockClass(runtime);
         const rootB = block.rootManager.createSession();

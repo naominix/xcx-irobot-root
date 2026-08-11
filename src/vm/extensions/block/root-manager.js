@@ -9,6 +9,10 @@ class RootSession {
         this.manager = manager;
         this.id = id;
         this.peripheralId = null;
+        // null means the adapter has not reported a lifecycle transition yet;
+        // explicit false prevents a stale adapter/socket state from making a
+        // disconnected slot look occupied during the next scan.
+        this.connectionState = null;
         this.displayName = `Root ${id}`;
         this.protocol = new RootProtocol();
         this.pendingCommands = new Map();
@@ -28,7 +32,10 @@ class RootSession {
     }
 
     isConnected () {
-        return this.transport.isConnected();
+        if (this.connectionState === false) return false;
+        const connected = this.transport.isConnected();
+        if (connected) this.connectionState = true;
+        return connected;
     }
 }
 
@@ -109,7 +116,10 @@ class RootManager {
     }
 
     disconnect (sessionId = this.activeSessionId) {
-        this.getSession(sessionId).transport.disconnect();
+        const session = this.getSession(sessionId);
+        if (!session) return;
+        session.connectionState = false;
+        session.transport.disconnect();
     }
 
     isConnected (sessionId = this.activeSessionId) {
@@ -125,6 +135,7 @@ class RootManager {
     }
 
     onConnected (session) {
+        session.connectionState = true;
         session.displayName = `Root ${session.id}`;
         this.pendingScanSessionId = null;
         this.activeSessionId = session.id;
@@ -132,6 +143,7 @@ class RootManager {
     }
 
     onReset (session) {
+        session.connectionState = false;
         if (this.pendingScanSessionId === session.id) this.pendingScanSessionId = null;
         if (this.callbacks.onReset) this.callbacks.onReset(session);
     }
