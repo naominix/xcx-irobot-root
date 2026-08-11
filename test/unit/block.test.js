@@ -384,6 +384,26 @@ describe('iRobot Root extension', () => {
         }
     });
 
+    test('does not reset one Root marker or trail when a parallel script selects simulator mode', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const utilA = {thread: {}};
+        const utilB = {thread: {}};
+        block.setControlMode({MODE: 'simulator'});
+        block.selectRoot({ROOT: '1'}, utilA);
+        block.marker({POSITION: '1'}, utilA);
+        block.simulator.robots.get(1).trail.push({x1: 0, y1: 0, x2: 50, y2: 0});
+        block.selectRoot({ROOT: String(rootB.id)}, utilB);
+
+        // This mirrors a second green-flag script containing the same mode
+        // block. It must not wipe Root 1's in-progress drawing.
+        block.setControlMode({MODE: 'simulator'});
+
+        expect(block.simulator.robots.get(1).marker).toBe(1);
+        expect(block.simulator.robots.get(1).trail).toHaveLength(1);
+        expect(block.simulator.robots.get(rootB.id).marker).toBe(0);
+    });
+
     test('navigation reset preserves simulator marker and LED state', () => {
         const block = new blockClass(runtime);
         block.setControlMode({MODE: 'simulator'});

@@ -490,10 +490,15 @@ class IrobotRootBlocks {
         const requested = String(args.MODE || CONTROL_MODE_AUTO);
         const mode = [CONTROL_MODE_AUTO, CONTROL_MODE_SIMULATOR, CONTROL_MODE_PHYSICAL].includes(requested) ?
             requested : CONTROL_MODE_AUTO;
-        const wasPhysical = !this._isSimulatorActive();
+        const wasSimulatorActive = this._isSimulatorActive();
         this.controlMode = mode;
-        if (this._isSimulatorActive()) {
-            if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
+        const isSimulatorActive = this._isSimulatorActive();
+        // Multiple green-flag scripts commonly start by selecting simulator
+        // mode. Only the transition into simulator mode may reset the shared
+        // world; resetting on every identical block invocation clears another
+        // Root's marker/trail halfway through a parallel drawing.
+        if (isSimulatorActive && !wasSimulatorActive) {
+            if (this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
             this._cancelPendingCommands(new Error('Root control target changed to simulator'), this._activeSession());
             this.simulator.reset();
             this.simulator.open();
