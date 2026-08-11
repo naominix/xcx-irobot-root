@@ -4,6 +4,9 @@ const DEG = Math.PI / 180;
 const SCALE = 1.8;
 const ROBOT_RADIUS = 24;
 const TOUCH_RADIUS = 44;
+// A Root body has a 24 mm collision radius. Keep virtual Roots comfortably
+// apart on creation, while retaining Root 1 at the familiar world origin.
+const INITIAL_ROOT_SPACING_MM = 160;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const headingRadians = heading => heading * DEG;
 const normalizeHeading = heading => ((heading % 360) + 360) % 360;
@@ -66,9 +69,22 @@ class RootSimulatorWorld {
             robot.obstacles = this.obstacles;
             robot._draw = () => this._draw();
             robot._collisionAt = pose => this._collisionAt(key, pose, robot);
+            this._setInitialPose(robot, key);
             this.robots.set(key, robot);
         }
         return this.robots.get(key);
+    }
+
+    _initialPose (id) {
+        return {
+            x: (Number(id) - 1) * INITIAL_ROOT_SPACING_MM,
+            y: 0,
+            heading: 90
+        };
+    }
+
+    _setInitialPose (robot, id) {
+        robot.pose = this._initialPose(id);
     }
 
     open () { this.host.open(); this._draw(); }
@@ -76,6 +92,12 @@ class RootSimulatorWorld {
     isOpen () { return this.host.isOpen(); }
     refresh () { this._draw(); }
     setActiveRoot (id) { this.activeId = Number(id) || 1; this.ensureRobot(this.activeId); this._draw(); }
+    clearRobots () {
+        for (const robot of this.robots.values()) robot.stop();
+        this.robots.clear();
+        this.activeId = null;
+        this._draw();
+    }
     setSpeedMultiplier (multiplier) {
         this.host.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
         for (const robot of this.robots.values()) robot.speedMultiplier = this.host.speedMultiplier;
@@ -88,16 +110,38 @@ class RootSimulatorWorld {
         return this.host.viewZoom;
     }
     reset () {
-        for (const robot of this.robots.values()) robot.reset();
+        for (const [id, robot] of this.robots) {
+            robot.reset();
+            this._setInitialPose(robot, id);
+        }
         this._draw();
     }
-    resetRoot (id) { this.ensureRobot(id).reset(); this._draw(); }
-    resetNavigation (id) { this.ensureRobot(id).resetNavigation(); this._draw(); }
+    resetRoot (id) {
+        const robot = this.ensureRobot(id);
+        robot.reset();
+        this._setInitialPose(robot, id);
+        this._draw();
+    }
+    resetNavigation (id) {
+        const robot = this.ensureRobot(id);
+        robot.resetNavigation();
+        this._setInitialPose(robot, id);
+        this._draw();
+    }
     motors (id, left, right) { return this.ensureRobot(id).motors(left, right); }
     move (id, distance) { return this.ensureRobot(id).move(distance); }
     turn (id, degrees) { return this.ensureRobot(id).turn(degrees); }
     arc (id, radius, degrees) { return this.ensureRobot(id).arc(radius, degrees); }
-    navigateTo (id, x, y) { return this.ensureRobot(id).navigateTo(x, y); }
+    navigateTo (id, x, y) {
+        // Each virtual Root has its own navigation origin. The world offset is
+        // only for rendering/collision separation, so "x: 0, y: 0" returns
+        // Root 2 (or later) to its own starting position rather than Root 1.
+        const origin = this._initialPose(id);
+        return this.ensureRobot(id).navigateTo(
+            origin.x + (Number(x) || 0),
+            origin.y + (Number(y) || 0)
+        );
+    }
     stop (id) { return this.ensureRobot(id).stop(); }
     setMarker (id, position) { return this.ensureRobot(id).setMarker(position); }
     setLed (id, effect, red, green, blue) { return this.ensureRobot(id).setLed(effect, red, green, blue); }
@@ -251,7 +295,13 @@ class RootSimulatorWorld {
             this._drawRobot(context, robot, point, scale);
             const p = point(robot.pose); context.fillStyle = id === this.activeId ? '#26353a' : '#52646c'; context.font = 'bold 16px Arial'; context.fillText(`Root ${id}`, p.x + 38, p.y - 28);
         }
-        const active = this.ensureRobot(this.activeId); context.fillStyle = '#26353a'; context.font = '18px Arial'; context.fillText(`Root ${this.activeId} · ${this.host._t('x', 'x')}: ${active.pose.x.toFixed(1)} mm   ${this.host._t('y', 'y')}: ${active.pose.y.toFixed(1)} mm   ${this.host._t('heading', 'heading')}: ${active.pose.heading.toFixed(1)}°`, 18, 30);
+        const active = this.robots.get(this.activeId);
+        context.fillStyle = '#26353a'; context.font = '18px Arial';
+        if (!active) {
+            context.fillText(this.host._t('noRoot', 'No Root selected'), 18, 30);
+            return;
+        }
+        context.fillText(`Root ${this.activeId} · ${this.host._t('x', 'x')}: ${active.pose.x.toFixed(1)} mm   ${this.host._t('y', 'y')}: ${active.pose.y.toFixed(1)} mm   ${this.host._t('heading', 'heading')}: ${active.pose.heading.toFixed(1)}°`, 18, 30);
         context.fillText(`${this.host._t('marker', 'marker')}: ${active.marker}   LED: rgb(${active.led.red}, ${active.led.green}, ${active.led.blue})`, 18, 57);
     }
 }

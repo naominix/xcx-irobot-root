@@ -5852,6 +5852,9 @@ var DEG = Math.PI / 180;
 var SCALE = 1.8;
 var ROBOT_RADIUS = 24;
 var TOUCH_RADIUS = 44;
+// A Root body has a 24 mm collision radius. Keep virtual Roots comfortably
+// apart on creation, while retaining Root 1 at the familiar world origin.
+var INITIAL_ROOT_SPACING_MM = 160;
 var clamp = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 };
@@ -6011,9 +6014,24 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
         robot._collisionAt = function (pose) {
           return _this2._collisionAt(key, pose, robot);
         };
+        this._setInitialPose(robot, key);
         this.robots.set(key, robot);
       }
       return this.robots.get(key);
+    }
+  }, {
+    key: "_initialPose",
+    value: function _initialPose(id) {
+      return {
+        x: (Number(id) - 1) * INITIAL_ROOT_SPACING_MM,
+        y: 0,
+        heading: 90
+      };
+    }
+  }, {
+    key: "_setInitialPose",
+    value: function _setInitialPose(robot, id) {
+      robot.pose = this._initialPose(id);
     }
   }, {
     key: "open",
@@ -6044,20 +6062,39 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
       this._draw();
     }
   }, {
-    key: "setSpeedMultiplier",
-    value: function setSpeedMultiplier(multiplier) {
-      this.host.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
+    key: "clearRobots",
+    value: function clearRobots() {
       var _iterator = _createForOfIteratorHelper$1(this.robots.values()),
         _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var robot = _step.value;
-          robot.speedMultiplier = this.host.speedMultiplier;
+          robot.stop();
         }
       } catch (err) {
         _iterator.e(err);
       } finally {
         _iterator.f();
+      }
+      this.robots.clear();
+      this.activeId = null;
+      this._draw();
+    }
+  }, {
+    key: "setSpeedMultiplier",
+    value: function setSpeedMultiplier(multiplier) {
+      this.host.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
+      var _iterator2 = _createForOfIteratorHelper$1(this.robots.values()),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var robot = _step2.value;
+          robot.speedMultiplier = this.host.speedMultiplier;
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
       }
       this._draw();
     }
@@ -6072,30 +6109,37 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
   }, {
     key: "reset",
     value: function reset() {
-      var _iterator2 = _createForOfIteratorHelper$1(this.robots.values()),
-        _step2;
+      var _iterator3 = _createForOfIteratorHelper$1(this.robots),
+        _step3;
       try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var robot = _step2.value;
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var _step3$value = _slicedToArray$1(_step3.value, 2),
+            id = _step3$value[0],
+            robot = _step3$value[1];
           robot.reset();
+          this._setInitialPose(robot, id);
         }
       } catch (err) {
-        _iterator2.e(err);
+        _iterator3.e(err);
       } finally {
-        _iterator2.f();
+        _iterator3.f();
       }
       this._draw();
     }
   }, {
     key: "resetRoot",
     value: function resetRoot(id) {
-      this.ensureRobot(id).reset();
+      var robot = this.ensureRobot(id);
+      robot.reset();
+      this._setInitialPose(robot, id);
       this._draw();
     }
   }, {
     key: "resetNavigation",
     value: function resetNavigation(id) {
-      this.ensureRobot(id).resetNavigation();
+      var robot = this.ensureRobot(id);
+      robot.resetNavigation();
+      this._setInitialPose(robot, id);
       this._draw();
     }
   }, {
@@ -6121,7 +6165,11 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
   }, {
     key: "navigateTo",
     value: function navigateTo(id, x, y) {
-      return this.ensureRobot(id).navigateTo(x, y);
+      // Each virtual Root has its own navigation origin. The world offset is
+      // only for rendering/collision separation, so "x: 0, y: 0" returns
+      // Root 2 (or later) to its own starting position rather than Root 1.
+      var origin = this._initialPose(id);
+      return this.ensureRobot(id).navigateTo(origin.x + (Number(x) || 0), origin.y + (Number(y) || 0));
     }
   }, {
     key: "stop",
@@ -6166,17 +6214,17 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
     value: function stopProject() {
       if (this.host.controls.isActive && !this.host.controls.isActive()) return false;
       if (this.host.controls.onStop) this.host.controls.onStop();
-      var _iterator3 = _createForOfIteratorHelper$1(this.robots.values()),
-        _step3;
+      var _iterator4 = _createForOfIteratorHelper$1(this.robots.values()),
+        _step4;
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var robot = _step3.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var robot = _step4.value;
           robot.stop();
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator3.f();
+        _iterator4.f();
       }
       return true;
     }
@@ -6215,17 +6263,17 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
     value: function clearObstacles() {
       this.obstacles.length = 0;
       this.host._selectedObstacle = -1;
-      var _iterator4 = _createForOfIteratorHelper$1(this.robots.values()),
-        _step4;
+      var _iterator5 = _createForOfIteratorHelper$1(this.robots.values()),
+        _step5;
       try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-          var robot = _step4.value;
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+          var robot = _step5.value;
           robot._setBumpers(false, false);
         }
       } catch (err) {
-        _iterator4.e(err);
+        _iterator5.e(err);
       } finally {
-        _iterator4.f();
+        _iterator5.f();
       }
       this._draw();
     }
@@ -6234,13 +6282,13 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
     value: function _collisionAt(id, pose, robot) {
       var obstacleCollision = RootSimulator.prototype._collisionAt.call(robot, pose);
       if (obstacleCollision) return obstacleCollision;
-      var _iterator5 = _createForOfIteratorHelper$1(this.robots),
-        _step5;
+      var _iterator6 = _createForOfIteratorHelper$1(this.robots),
+        _step6;
       try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-          var _step5$value = _slicedToArray$1(_step5.value, 2),
-            otherId = _step5$value[0],
-            other = _step5$value[1];
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+          var _step6$value = _slicedToArray$1(_step6.value, 2),
+            otherId = _step6$value[0],
+            other = _step6$value[1];
           if (otherId === id) continue;
           var dx = other.pose.x - pose.x;
           var dy = other.pose.y - pose.y;
@@ -6255,9 +6303,9 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
           };
         }
       } catch (err) {
-        _iterator5.e(err);
+        _iterator6.e(err);
       } finally {
-        _iterator5.f();
+        _iterator6.f();
       }
       return null;
     }
@@ -6276,13 +6324,13 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
       var cy = (event.clientY - bounds.top) * this.host._canvas.height / bounds.height;
       var scale = SCALE * this.host.viewZoom;
       var nearest = null;
-      var _iterator6 = _createForOfIteratorHelper$1(this.robots),
-        _step6;
+      var _iterator7 = _createForOfIteratorHelper$1(this.robots),
+        _step7;
       try {
-        for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
-          var _step6$value = _slicedToArray$1(_step6.value, 2),
-            id = _step6$value[0],
-            _robot = _step6$value[1];
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+          var _step7$value = _slicedToArray$1(_step7.value, 2),
+            id = _step7$value[0],
+            _robot = _step7$value[1];
           var rx = this.host._canvas.width / 2 + _robot.pose.x * scale;
           var ry = this.host._canvas.height / 2 - _robot.pose.y * scale;
           var distance = Math.pow(cx - rx, 2) + Math.pow(cy - ry, 2);
@@ -6293,9 +6341,9 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
           };
         }
       } catch (err) {
-        _iterator6.e(err);
+        _iterator7.e(err);
       } finally {
-        _iterator6.f();
+        _iterator7.f();
       }
       if (nearest) {
         this.activeId = nearest.id;
@@ -6339,20 +6387,20 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
   }, {
     key: "_pointerUp",
     value: function _pointerUp(event) {
-      var _iterator7 = _createForOfIteratorHelper$1(this.robots.values()),
-        _step7;
+      var _iterator8 = _createForOfIteratorHelper$1(this.robots.values()),
+        _step8;
       try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
-          var robot = _step7.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+          var robot = _step8.value;
           if (robot._activeTouchPointer === event.pointerId) {
             robot._activeTouchPointer = null;
             robot._setTouchMask(0);
           }
         }
       } catch (err) {
-        _iterator7.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator7.f();
+        _iterator8.f();
       }
       this.host._dragOffset = null;
       if (this.host._canvas && this.host._canvas.hasPointerCapture && this.host._canvas.hasPointerCapture(event.pointerId)) {
@@ -6487,21 +6535,21 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
         context.fill();
         context.stroke();
       });
-      var _iterator8 = _createForOfIteratorHelper$1(this.robots),
-        _step8;
+      var _iterator9 = _createForOfIteratorHelper$1(this.robots),
+        _step9;
       try {
-        for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
-          var _step8$value = _slicedToArray$1(_step8.value, 2),
-            id = _step8$value[0],
-            robot = _step8$value[1];
+        for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+          var _step9$value = _slicedToArray$1(_step9.value, 2),
+            id = _step9$value[0],
+            robot = _step9$value[1];
           context.strokeStyle = robot.marker === 2 ? '#fff' : id === this.activeId ? '#22a6a6' : '#8a9bd0';
           context.lineWidth = 4;
           context.lineCap = 'round';
-          var _iterator9 = _createForOfIteratorHelper$1(robot.trail),
-            _step9;
+          var _iterator0 = _createForOfIteratorHelper$1(robot.trail),
+            _step0;
           try {
-            for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
-              var segment = _step9.value;
+            for (_iterator0.s(); !(_step0 = _iterator0.n()).done;) {
+              var segment = _step0.value;
               var a = point(segment);
               var b = point({
                 x: segment.x2,
@@ -6513,9 +6561,9 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
               context.stroke();
             }
           } catch (err) {
-            _iterator9.e(err);
+            _iterator0.e(err);
           } finally {
-            _iterator9.f();
+            _iterator0.f();
           }
           this._drawRobot(context, robot, point, scale);
           var p = point(robot.pose);
@@ -6524,13 +6572,17 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
           context.fillText("Root ".concat(id), p.x + 38, p.y - 28);
         }
       } catch (err) {
-        _iterator8.e(err);
+        _iterator9.e(err);
       } finally {
-        _iterator8.f();
+        _iterator9.f();
       }
-      var active = this.ensureRobot(this.activeId);
+      var active = this.robots.get(this.activeId);
       context.fillStyle = '#26353a';
       context.font = '18px Arial';
+      if (!active) {
+        context.fillText(this.host._t('noRoot', 'No Root selected'), 18, 30);
+        return;
+      }
       context.fillText("Root ".concat(this.activeId, " \xB7 ").concat(this.host._t('x', 'x'), ": ").concat(active.pose.x.toFixed(1), " mm   ").concat(this.host._t('y', 'y'), ": ").concat(active.pose.y.toFixed(1), " mm   ").concat(this.host._t('heading', 'heading'), ": ").concat(active.pose.heading.toFixed(1), "\xB0"), 18, 30);
       context.fillText("".concat(this.host._t('marker', 'marker'), ": ").concat(active.marker, "   LED: rgb(").concat(active.led.red, ", ").concat(active.led.green, ", ").concat(active.led.blue, ")"), 18, 57);
     }
@@ -7406,6 +7458,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     key: "resetRootConnections",
     value: function resetRootConnections() {
       this.rootManager.resetConnections();
+      // The connection reset is also a clean boundary for the shared
+      // simulator world. Keep no stale virtual Roots after all physical
+      // Roots have been disconnected; selecting/using a Root creates its
+      // corresponding virtual robot again when simulator mode is used.
+      this.simulator.clearRobots();
     }
   }, {
     key: "selectRoot",

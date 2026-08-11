@@ -148,6 +148,19 @@ describe('iRobot Root extension', () => {
         expect(scan).not.toHaveBeenCalled();
     });
 
+    test('places each additional virtual Root at its own resettable world origin', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.addRoot();
+
+        expect(block.simulator.robots.get(1).pose).toEqual({x: 0, y: 0, heading: 90});
+        expect(block.simulator.robots.get(2).pose).toEqual({x: 160, y: 0, heading: 90});
+
+        block.simulator.robots.get(2).pose = {x: 10, y: 20, heading: 180};
+        block.simulator.resetRoot(2);
+        expect(block.simulator.robots.get(2).pose).toEqual({x: 160, y: 0, heading: 90});
+    });
+
     test('reuses a disconnected Root slot when scanning again', () => {
         const block = new blockClass(runtime);
         const rootA = block.rootManager.getSession(1);
@@ -216,6 +229,18 @@ describe('iRobot Root extension', () => {
         expect(block.getRootMenu()).toEqual([
             {text: 'Root 1', value: '1'}, {text: 'Root 2', value: '2'}
         ]);
+    });
+
+    test('clears every virtual Root from the simulator on connection reset', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.addRoot();
+        expect(block.simulator.robots.size).toBe(2);
+
+        block.resetRootConnections();
+
+        expect(block.simulator.robots.size).toBe(0);
+        expect(block.simulator.activeId).toBeNull();
     });
 
     test('keeps a selected Root bound to each parallel Scratch thread', async () => {

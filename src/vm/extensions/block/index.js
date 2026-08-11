@@ -467,7 +467,14 @@ class IrobotRootBlocks {
         this.rootManager.scan();
     }
     disconnect (args, util) { this.rootManager.disconnect(this._activeSession(util).id); }
-    resetRootConnections () { this.rootManager.resetConnections(); }
+    resetRootConnections () {
+        this.rootManager.resetConnections();
+        // The connection reset is also a clean boundary for the shared
+        // simulator world. Keep no stale virtual Roots after all physical
+        // Roots have been disconnected; selecting/using a Root creates its
+        // corresponding virtual robot again when simulator mode is used.
+        this.simulator.clearRobots();
+    }
     selectRoot (args, util) {
         const session = this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
         this.simulator.setActiveRoot(session.id);
