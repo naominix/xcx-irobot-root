@@ -76,7 +76,8 @@ describe('iRobot Root extension', () => {
         expect(block.whenBumper()).toBe(true);
         expect(block.whenTouchSensor()).toBe(true);
         expect(block.whenFixedEvent()).toBe(true);
-        expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot', block.transport);
+        expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot', block.rootManager);
+        expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot:session:1', block.transport);
     });
 
     test('falls back to standard Scratch number fields when the editor has no motion picker', () => {
@@ -91,6 +92,117 @@ describe('iRobot Root extension', () => {
         expect(findBlock('arc').arguments.RADIUS.type).toBe('number');
         expect(findBlock('arc').arguments.DEGREES.type).toBe('number');
         expect(info.customFieldTypes).toEqual({});
+    });
+
+    test('keeps Root A and Root B protocol packet ids and LED writes independent', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        rootA.transport.write = jest.fn();
+        rootB.transport.write = jest.fn();
+
+        block.selectRoot({ROOT: '1'});
+        block.led({RED: 255, GREEN: 0, BLUE: 0});
+        block.selectRoot({ROOT: String(rootB.id)});
+        block.led({RED: 0, GREEN: 0, BLUE: 255});
+
+        expect(rootA.protocol.packetId).toBe(1);
+        expect(rootB.protocol.packetId).toBe(1);
+        expect(rootA.transport.write.mock.calls[0][0][3]).toBe(1);
+        expect(rootA.transport.write.mock.calls[0][0][4]).toBe(255);
+        expect(rootB.transport.write.mock.calls[0][0][3]).toBe(1);
+        expect(rootB.transport.write.mock.calls[0][0][6]).toBe(255);
+        expect(block.getRootMenu()).toEqual([
+            {text: 'Root 1', value: '1'}, {text: 'Root 2', value: '2'}
+        ]);
+    });
+
+    test('keeps a selected Root bound to each parallel Scratch thread', async () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        rootA.transport.write = jest.fn();
+        rootB.transport.write = jest.fn();
+        const utilA = {thread: {}};
+        const utilB = {thread: {}};
+
+        block.selectRoot({ROOT: '1'}, utilA);
+        block.selectRoot({ROOT: String(rootB.id)}, utilB);
+        const turnA = block.turn({DEGREES: 90}, utilA).catch(() => undefined);
+        const turnB = block.turn({DEGREES: -90}, utilB).catch(() => undefined);
+
+        expect(utilA.thread.irobotRootSessionId).toBe(rootA.id);
+        expect(utilB.thread.irobotRootSessionId).toBe(rootB.id);
+        expect(rootA.transport.write).toHaveBeenCalledTimes(1);
+        expect(rootB.transport.write).toHaveBeenCalledTimes(1);
+        expect(rootA.transport.write.mock.calls[0][0][1]).toBe(12);
+        expect(rootB.transport.write.mock.calls[0][0][1]).toBe(12);
+
+        block._cancelPendingCommands(new Error('test cleanup'), rootA);
+        block._cancelPendingCommands(new Error('test cleanup'), rootB);
+        await Promise.all([turnA, turnB]);
+    });
+
+    test('filters Root-specific sensor hats by the notification session', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        const util = {thread: {}};
+
+        block._hatDispatchSessionId = rootA.id;
+        expect(block.whenBumper({ROOT: String(rootA.id)}, util)).toBe(true);
+        expect(block.whenBumper({ROOT: String(rootB.id)}, util)).toBe(false);
+        expect(block.whenTouchSensor({ROOT: String(rootA.id)}, util)).toBe(true);
+        expect(block.whenFixedEvent({ROOT: String(rootB.id)}, util)).toBe(false);
+        block._hatDispatchSessionId = null;
+    });
+
+    test('routes identical packet ids to the matching session pending command', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        const pending = session => {
+            const resolve = jest.fn();
+            const reject = jest.fn();
+            session.pendingCommands.set('1:8:7', {
+                resolve, reject, timeout: null, watchdog: null, settle: null,
+                settling: false, stopMotion: false
+            });
+            return {resolve, reject};
+        };
+        const a = pending(rootA);
+        const b = pending(rootB);
+
+        block._resolvePendingCommand({device: 1, command: 8, packetId: 7}, rootA);
+
+        expect(a.resolve).toHaveBeenCalledTimes(1);
+        expect(b.resolve).not.toHaveBeenCalled();
+        expect(rootA.pendingCommands.size).toBe(0);
+        expect(rootB.pendingCommands.size).toBe(1);
+    });
+
+    test('keeps sensor state, navigation, and pending commands isolated on disconnect', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        rootA.navigationPosition = {x: 100, y: 0, heading: 90};
+        rootB.navigationPosition = {x: -100, y: 0, heading: 180};
+        rootA.bumperState = 0x80;
+        block._receiveBumperEvent({leftBumper: false, rightBumper: false}, rootB);
+        const rejectA = jest.fn();
+        const rejectB = jest.fn();
+        rootA.pendingCommands.set('a', {resolve: jest.fn(), reject: rejectA, timeout: null, watchdog: null, settle: null});
+        rootB.pendingCommands.set('b', {resolve: jest.fn(), reject: rejectB, timeout: null, watchdog: null, settle: null});
+
+        rootA.transport.disconnect();
+
+        expect(rootA.bumperState).toBe(0x80);
+        expect(rootB.bumperState).toBe(0);
+        expect(rootA.navigationPosition).toEqual({x: 100, y: 0, heading: 90});
+        expect(rootB.navigationPosition).toEqual({x: -100, y: 0, heading: 180});
+        expect(rejectA).toHaveBeenCalledTimes(1);
+        expect(rejectB).not.toHaveBeenCalled();
+        expect(rootB.pendingCommands).toHaveProperty('size', 1);
     });
 
     test('runs motion in simulator-fixed mode without writing BLE packets', async () => {
@@ -255,7 +367,7 @@ describe('iRobot Root extension', () => {
         expect(findBlock(japaneseInfo, 'resetNavigation').text).toBe('ナビをリセットする');
         expect(findBlock(japaneseInfo, 'navigateTo').text).toBe('ナビで x [X] y [Y] cmへ移動する');
         expect(findBlock(japaneseInfo, 'sayPhrase').text).toBe('[PHRASE] と言う');
-        expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
+        expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('[ROOT] のFLタッチセンサーに触れたとき');
         expect(japaneseInfo.menus.markerMenu.items[0]).toEqual({text: '上げる', value: '0'});
         expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ もう一度実行');
         expect(block.simulator._t('clearObstacles', 'Clear obstacles')).toBe('障害物を全消去');
@@ -269,8 +381,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(hiraganaInfo, 'resetNavigation').text).toBe('なびのいちをりせっとする');
         expect(findBlock(hiraganaInfo, 'navigateTo').text).toBe('なびで x [X] y [Y] cmへうごく');
         expect(findBlock(hiraganaInfo, 'sayPhrase').text).toBe('[PHRASE] という');
-        expect(findBlock(hiraganaInfo, 'whenBumper').text).toBe('[BUMPER] ばんぱーが [ACTION] とき');
-        expect(findBlock(hiraganaInfo, 'whenFLTouch').text).toBe('FLたっちせんさーにふれたとき');
+        expect(findBlock(hiraganaInfo, 'whenBumper').text).toBe('[ROOT] の [BUMPER] ばんぱーが [ACTION] とき');
+        expect(findBlock(hiraganaInfo, 'whenFLTouch').text).toBe('[ROOT] のFLたっちせんさーにふれたとき');
         expect(hiraganaInfo.menus.markerMenu.items[0]).toEqual({text: 'あげる', value: '0'});
         expect(hiraganaInfo.menus.bumperActionMenu.items[0]).toEqual({text: 'おされた', value: 'PUSH'});
         expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ もういちどうごかす');
@@ -288,7 +400,7 @@ describe('iRobot Root extension', () => {
         expect(findBlock(englishInfo, 'resetNavigation').text).toBe('reset navigation position');
         expect(findBlock(englishInfo, 'navigateTo').text).toBe('navigate to x [X] y [Y] cm');
         expect(findBlock(englishInfo, 'sayPhrase').text).toBe('say [PHRASE]');
-        expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
+        expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when [ROOT] FL touch sensor is touched');
         expect(englishInfo.menus.markerMenu.items[0]).toEqual({text: 'up', value: '0'});
         expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ Run again');
     });

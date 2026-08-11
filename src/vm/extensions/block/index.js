@@ -3,7 +3,8 @@ import ArgumentType from '../../extension-support/argument-type';
 import Cast from '../../util/cast';
 import translations from './translations.json';
 import blockIcon from './block-icon.png';
-import {RootProtocol, RootTransport} from './root-ble';
+import {RootProtocol} from './root-ble';
+import {RootManager} from './root-manager';
 import RootSimulator from './root-simulator';
 
 let formatMessage = message => message.default;
@@ -108,20 +109,20 @@ const normalizeTurn = degrees => {
 const midiNoteToFrequency = midiNote => Math.round(440 * Math.pow(2, (midiNote - 69) / 12));
 
 const FIXED_EVENT_HAT_MESSAGES = [
-    ['whenLeftBumperPush', 'hat.leftBumperPush', 'when left bumper is pushed'],
-    ['whenLeftBumperRelease', 'hat.leftBumperRelease', 'when left bumper is released'],
-    ['whenRightBumperPush', 'hat.rightBumperPush', 'when right bumper is pushed'],
-    ['whenRightBumperRelease', 'hat.rightBumperRelease', 'when right bumper is released'],
-    ['whenBothBumpersPush', 'hat.bothBumpersPush', 'when both bumpers are pushed simultaneously'],
-    ['whenBothBumpersRelease', 'hat.bothBumpersRelease', 'when both bumpers are released simultaneously'],
-    ['whenFLTouch', 'hat.flTouch', 'when FL touch sensor is touched'],
-    ['whenFLRelease', 'hat.flRelease', 'when FL touch sensor is released'],
-    ['whenFRTouch', 'hat.frTouch', 'when FR touch sensor is touched'],
-    ['whenFRRelease', 'hat.frRelease', 'when FR touch sensor is released'],
-    ['whenRLTouch', 'hat.rlTouch', 'when RL touch sensor is touched'],
-    ['whenRLRelease', 'hat.rlRelease', 'when RL touch sensor is released'],
-    ['whenRRTouch', 'hat.rrTouch', 'when RR touch sensor is touched'],
-    ['whenRRRelease', 'hat.rrRelease', 'when RR touch sensor is released']
+    ['whenLeftBumperPush', 'hat.leftBumperPush', 'when [ROOT] left bumper is pushed'],
+    ['whenLeftBumperRelease', 'hat.leftBumperRelease', 'when [ROOT] left bumper is released'],
+    ['whenRightBumperPush', 'hat.rightBumperPush', 'when [ROOT] right bumper is pushed'],
+    ['whenRightBumperRelease', 'hat.rightBumperRelease', 'when [ROOT] right bumper is released'],
+    ['whenBothBumpersPush', 'hat.bothBumpersPush', 'when [ROOT] both bumpers are pushed simultaneously'],
+    ['whenBothBumpersRelease', 'hat.bothBumpersRelease', 'when [ROOT] both bumpers are released simultaneously'],
+    ['whenFLTouch', 'hat.flTouch', 'when [ROOT] FL touch sensor is touched'],
+    ['whenFLRelease', 'hat.flRelease', 'when [ROOT] FL touch sensor is released'],
+    ['whenFRTouch', 'hat.frTouch', 'when [ROOT] FR touch sensor is touched'],
+    ['whenFRRelease', 'hat.frRelease', 'when [ROOT] FR touch sensor is released'],
+    ['whenRLTouch', 'hat.rlTouch', 'when [ROOT] RL touch sensor is touched'],
+    ['whenRLRelease', 'hat.rlRelease', 'when [ROOT] RL touch sensor is released'],
+    ['whenRRTouch', 'hat.rrTouch', 'when [ROOT] RR touch sensor is touched'],
+    ['whenRRRelease', 'hat.rrRelease', 'when [ROOT] RR touch sensor is released']
 ];
 
 const fixedEventHats = () => FIXED_EVENT_HAT_MESSAGES.map(([opcode, id, defaultText]) => ({
@@ -129,7 +130,10 @@ const fixedEventHats = () => FIXED_EVENT_HAT_MESSAGES.map(([opcode, id, defaultT
     func: 'whenFixedEvent',
     blockType: BlockType.HAT,
     text: translate(id, defaultText),
-    isEdgeActivated: false
+    isEdgeActivated: false,
+    arguments: {
+        ROOT: {type: ArgumentType.STRING, menu: 'rootMenu'}
+    }
 }));
 
 const FIXED_EVENT_OPCODES = {
@@ -172,14 +176,11 @@ class IrobotRootBlocks {
         // editable while preserving the visual picker in enhanced editors.
         this.supportsRootMotionPicker = Boolean(runtime && runtime[ROOT_MOTION_PICKER_CAPABILITY]);
         if (runtime.formatMessage) formatMessage = runtime.formatMessage;
-        this.protocol = new RootProtocol();
-        this.pendingCommands = new Map();
-        this.transport = new RootTransport(
-            runtime,
-            EXTENSION_ID,
-            packet => this._receive(packet),
-            () => this._cancelPendingCommands(new Error('Root connection was reset'))
-        );
+        this.rootManager = new RootManager(runtime, EXTENSION_ID, {
+            onData: (session, packet) => this._receive(packet, session),
+            onReset: session => this._cancelPendingCommands(new Error('Root connection was reset'), session)
+        });
+        this._hatDispatchSessionId = null;
         // Preserve the established extension behaviour for existing projects.
         // New projects can opt into Auto (simulator while disconnected) or
         // Simulator fixed explicitly; this default will be reconsidered only
@@ -200,18 +201,44 @@ class IrobotRootBlocks {
                 if (typeof this.runtime.stopAll === 'function') this.runtime.stopAll();
             }
         });
-        this.last = {};
-        this.lastDetailedEvent = '';
-        this.currentEvent = null;
-        this.bumperState = 0;
-        this.touchState = 0;
-        // Root rt0/rt1 navigation is implemented in the client, as in the
-        // official Python SDK. Heading uses the conventional xy plane: 90° is
-        // forward (+y), and a positive Root rotation turns clockwise.
-        this.navigationPosition = {x: 0, y: 0, heading: 90};
         this._playNoteForPicker = this._playNoteForPicker.bind(this);
         if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
     }
+
+    _activeSession (util = null) {
+        const sessionId = util && util.thread && util.thread.irobotRootSessionId !== undefined ?
+            util.thread.irobotRootSessionId : this._hatDispatchSessionId;
+        return this.rootManager.getSession(sessionId) || this.rootManager.getActiveSession();
+    }
+
+    _setThreadSession (util, session) {
+        if (util && util.thread) util.thread.irobotRootSessionId = session.id;
+        return session;
+    }
+
+    _matchesThreadSession (args, util) {
+        const requested = args && args.ROOT;
+        if (requested === undefined || requested === null || requested === '') return true;
+        const sessionId = util && util.thread && util.thread.irobotRootEventSessionId !== undefined ?
+            util.thread.irobotRootEventSessionId : this._hatDispatchSessionId;
+        if (sessionId === undefined || sessionId === null) return true;
+        return Number(requested) === Number(sessionId);
+    }
+    get protocol () { return this._activeSession().protocol; }
+    get pendingCommands () { return this._activeSession().pendingCommands; }
+    get transport () { return this._activeSession().transport; }
+    get last () { return this._activeSession().last; }
+    set last (value) { this._activeSession().last = value; }
+    get lastDetailedEvent () { return this._activeSession().lastDetailedEvent; }
+    set lastDetailedEvent (value) { this._activeSession().lastDetailedEvent = value; }
+    get currentEvent () { return this._activeSession().currentEvent; }
+    set currentEvent (value) { this._activeSession().currentEvent = value; }
+    get bumperState () { return this._activeSession().bumperState; }
+    set bumperState (value) { this._activeSession().bumperState = value; }
+    get touchState () { return this._activeSession().touchState; }
+    set touchState (value) { this._activeSession().touchState = value; }
+    get navigationPosition () { return this._activeSession().navigationPosition; }
+    set navigationPosition (value) { this._activeSession().navigationPosition = value; }
 
     getInfo () {
         setupTranslations();
@@ -227,8 +254,16 @@ class IrobotRootBlocks {
             blocks: [
                 {opcode: 'connect', blockType: BlockType.COMMAND,
                     text: translate('block.connect', 'connect to Root')},
+                {opcode: 'addRoot', blockType: BlockType.COMMAND,
+                    text: translate('block.addRoot', 'connect another Root')},
                 {opcode: 'disconnect', blockType: BlockType.COMMAND,
                     text: translate('block.disconnect', 'disconnect Root')},
+                {opcode: 'selectRoot', blockType: BlockType.COMMAND,
+                    text: translate('block.selectRoot', 'use [ROOT]'), arguments: {
+                        ROOT: {type: ArgumentType.STRING, menu: 'rootMenu'}
+                    }},
+                {opcode: 'activeRoot', blockType: BlockType.REPORTER,
+                    text: translate('block.activeRoot', 'selected Root')},
                 {opcode: 'isConnected', blockType: BlockType.BOOLEAN,
                     text: translate('block.isConnected', 'Root is connected?')},
                 {opcode: 'transportMode', blockType: BlockType.REPORTER,
@@ -316,18 +351,21 @@ class IrobotRootBlocks {
                     VALUE: {type: ArgumentType.STRING, menu: 'valueMenu'}
                 }},
                 {opcode: 'whenEvent', blockType: BlockType.HAT,
-                    text: translate('block.whenEvent', 'when [EVENT] changes'), isEdgeActivated: false, arguments: {
-                    EVENT: {type: ArgumentType.STRING, menu: 'eventMenu'}
+                    text: translate('block.whenEvent', 'when [ROOT] [EVENT] changes'), isEdgeActivated: false, arguments: {
+                    ROOT: {type: ArgumentType.STRING, menu: 'rootMenu'},
+                        EVENT: {type: ArgumentType.STRING, menu: 'eventMenu'}
                 }},
                 {opcode: 'whenBumper', blockType: BlockType.HAT,
-                    text: translate('block.whenBumper', 'when [BUMPER] bumper is [ACTION]'),
+                    text: translate('block.whenBumper', 'when [ROOT] [BUMPER] bumper is [ACTION]'),
                     isEdgeActivated: false, arguments: {
+                    ROOT: {type: ArgumentType.STRING, menu: 'rootMenu'},
                     BUMPER: {type: ArgumentType.STRING, menu: 'bumperMenu'},
                     ACTION: {type: ArgumentType.STRING, menu: 'bumperActionMenu'}
                 }},
                 {opcode: 'whenTouchSensor', blockType: BlockType.HAT,
-                    text: translate('block.whenTouchSensor', 'when [SENSOR] touch sensor is [ACTION]'),
+                    text: translate('block.whenTouchSensor', 'when [ROOT] [SENSOR] touch sensor is [ACTION]'),
                     isEdgeActivated: false, arguments: {
+                    ROOT: {type: ArgumentType.STRING, menu: 'rootMenu'},
                     SENSOR: {type: ArgumentType.STRING, menu: 'touchSensorMenu'},
                     ACTION: {type: ArgumentType.STRING, menu: 'touchActionMenu'}
                 }},
@@ -402,24 +440,32 @@ class IrobotRootBlocks {
                     {text: translate('menu.controlMode.auto', 'automatic'), value: CONTROL_MODE_AUTO},
                     {text: translate('menu.controlMode.simulator', 'simulator'), value: CONTROL_MODE_SIMULATOR},
                     {text: translate('menu.controlMode.physical', 'physical Root'), value: CONTROL_MODE_PHYSICAL}
-                ]}
+                ]},
+                rootMenu: {acceptReporters: true, items: 'getRootMenu'}
             }
         };
     }
 
     connect () {
-        this.navigationPosition = {x: 0, y: 0, heading: 90};
         if (this.controlMode === CONTROL_MODE_SIMULATOR) {
             this.simulator.open();
             return;
         }
-        this.transport.scan();
+        this.rootManager.scan();
     }
 
-    disconnect () { this.transport.disconnect(); }
-    isConnected () { return this.transport.isConnected(); }
-    transportMode () { return this.transport.mode; }
-    lastConnectionError () { return this.transport.lastError; }
+    addRoot () { this.rootManager.scan(); }
+    disconnect (args, util) { this.rootManager.disconnect(this._activeSession(util).id); }
+    selectRoot (args, util) {
+        this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
+    }
+    activeRoot (args, util) { return this._activeSession(util).displayName; }
+    getRootMenu () { return this.rootManager.getMenu(); }
+    isConnected (args, util) { return this.rootManager.isConnected(this._activeSession(util).id); }
+    transportMode (args, util) { return this.rootManager.transportMode(this._activeSession(util).id); }
+    lastConnectionError (args, util) {
+        return this.rootManager.lastConnectionError(this._activeSession(util).id);
+    }
     setControlMode (args) {
         const requested = String(args.MODE || CONTROL_MODE_AUTO);
         const mode = [CONTROL_MODE_AUTO, CONTROL_MODE_SIMULATOR, CONTROL_MODE_PHYSICAL].includes(requested) ?
@@ -428,61 +474,71 @@ class IrobotRootBlocks {
         this.controlMode = mode;
         if (this._isSimulatorActive()) {
             if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
-            this._cancelPendingCommands(new Error('Root control target changed to simulator'));
+            this._cancelPendingCommands(new Error('Root control target changed to simulator'), this._activeSession());
             this.simulator.reset();
             this.simulator.open();
         }
         this.simulator.refresh();
     }
-    controlTarget () { return this._isSimulatorActive() ? 'Simulator' : 'Physical Root'; }
+    controlTarget (args, util) {
+        return this._isSimulatorActive(util) ? 'Simulator' : 'Physical Root';
+    }
     openSimulator () { this.simulator.open(); }
     resetSimulator () { this.simulator.reset(); this.simulator.open(); }
 
-    _isSimulatorActive () {
+    _isSimulatorActive (util = null, session = this._activeSession(util)) {
         return this.controlMode === CONTROL_MODE_SIMULATOR ||
-            (this.controlMode === CONTROL_MODE_AUTO && !this.transport.isConnected());
+            (this.controlMode === CONTROL_MODE_AUTO && !session.isConnected());
     }
 
-    motors (args) {
-        this.navigationPosition = null;
-        if (this._isSimulatorActive()) return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
-        return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)));
+    motors (args, util) {
+        const session = this._activeSession(util);
+        session.navigationPosition = null;
+        if (this._isSimulatorActive(util, session)) {
+            return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
+        }
+        return this._send(session.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)), session);
     }
-    drive (args) {
+    drive (args, util) {
         const distance = Cast.toNumber(args.MM);
-        this.navigationPosition = null;
-        if (this._isSimulatorActive()) return this.simulator.move(distance);
-        return this._sendAndWait(this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
+        const session = this._activeSession(util);
+        session.navigationPosition = null;
+        if (this._isSimulatorActive(util, session)) return this.simulator.move(distance);
+        return this._sendAndWait(session.protocol.driveDistance(distance), linearMotionWatchdogMs(distance), session);
     }
-    turn (args) {
+    turn (args, util) {
         const degrees = Cast.toNumber(args.DEGREES);
-        if (this._isSimulatorActive()) return this.simulator.turn(degrees);
-        return this._sendAndWait(this.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees));
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return this.simulator.turn(degrees);
+        return this._sendAndWait(session.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees), session);
     }
-    arc (args) {
+    arc (args, util) {
         const degrees = Cast.toNumber(args.DEGREES);
         const radius = Cast.toNumber(args.RADIUS);
-        this.navigationPosition = null;
-        if (this._isSimulatorActive()) return this.simulator.arc(radius, degrees);
+        const session = this._activeSession(util);
+        session.navigationPosition = null;
+        if (this._isSimulatorActive(util, session)) return this.simulator.arc(radius, degrees);
         return this._sendAndWait(
-            this.protocol.driveArc(degrees * 10, radius),
-            arcMotionWatchdogMs(degrees, radius)
+            session.protocol.driveArc(degrees * 10, radius),
+            arcMotionWatchdogMs(degrees, radius), session
         );
     }
-    resetNavigation () {
+    resetNavigation (args, util) {
         // The official SDK keeps Root rt0/rt1 pose on the client. Native
         // Reset Position / Navigate to Position packets are not accepted by
         // every Root firmware even though they exist in the shared protocol.
-        this.navigationPosition = {x: 0, y: 0, heading: 90};
-        if (this._isSimulatorActive()) this.simulator.resetNavigation();
+        const session = this._activeSession(util);
+        session.navigationPosition = {x: 0, y: 0, heading: 90};
+        if (this._isSimulatorActive(util, session)) this.simulator.resetNavigation();
     }
-    navigateTo (args) {
+    navigateTo (args, util) {
         const target = {
             x: Math.round(Cast.toNumber(args.X) * 10),
             y: Math.round(Cast.toNumber(args.Y) * 10)
         };
-        const origin = this.navigationPosition || {x: 0, y: 0, heading: 90};
-        if (this._isSimulatorActive()) return this.simulator.navigateTo(target.x, target.y);
+        const session = this._activeSession(util);
+        const origin = session.navigationPosition || {x: 0, y: 0, heading: 90};
+        if (this._isSimulatorActive(util, session)) return this.simulator.navigateTo(target.x, target.y);
         const deltaX = target.x - origin.x;
         const deltaY = target.y - origin.y;
         const distance = Math.round(Math.hypot(deltaX, deltaY));
@@ -494,7 +550,7 @@ class IrobotRootBlocks {
         const turn = normalizeTurn(origin.heading - targetHeading);
         const needsRotation = Math.abs(turn) >= 0.05;
         const rotation = needsRotation ?
-            this._sendAndWait(this.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn)) :
+            this._sendAndWait(session.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn), session) :
             Promise.resolve();
         // A completed finite movement is followed by a zero-speed motor packet
         // to suppress residual closed-loop corrections. Scratch Link/Scrub does
@@ -506,64 +562,73 @@ class IrobotRootBlocks {
             rotation.then(() => new Promise(resolve => setTimeout(resolve, MOTION_COMMAND_GAP_MS))) :
             rotation;
         return settledRotation.then(() => this._sendAndWait(
-            this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance)
+            session.protocol.driveDistance(distance), linearMotionWatchdogMs(distance), session
         )).then(() => {
-            this.navigationPosition = {x: target.x, y: target.y, heading: targetHeading};
+            session.navigationPosition = {x: target.x, y: target.y, heading: targetHeading};
         }).catch(error => {
-            this.navigationPosition = null;
+            session.navigationPosition = null;
             throw error;
         });
     }
-    stop () {
-        if (this._isSimulatorActive()) return this.simulator.stop();
-        return this._send(this.protocol.packet(0, 3));
+    stop (args, util) {
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return this.simulator.stop();
+        return this._send(session.protocol.packet(0, 3), session);
     }
-    marker (args) {
-        if (this._isSimulatorActive()) return this.simulator.setMarker(args.POSITION);
-        return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]));
+    marker (args, util) {
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return this.simulator.setMarker(args.POSITION);
+        return this._send(session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]), session);
     }
-    ledColor (args) {
+    ledColor (args, util) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
-        if (this._isSimulatorActive()) return this.simulator.setLed(1, red, green, blue);
-        return this._send(this.protocol.led(1, red, green, blue));
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(1, red, green, blue);
+        return this._send(session.protocol.led(1, red, green, blue), session);
     }
-    ledAnimationColor (args) {
+    ledAnimationColor (args, util) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
-        if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
-        return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue));
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
+        return this._send(session.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue), session);
     }
-    led (args) {
-        if (this._isSimulatorActive()) return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
-        return this._send(this.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
+    led (args, util) {
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) {
+            return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
+        }
+        return this._send(session.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)), session);
     }
-    ledAnimation (args) {
-        if (this._isSimulatorActive()) return this.simulator.setLed(
+    ledAnimation (args, util) {
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(
             Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
         );
-        return this._send(this.protocol.led(
+        return this._send(session.protocol.led(
             Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
-        ));
+        ), session);
     }
-    playNote (args) {
+    playNote (args, util) {
         const midiNote = Math.min(127, Math.max(0, Math.round(Cast.toNumber(args.NOTE))));
-        return this._playFrequency(midiNoteToFrequency(midiNote), args.MS);
+        return this._playFrequency(midiNoteToFrequency(midiNote), args.MS, util);
     }
 
-    note (args) { return this._playFrequency(Cast.toNumber(args.HZ), args.MS); }
+    note (args, util) { return this._playFrequency(Cast.toNumber(args.HZ), args.MS, util); }
 
-    _playFrequency (frequency, milliseconds) {
+    _playFrequency (frequency, milliseconds, util) {
         // Root's sound command stores the duration in an unsigned 16-bit
         // field. Wait for Root's matching Play Note Finished packet rather
         // than a browser timer, so BLE latency cannot make the next note
         // interrupt this one just before it actually finishes.
         const durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
-        if (this._isSimulatorActive()) return this.simulator.playNote(frequency, durationMs);
-        const packet = this.protocol.note(frequency, durationMs);
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return this.simulator.playNote(frequency, durationMs);
+        const packet = session.protocol.note(frequency, durationMs);
         if (durationMs === 0) {
-            this._send(packet);
+            this._send(packet, session);
             return Promise.resolve();
         }
-        return this._sendSoundAndWait(packet, durationMs);
+        return this._sendSoundAndWait(packet, durationMs, session);
     }
 
     _playNoteForPicker (midiNote, category) {
@@ -576,59 +641,66 @@ class IrobotRootBlocks {
         this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
     }
 
-    sayPhrase (args) {
-        if (this._isSimulatorActive()) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
+    sayPhrase (args, util) {
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
         return this._sendSoundCommandAndWait(
-            this.protocol.sayPhrase(Cast.toString(args.PHRASE)),
+            session.protocol.sayPhrase(Cast.toString(args.PHRASE)),
             SAY_PHRASE_TIMEOUT_MS,
-            'phrase'
+            'phrase', session
         );
     }
 
-    refreshSensor (args) {
-        if (this._isSimulatorActive()) return;
+    refreshSensor (args, util) {
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return;
         const commands = {battery: [14, 1], light: [13, 1], accel: [16, 1]};
         const command = commands[args.SENSOR];
-        return command ? this._send(this.protocol.packet(command[0], command[1])) : undefined;
+        return command ? this._send(session.protocol.packet(command[0], command[1]), session) : undefined;
     }
 
-    sensor (args) {
-        if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
-        return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
+    sensor (args, util) {
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) return this.simulator.getSensor(args.VALUE);
+        return session.last[args.VALUE] === undefined ? 0 : session.last[args.VALUE];
     }
 
-    whenEvent (args) { return String(args.EVENT).toUpperCase() === this.currentEvent; }
+    whenEvent (args, util) {
+        return this._matchesThreadSession(args, util) &&
+            String(args.EVENT).toUpperCase() === this._activeSession(util).currentEvent;
+    }
 
     // These hats are selected by runtime.startHats match fields before their
     // primitives run, so the primitive itself must allow the selected thread.
-    whenBumper () { return true; }
+    whenBumper (args, util) { return this._matchesThreadSession(args, util); }
 
-    whenTouchSensor () { return true; }
+    whenTouchSensor (args, util) { return this._matchesThreadSession(args, util); }
 
-    whenFixedEvent () { return true; }
+    whenFixedEvent (args, util) { return this._matchesThreadSession(args, util); }
 
-    raw (args) {
-        if (this._isSimulatorActive()) {
-            this.transport.setError(new Error('Raw BLE packets are unavailable in simulator mode'));
+    raw (args, util) {
+        const session = this._activeSession(util);
+        if (this._isSimulatorActive(util, session)) {
+            session.transport.setError(new Error('Raw BLE packets are unavailable in simulator mode'));
             return;
         }
-        return this._send(this.protocol.packet(Cast.toNumber(args.DEVICE), Cast.toNumber(args.COMMAND), RootProtocol.hexToBytes(args.PAYLOAD)));
+        return this._send(session.protocol.packet(Cast.toNumber(args.DEVICE), Cast.toNumber(args.COMMAND), RootProtocol.hexToBytes(args.PAYLOAD)), session);
     }
 
-    lastPacket () { return this.last.raw || ''; }
-    detailedEvent () { return this.lastDetailedEvent; }
-    _send (packet) {
+    lastPacket (args, util) { return this._activeSession(util).last.raw || ''; }
+    detailedEvent (args, util) { return this._activeSession(util).lastDetailedEvent; }
+    _send (packet, session = this._activeSession()) {
         // Hardware writes are fire-and-forget from Scratch's point of view.
         // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
         // after CoreBluetooth accepted the bytes; returning that promise would
         // leave the command block and the rest of its stack permanently waiting.
         try {
-            const pendingWrite = this.transport.write(packet);
+            const pendingWrite = session.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
-                pendingWrite.catch(error => this.transport.setError(error));
+                pendingWrite.catch(error => session.transport.setError(error));
             }
         } catch (error) {
-            this.transport.setError(error);
+            session.transport.setError(error);
         }
     }
 
@@ -636,21 +708,21 @@ class IrobotRootBlocks {
         return `${device}:${command}:${packetId}`;
     }
 
-    _sendAndWait (packet, motionWatchdogMs) {
+    _sendAndWait (packet, motionWatchdogMs, session = this._activeSession()) {
         const key = this._commandKey(packet[0], packet[1], packet[2]);
         const completion = new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
-                const pending = this.pendingCommands.get(key);
+                const pending = session.pendingCommands.get(key);
                 if (!pending) return;
-                this._clearPendingCommand(key, pending);
+                this._clearPendingCommand(key, pending, session);
                 const error = new Error(
                     `Root command timed out (command ${packet[1]}, packet ${packet[2]})`
                 );
-                this.transport.setError(error);
+                session.transport.setError(error);
                 reject(error);
             }, COMMAND_FINISH_TIMEOUT_MS);
             const watchdog = setTimeout(() => {
-                const pending = this.pendingCommands.get(key);
+                const pending = session.pendingCommands.get(key);
                 if (!pending || pending.settling) return;
                 pending.settling = true;
 
@@ -661,17 +733,17 @@ class IrobotRootBlocks {
                 // interrupted movement also produces its matching Finished
                 // response. Resolve after a short BLE settling interval even if
                 // old firmware omits that response.
-                this._sendMotionStop(key);
+                this._sendMotionStop(key, session);
                 pending.settle = setTimeout(() => {
-                    if (this.pendingCommands.get(key) !== pending) return;
-                    this._clearPendingCommand(key, pending);
-                    this.transport.setError(new Error(
+                    if (session.pendingCommands.get(key) !== pending) return;
+                    this._clearPendingCommand(key, pending, session);
+                    session.transport.setError(new Error(
                         `Root motion completion watchdog stopped residual movement (command ${packet[1]})`
                     ));
                     resolve();
                 }, MOTION_WATCHDOG_SETTLE_MS);
             }, motionWatchdogMs);
-            this.pendingCommands.set(key, {
+            session.pendingCommands.set(key, {
                 resolve, reject, timeout, watchdog, settle: null, settling: false, stopMotion: true
             });
         });
@@ -680,183 +752,195 @@ class IrobotRootBlocks {
         // versions leave it pending after CoreBluetooth has accepted the bytes.
         // The Scratch block waits only for Root's own matching Finished packet.
         try {
-            const pendingWrite = this.transport.write(packet);
+            const pendingWrite = session.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
-                pendingWrite.catch(error => this._rejectPendingCommand(key, error));
+                pendingWrite.catch(error => this._rejectPendingCommand(key, error, session));
             }
         } catch (error) {
-            this._rejectPendingCommand(key, error);
+            this._rejectPendingCommand(key, error, session);
         }
         return completion;
     }
 
-    _sendSoundAndWait (packet, durationMs) {
-        return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound');
+    _sendSoundAndWait (packet, durationMs, session = this._activeSession()) {
+        return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound', session);
     }
 
-    _sendSoundCommandAndWait (packet, timeoutMs, description) {
+    _sendSoundCommandAndWait (packet, timeoutMs, description, session = this._activeSession()) {
         const key = this._commandKey(packet[0], packet[1], packet[2]);
         const completion = new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
-                const pending = this.pendingCommands.get(key);
+                const pending = session.pendingCommands.get(key);
                 if (!pending) return;
-                this._clearPendingCommand(key, pending);
-                this.transport.setError(new Error(
+                this._clearPendingCommand(key, pending, session);
+                session.transport.setError(new Error(
                     `Root ${description} completion response timed out (packet ${packet[2]})`
                 ));
                 // Do not leave a Scratch stack stuck if a single notification
                 // was lost after Root had enough time to finish the sound.
                 resolve();
             }, timeoutMs);
-            this.pendingCommands.set(key, {
+            session.pendingCommands.set(key, {
                 resolve, reject, timeout, watchdog: null, settle: null, settling: false, stopMotion: false
             });
         });
 
         try {
-            const pendingWrite = this.transport.write(packet);
+            const pendingWrite = session.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
-                pendingWrite.catch(error => this._rejectPendingCommand(key, error));
+                pendingWrite.catch(error => this._rejectPendingCommand(key, error, session));
             }
         } catch (error) {
-            this._rejectPendingCommand(key, error);
+            this._rejectPendingCommand(key, error, session);
         }
         return completion;
     }
 
-    _resolvePendingCommand (decoded) {
+    _resolvePendingCommand (decoded, session = this._activeSession()) {
         const key = this._commandKey(decoded.device, decoded.command, decoded.packetId);
-        const pending = this.pendingCommands.get(key);
+        const pending = session.pendingCommands.get(key);
         if (!pending) return false;
         // Explicitly zero the wheel speeds even after Root reports completion.
         // This prevents a residual velocity/controller correction from leaking
         // into the following Scratch command.
-        if (pending.stopMotion && !pending.settling) this._sendMotionStop(key);
-        this._clearPendingCommand(key, pending);
+        if (pending.stopMotion && !pending.settling) this._sendMotionStop(key, session);
+        this._clearPendingCommand(key, pending, session);
         pending.resolve();
         return true;
     }
 
-    _sendMotionStop (pendingKey) {
+    _sendMotionStop (pendingKey, session = this._activeSession()) {
         try {
-            const pendingWrite = this.transport.write(this.protocol.motors(0, 0));
+            const pendingWrite = session.transport.write(session.protocol.motors(0, 0));
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
-                pendingWrite.catch(error => this._rejectPendingCommand(pendingKey, error));
+                pendingWrite.catch(error => this._rejectPendingCommand(pendingKey, error, session));
             }
         } catch (error) {
-            this._rejectPendingCommand(pendingKey, error);
+            this._rejectPendingCommand(pendingKey, error, session);
         }
     }
 
-    _clearPendingCommand (key, pending) {
+    _clearPendingCommand (key, pending, session = this._activeSession()) {
         clearTimeout(pending.timeout);
         if (pending.watchdog) clearTimeout(pending.watchdog);
         if (pending.settle) clearTimeout(pending.settle);
-        this.pendingCommands.delete(key);
+        session.pendingCommands.delete(key);
     }
 
-    _rejectPendingCommand (key, error) {
-        const pending = this.pendingCommands.get(key);
+    _rejectPendingCommand (key, error, session = this._activeSession()) {
+        const pending = session.pendingCommands.get(key);
         if (!pending) return false;
-        this._clearPendingCommand(key, pending);
-        this.transport.setError(error);
+        this._clearPendingCommand(key, pending, session);
+        session.transport.setError(error);
         pending.reject(error);
         return true;
     }
 
-    _cancelPendingCommands (error) {
-        for (const [key, pending] of this.pendingCommands) {
-            this._clearPendingCommand(key, pending);
+    _cancelPendingCommands (error, session = this._activeSession()) {
+        for (const [key, pending] of session.pendingCommands) {
+            this._clearPendingCommand(key, pending, session);
             pending.reject(error);
         }
     }
 
-    _startEventHat (opcode, property, event) {
-        this[property] = event;
+    _startEventHat (opcode, property, event, session = this._activeSession(), matchFields = {}) {
+        if (property) session[property] = event;
+        const previousDispatchSessionId = this._hatDispatchSessionId;
+        this._hatDispatchSessionId = session.id;
         try {
-            this.runtime.startHats(`${EXTENSION_ID}_${opcode}`);
+            const hatOpcode = `${EXTENSION_ID}_${opcode}`;
+            const threads = Object.keys(matchFields).length > 0 ?
+                this.runtime.startHats(hatOpcode, matchFields) || [] :
+                this.runtime.startHats(hatOpcode) || [];
+            threads.forEach(thread => {
+                thread.irobotRootSessionId = session.id;
+                thread.irobotRootEventSessionId = session.id;
+            });
+            return threads;
         } finally {
-            this[property] = null;
+            if (property) session[property] = null;
+            this._hatDispatchSessionId = previousDispatchSessionId;
         }
     }
 
-    _startBumperHat (event) {
-        this.lastDetailedEvent = event;
-        this._startFixedEventHat(event);
+    _startBumperHat (event, session = this._activeSession()) {
+        session.lastDetailedEvent = event;
+        this._startFixedEventHat(event, session);
         const [bumper, action] = event.split('_');
         try {
-            this.runtime.startHats(`${EXTENSION_ID}_whenBumper`, {BUMPER: bumper, ACTION: action});
+            this._startEventHat('whenBumper', null, event, session, {BUMPER: bumper, ACTION: action});
         } catch (error) {
             // A parameterized hat saved by an older extension version can have
             // stale/missing fields. It must not prevent fixed hats or BLE I/O.
-            this.transport.setError(error);
+            session.transport.setError(error);
         }
     }
 
-    _startTouchHat (event) {
-        this.lastDetailedEvent = event;
-        this._startFixedEventHat(event);
+    _startTouchHat (event, session = this._activeSession()) {
+        session.lastDetailedEvent = event;
+        this._startFixedEventHat(event, session);
         const [sensor, action] = event.split('_');
         try {
-            this.runtime.startHats(`${EXTENSION_ID}_whenTouchSensor`, {SENSOR: sensor, ACTION: action});
+            this._startEventHat('whenTouchSensor', null, event, session, {SENSOR: sensor, ACTION: action});
         } catch (error) {
-            this.transport.setError(error);
+            session.transport.setError(error);
         }
     }
 
-    _startFixedEventHat (event) {
+    _startFixedEventHat (event, session = this._activeSession()) {
         const opcode = FIXED_EVENT_OPCODES[event];
-        if (opcode) this.runtime.startHats(`${EXTENSION_ID}_${opcode}`);
+        if (opcode) this._startEventHat(opcode, null, event, session);
     }
 
-    _receiveBumperEvent (decoded) {
-        const previous = this.bumperState;
+    _receiveBumperEvent (decoded, session = this._activeSession()) {
+        const previous = session.bumperState;
         const next = (decoded.leftBumper ? 0x80 : 0) | (decoded.rightBumper ? 0x40 : 0);
-        this.bumperState = next;
+        session.bumperState = next;
 
         if (previous === 0 && next === 0xC0) {
-            this._startBumperHat('BOTH_PUSH');
+            this._startBumperHat('BOTH_PUSH', session);
             return;
         }
         if (previous === 0xC0 && next === 0) {
-            this._startBumperHat('BOTH_RELEASE');
+            this._startBumperHat('BOTH_RELEASE', session);
             return;
         }
         if ((previous ^ next) & 0x80) {
-            this._startBumperHat(next & 0x80 ? 'LEFT_PUSH' : 'LEFT_RELEASE');
+            this._startBumperHat(next & 0x80 ? 'LEFT_PUSH' : 'LEFT_RELEASE', session);
         }
         if ((previous ^ next) & 0x40) {
-            this._startBumperHat(next & 0x40 ? 'RIGHT_PUSH' : 'RIGHT_RELEASE');
+            this._startBumperHat(next & 0x40 ? 'RIGHT_PUSH' : 'RIGHT_RELEASE', session);
         }
     }
 
-    _receiveTouchEvent (decoded) {
-        const previous = this.touchState;
+    _receiveTouchEvent (decoded, session = this._activeSession()) {
+        const previous = session.touchState;
         const next = decoded.touchMask;
-        this.touchState = next;
+        session.touchState = next;
         const sensors = [['FL', 0x8], ['FR', 0x4], ['RR', 0x2], ['RL', 0x1]];
         for (const [sensor, mask] of sensors) {
             if ((previous ^ next) & mask) {
-                this._startTouchHat(`${sensor}_${next & mask ? 'TOUCH' : 'RELEASE'}`);
+                this._startTouchHat(`${sensor}_${next & mask ? 'TOUCH' : 'RELEASE'}`, session);
             }
         }
     }
 
-    _receive (packet) {
+    _receive (packet, session = this._activeSession()) {
         // A connected physical Root may keep sending sensor notifications while
         // the student deliberately works in simulator-fixed mode. Never let
         // those events launch scripts for the virtual Root.
-        if (this._isSimulatorActive()) return;
-        const decoded = this.protocol.decode(packet);
+        if (this.controlMode === CONTROL_MODE_SIMULATOR ||
+            (this.controlMode === CONTROL_MODE_AUTO && !session.isConnected())) return;
+        const decoded = session.protocol.decode(packet);
         if (!decoded) return;
-        this.last = Object.assign({}, this.last, decoded);
-        this._resolvePendingCommand(decoded);
+        session.last = Object.assign({}, session.last, decoded);
+        this._resolvePendingCommand(decoded, session);
         if (decoded.command !== 0) return;
-        if (decoded.device === 12) this._receiveBumperEvent(decoded);
-        if (decoded.device === 17) this._receiveTouchEvent(decoded);
+        if (decoded.device === 12) this._receiveBumperEvent(decoded, session);
+        if (decoded.device === 17) this._receiveTouchEvent(decoded, session);
         const names = {12: 'BUMPER', 17: 'TOUCH', 20: 'CLIFF', 14: 'BATTERY'};
         const name = names[decoded.device];
-        if (name) this._startEventHat('whenEvent', 'currentEvent', name);
+        if (name) this._startEventHat('whenEvent', 'currentEvent', name, session);
     }
 
     _receiveSimulatorEvent (event) {

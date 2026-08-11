@@ -216,11 +216,12 @@ class RootProtocol {
 }
 
 class RootTransport {
-    constructor (runtime, extensionId, onData, onReset = null) {
+    constructor (runtime, extensionId, onData, onReset = null, onConnected = null) {
         this.runtime = runtime;
         this.extensionId = extensionId;
         this.onData = onData;
         this.onReset = onReset;
+        this.onConnected = onConnected;
         this.ble = null;
         this.mode = supportsWebBluetooth() ? 'Web Bluetooth' : 'Scratch Link / Scrub';
         this.lastError = '';
@@ -262,6 +263,7 @@ class RootTransport {
         this.ble.startNotifications(UART_SERVICE, TX, message => {
             this.onData(base64ToBytes(message));
         });
+        if (this.onConnected) this.onConnected();
     }
 
     write (bytes) {
@@ -297,6 +299,10 @@ class RootTransport {
             }
         });
         this.runtime.on(RuntimeClass.PERIPHERAL_SCAN_TIMEOUT, () => {
+            // Scratch VM does not include extensionId in this legacy event.
+            // Session transports must not turn another Root's scan timeout
+            // into their own connection error.
+            if (this.extensionId.includes(':session:')) return;
             this.lastError = `${this.mode}: Rootが見つかりませんでした`;
         });
         this.runtime.on(RuntimeClass.PERIPHERAL_CONNECTION_LOST_ERROR, details => {

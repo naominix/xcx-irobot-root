@@ -97,6 +97,21 @@ Scratch標準のカラーピッカーでLEDの色を選び、点灯、点滅、�
 
 バンパーとタッチセンサーには、選択メニュー付きHATと、種類ごとの固定HATがあります。イベントはRootから受信したBLE通知パケットを解析して発火します。
 
+### 実験機能: 複数Root（`multi-root`ブランチのみ）
+
+`multi-root`ブランチでは、Rootごとに独立したBLEセッションを保持する実験実装を検証しています。「Rootに接続する」は1台目のスキャン、「別のRootを接続する」は既存接続を維持した追加スキャンとして動作します。「use [Root]」で操作対象を切り替え、既存の移動・LED・音・センサー・ナビブロックを選択中のRootへ送ります。選択ブロックはScratchの実行スレッドにRoot IDを記録するため、緑の旗から並列に開始したスクリプトでも、Root 1とRoot 2の命令が切り替わりません。バンパー／タッチセンサーHATにもRoot選択欄を追加し、通知元と異なるRootのHATは発火しないようにしています。各Rootのpacket ID、完了待ち、センサー状態、ナビ座標、切断処理はセッション単位です。
+
+この機能は技術検証用であり、`main`には未統合です。GitHub Pagesや公式配布物にはデプロイしていません。Web Bluetooth、Scratch Link、ScrubでのRoot実機2台同時接続は、環境ごとに以下の手順で人間による実機検証が必要です。
+
+1. `multi-root`ブランチのリポジトリで依存関係をインストールし、`npm run build`を実行します。
+2. 別途チェックアウトしたXcratchで、`npm --prefix packages/scratch-gui run start -- --port 8601`を実行し、開発サーバーのルート `https://localhost:8601/` を開きます。`/editor/`はGitHub Pages等の公開構成用で、webpack-dev-serverでは使用しません（Xcratchの構成により起動コマンド／URLが異なる場合があります）。
+3. `dist/`をHTTPSで配信できるローカルサーバーから `irobotRoot.mjs` をExtension Loaderで読み込みます。例えば `npm run build`後に `python3 -m http.server 8700 --directory dist` を実行し、`http://localhost:8700/irobotRoot.mjs` を指定します。localhostはWeb Bluetoothのsecure contextとして扱われます。
+4. Root Aを接続し、拡張機能の接続ボタン（オレンジ色の接続アイコン）を再度実行してRoot Bを接続します。「別のRootを接続する」ブロックは追加スキャンを開始しますが、一覧選択UIは接続ボタンから開いてください。
+5. Root Aを選択して赤色LED、Root Bを選択して青色LEDを設定し、対象だけが変化することを確認します。
+6. 移動完了、センサーイベント、片方だけの切断・再接続も同様に確認します。
+
+Codexでは物理Rootを操作できないため、2台同時接続の実機結果は未確認です。今回のブランチでは自動テストとビルド結果、コードレビュー上の分離のみを報告します。
+
 ## サンプルプロジェクト
 
 [example.sb3](projects/example.sb3)をダウンロードし、拡張機能を読み込んだXcratchで開いてください。

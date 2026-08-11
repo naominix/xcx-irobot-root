@@ -844,7 +844,10 @@ var Cast = /*@__PURE__*/getDefaultExportFromCjs(castExports);
 var en = {
 	"irobotRoot.name": "iRobot Root",
 	"irobotRoot.block.connect": "connect to Root",
+	"irobotRoot.block.addRoot": "connect another Root",
 	"irobotRoot.block.disconnect": "disconnect Root",
+	"irobotRoot.block.selectRoot": "use [ROOT]",
+	"irobotRoot.block.activeRoot": "selected Root",
 	"irobotRoot.block.isConnected": "Root is connected?",
 	"irobotRoot.block.transportMode": "Root connection method",
 	"irobotRoot.block.lastConnectionError": "last connection error",
@@ -869,26 +872,26 @@ var en = {
 	"irobotRoot.block.sayPhrase": "say [PHRASE]",
 	"irobotRoot.block.refreshSensor": "read [SENSOR]",
 	"irobotRoot.block.sensor": "[VALUE] value",
-	"irobotRoot.block.whenEvent": "when [EVENT] changes",
-	"irobotRoot.block.whenBumper": "when [BUMPER] bumper is [ACTION]",
-	"irobotRoot.block.whenTouchSensor": "when [SENSOR] touch sensor is [ACTION]",
+	"irobotRoot.block.whenEvent": "when [ROOT] [EVENT] changes",
+	"irobotRoot.block.whenBumper": "when [ROOT] [BUMPER] bumper is [ACTION]",
+	"irobotRoot.block.whenTouchSensor": "when [ROOT] [SENSOR] touch sensor is [ACTION]",
 	"irobotRoot.block.raw": "device [DEVICE] command [COMMAND] payload [PAYLOAD]",
 	"irobotRoot.block.lastPacket": "last received packet",
 	"irobotRoot.block.detailedEvent": "last detailed event",
-	"irobotRoot.hat.leftBumperPush": "when left bumper is pushed",
-	"irobotRoot.hat.leftBumperRelease": "when left bumper is released",
-	"irobotRoot.hat.rightBumperPush": "when right bumper is pushed",
-	"irobotRoot.hat.rightBumperRelease": "when right bumper is released",
-	"irobotRoot.hat.bothBumpersPush": "when both bumpers are pushed simultaneously",
-	"irobotRoot.hat.bothBumpersRelease": "when both bumpers are released simultaneously",
-	"irobotRoot.hat.flTouch": "when FL touch sensor is touched",
-	"irobotRoot.hat.flRelease": "when FL touch sensor is released",
-	"irobotRoot.hat.frTouch": "when FR touch sensor is touched",
-	"irobotRoot.hat.frRelease": "when FR touch sensor is released",
-	"irobotRoot.hat.rlTouch": "when RL touch sensor is touched",
-	"irobotRoot.hat.rlRelease": "when RL touch sensor is released",
-	"irobotRoot.hat.rrTouch": "when RR touch sensor is touched",
-	"irobotRoot.hat.rrRelease": "when RR touch sensor is released",
+	"irobotRoot.hat.leftBumperPush": "when [ROOT] left bumper is pushed",
+	"irobotRoot.hat.leftBumperRelease": "when [ROOT] left bumper is released",
+	"irobotRoot.hat.rightBumperPush": "when [ROOT] right bumper is pushed",
+	"irobotRoot.hat.rightBumperRelease": "when [ROOT] right bumper is released",
+	"irobotRoot.hat.bothBumpersPush": "when [ROOT] both bumpers are pushed simultaneously",
+	"irobotRoot.hat.bothBumpersRelease": "when [ROOT] both bumpers are released simultaneously",
+	"irobotRoot.hat.flTouch": "when [ROOT] FL touch sensor is touched",
+	"irobotRoot.hat.flRelease": "when [ROOT] FL touch sensor is released",
+	"irobotRoot.hat.frTouch": "when [ROOT] FR touch sensor is touched",
+	"irobotRoot.hat.frRelease": "when [ROOT] FR touch sensor is released",
+	"irobotRoot.hat.rlTouch": "when [ROOT] RL touch sensor is touched",
+	"irobotRoot.hat.rlRelease": "when [ROOT] RL touch sensor is released",
+	"irobotRoot.hat.rrTouch": "when [ROOT] RR touch sensor is touched",
+	"irobotRoot.hat.rrRelease": "when [ROOT] RR touch sensor is released",
 	"irobotRoot.menu.marker.up": "up",
 	"irobotRoot.menu.marker.down": "down",
 	"irobotRoot.menu.marker.eraser": "eraser",
@@ -955,7 +958,10 @@ var en = {
 var ja = {
 	"irobotRoot.name": "iRobot Root",
 	"irobotRoot.block.connect": "Rootに接続する",
+	"irobotRoot.block.addRoot": "別のRootを接続する",
 	"irobotRoot.block.disconnect": "Rootを切断する",
+	"irobotRoot.block.selectRoot": "[ROOT]を操作する",
+	"irobotRoot.block.activeRoot": "選択中のRoot",
 	"irobotRoot.block.isConnected": "Rootは接続済み",
 	"irobotRoot.block.transportMode": "Rootの通信方式",
 	"irobotRoot.block.lastConnectionError": "最後の接続エラー",
@@ -980,26 +986,26 @@ var ja = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] と言う",
 	"irobotRoot.block.refreshSensor": "[SENSOR] を読み取る",
 	"irobotRoot.block.sensor": "[VALUE] の値",
-	"irobotRoot.block.whenEvent": "[EVENT] が変化したとき",
-	"irobotRoot.block.whenBumper": "[BUMPER] バンパーが [ACTION] されたとき",
-	"irobotRoot.block.whenTouchSensor": "[SENSOR] タッチセンサーが [ACTION] されたとき",
+	"irobotRoot.block.whenEvent": "[ROOT] の [EVENT] が変化したとき",
+	"irobotRoot.block.whenBumper": "[ROOT] の [BUMPER] バンパーが [ACTION] されたとき",
+	"irobotRoot.block.whenTouchSensor": "[ROOT] の [SENSOR] タッチセンサーが [ACTION] されたとき",
 	"irobotRoot.block.raw": "デバイス [DEVICE] コマンド [COMMAND] ペイロード [PAYLOAD]",
 	"irobotRoot.block.lastPacket": "最後の受信パケット",
 	"irobotRoot.block.detailedEvent": "最後の詳細イベント",
-	"irobotRoot.hat.leftBumperPush": "左バンパーが押されたとき",
-	"irobotRoot.hat.leftBumperRelease": "左バンパーが離されたとき",
-	"irobotRoot.hat.rightBumperPush": "右バンパーが押されたとき",
-	"irobotRoot.hat.rightBumperRelease": "右バンパーが離されたとき",
-	"irobotRoot.hat.bothBumpersPush": "左右のバンパーが同時に押されたとき",
-	"irobotRoot.hat.bothBumpersRelease": "左右のバンパーが同時に離されたとき",
-	"irobotRoot.hat.flTouch": "FLタッチセンサーに触れたとき",
-	"irobotRoot.hat.flRelease": "FLタッチセンサーを離したとき",
-	"irobotRoot.hat.frTouch": "FRタッチセンサーに触れたとき",
-	"irobotRoot.hat.frRelease": "FRタッチセンサーを離したとき",
-	"irobotRoot.hat.rlTouch": "RLタッチセンサーに触れたとき",
-	"irobotRoot.hat.rlRelease": "RLタッチセンサーを離したとき",
-	"irobotRoot.hat.rrTouch": "RRタッチセンサーに触れたとき",
-	"irobotRoot.hat.rrRelease": "RRタッチセンサーを離したとき",
+	"irobotRoot.hat.leftBumperPush": "[ROOT] の左バンパーが押されたとき",
+	"irobotRoot.hat.leftBumperRelease": "[ROOT] の左バンパーが離されたとき",
+	"irobotRoot.hat.rightBumperPush": "[ROOT] の右バンパーが押されたとき",
+	"irobotRoot.hat.rightBumperRelease": "[ROOT] の右バンパーが離されたとき",
+	"irobotRoot.hat.bothBumpersPush": "[ROOT] の左右のバンパーが同時に押されたとき",
+	"irobotRoot.hat.bothBumpersRelease": "[ROOT] の左右のバンパーが同時に離されたとき",
+	"irobotRoot.hat.flTouch": "[ROOT] のFLタッチセンサーに触れたとき",
+	"irobotRoot.hat.flRelease": "[ROOT] のFLタッチセンサーを離したとき",
+	"irobotRoot.hat.frTouch": "[ROOT] のFRタッチセンサーに触れたとき",
+	"irobotRoot.hat.frRelease": "[ROOT] のFRタッチセンサーを離したとき",
+	"irobotRoot.hat.rlTouch": "[ROOT] のRLタッチセンサーに触れたとき",
+	"irobotRoot.hat.rlRelease": "[ROOT] のRLタッチセンサーを離したとき",
+	"irobotRoot.hat.rrTouch": "[ROOT] のRRタッチセンサーに触れたとき",
+	"irobotRoot.hat.rrRelease": "[ROOT] のRRタッチセンサーを離したとき",
 	"irobotRoot.menu.marker.up": "上げる",
 	"irobotRoot.menu.marker.down": "下げる",
 	"irobotRoot.menu.marker.eraser": "消しゴム",
@@ -1069,7 +1075,10 @@ var translations = {
 	"ja-Hira": {
 	"irobotRoot.name": "iRobot Root",
 	"irobotRoot.block.connect": "るーとにつなぐ",
+	"irobotRoot.block.addRoot": "べつのるーとをつなぐ",
 	"irobotRoot.block.disconnect": "るーとをきりはなす",
+	"irobotRoot.block.selectRoot": "[ROOT]をそうさする",
+	"irobotRoot.block.activeRoot": "せんたくちゅうのるーと",
 	"irobotRoot.block.isConnected": "るーとはつながっている",
 	"irobotRoot.block.transportMode": "るーとのつなぎかた",
 	"irobotRoot.block.lastConnectionError": "さいごのせつぞくのもんだい",
@@ -1094,26 +1103,26 @@ var translations = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] という",
 	"irobotRoot.block.refreshSensor": "[SENSOR] をよみとる",
 	"irobotRoot.block.sensor": "[VALUE] のあたい",
-	"irobotRoot.block.whenEvent": "[EVENT] がかわったとき",
-	"irobotRoot.block.whenBumper": "[BUMPER] ばんぱーが [ACTION] とき",
-	"irobotRoot.block.whenTouchSensor": "[SENSOR] たっちせんさーが [ACTION] とき",
+	"irobotRoot.block.whenEvent": "[ROOT] の [EVENT] がかわったとき",
+	"irobotRoot.block.whenBumper": "[ROOT] の [BUMPER] ばんぱーが [ACTION] とき",
+	"irobotRoot.block.whenTouchSensor": "[ROOT] の [SENSOR] たっちせんさーが [ACTION] とき",
 	"irobotRoot.block.raw": "でばいす [DEVICE] こまんど [COMMAND] ぺいろーど [PAYLOAD]",
 	"irobotRoot.block.lastPacket": "さいごにうけとったぱけっと",
 	"irobotRoot.block.detailedEvent": "さいごのくわしいいべんと",
-	"irobotRoot.hat.leftBumperPush": "ひだりばんぱーがおされたとき",
-	"irobotRoot.hat.leftBumperRelease": "ひだりばんぱーがはなされたとき",
-	"irobotRoot.hat.rightBumperPush": "みぎばんぱーがおされたとき",
-	"irobotRoot.hat.rightBumperRelease": "みぎばんぱーがはなされたとき",
-	"irobotRoot.hat.bothBumpersPush": "さゆうのばんぱーがどうじにおされたとき",
-	"irobotRoot.hat.bothBumpersRelease": "さゆうのばんぱーがどうじにはなされたとき",
-	"irobotRoot.hat.flTouch": "FLたっちせんさーにふれたとき",
-	"irobotRoot.hat.flRelease": "FLたっちせんさーをはなしたとき",
-	"irobotRoot.hat.frTouch": "FRたっちせんさーにふれたとき",
-	"irobotRoot.hat.frRelease": "FRたっちせんさーをはなしたとき",
-	"irobotRoot.hat.rlTouch": "RLたっちせんさーにふれたとき",
-	"irobotRoot.hat.rlRelease": "RLたっちせんさーをはなしたとき",
-	"irobotRoot.hat.rrTouch": "RRたっちせんさーにふれたとき",
-	"irobotRoot.hat.rrRelease": "RRたっちせんさーをはなしたとき",
+	"irobotRoot.hat.leftBumperPush": "[ROOT] のひだりばんぱーがおされたとき",
+	"irobotRoot.hat.leftBumperRelease": "[ROOT] のひだりばんぱーがはなされたとき",
+	"irobotRoot.hat.rightBumperPush": "[ROOT] のみぎばんぱーがおされたとき",
+	"irobotRoot.hat.rightBumperRelease": "[ROOT] のみぎばんぱーがはなされたとき",
+	"irobotRoot.hat.bothBumpersPush": "[ROOT] のさゆうのばんぱーがどうじにおされたとき",
+	"irobotRoot.hat.bothBumpersRelease": "[ROOT] のさゆうのばんぱーがどうじにはなされたとき",
+	"irobotRoot.hat.flTouch": "[ROOT] のFLたっちせんさーにふれたとき",
+	"irobotRoot.hat.flRelease": "[ROOT] のFLたっちせんさーをはなしたとき",
+	"irobotRoot.hat.frTouch": "[ROOT] のFRたっちせんさーにふれたとき",
+	"irobotRoot.hat.frRelease": "[ROOT] のFRたっちせんさーをはなしたとき",
+	"irobotRoot.hat.rlTouch": "[ROOT] のRLたっちせんさーにふれたとき",
+	"irobotRoot.hat.rlRelease": "[ROOT] のRLたっちせんさーをはなしたとき",
+	"irobotRoot.hat.rrTouch": "[ROOT] のRRたっちせんさーにふれたとき",
+	"irobotRoot.hat.rrRelease": "[ROOT] のRRたっちせんさーをはなしたとき",
 	"irobotRoot.menu.marker.up": "あげる",
 	"irobotRoot.menu.marker.down": "さげる",
 	"irobotRoot.menu.marker.eraser": "けしごむ",
@@ -4469,11 +4478,13 @@ var RootProtocol = /*#__PURE__*/function () {
 var RootTransport = /*#__PURE__*/function () {
   function RootTransport(runtime, extensionId, onData) {
     var onReset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    var onConnected = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
     _classCallCheck$1(this, RootTransport);
     this.runtime = runtime;
     this.extensionId = extensionId;
     this.onData = onData;
     this.onReset = onReset;
+    this.onConnected = onConnected;
     this.ble = null;
     this.mode = supportsWebBluetooth() ? 'Web Bluetooth' : 'Scratch Link / Scrub';
     this.lastError = '';
@@ -4509,6 +4520,7 @@ var RootTransport = /*#__PURE__*/function () {
       this.ble.startNotifications(UART_SERVICE, TX, function (message) {
         _this3.onData(base64ToBytes(message));
       });
+      if (this.onConnected) this.onConnected();
     }
   }, {
     key: "write",
@@ -4552,6 +4564,10 @@ var RootTransport = /*#__PURE__*/function () {
         }
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_SCAN_TIMEOUT, function () {
+        // Scratch VM does not include extensionId in this legacy event.
+        // Session transports must not turn another Root's scan timeout
+        // into their own connection error.
+        if (_this5.extensionId.includes(':session:')) return;
         _this5.lastError = "".concat(_this5.mode, ": Root\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3067\u3057\u305F");
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_CONNECTION_LOST_ERROR, function (details) {
@@ -4564,6 +4580,171 @@ var RootTransport = /*#__PURE__*/function () {
     key: "isConnected",
     value: function isConnected() {
       return Boolean(this.ble && this.ble.isConnected());
+    }
+  }]);
+}();
+
+/**
+ * State and transport for one physical Root. Keeping this state together is
+ * important because packet ids and command completion ids restart per Root.
+ */
+var RootSession = /*#__PURE__*/function () {
+  function RootSession(manager, id) {
+    var _this = this;
+    _classCallCheck$1(this, RootSession);
+    this.manager = manager;
+    this.id = id;
+    this.peripheralId = null;
+    this.displayName = "Root ".concat(id);
+    this.protocol = new RootProtocol();
+    this.pendingCommands = new Map();
+    this.last = {};
+    this.lastDetailedEvent = '';
+    this.currentEvent = null;
+    this.bumperState = 0;
+    this.touchState = 0;
+    this.navigationPosition = {
+      x: 0,
+      y: 0,
+      heading: 90
+    };
+    this.transport = new RootTransport(manager.runtime, "".concat(manager.extensionId, ":session:").concat(id), function (packet) {
+      return manager.onData(_this, packet);
+    }, function () {
+      return manager.onReset(_this);
+    }, function () {
+      return manager.onConnected(_this);
+    });
+  }
+  return _createClass$1(RootSession, [{
+    key: "isConnected",
+    value: function isConnected() {
+      return this.transport.isConnected();
+    }
+  }]);
+}();
+/**
+ * Facade registered under the public Scratch extension id plus a collection of
+ * uniquely registered transports. The facade keeps Scratch's one-extension-id
+ * API compatible while each Root gets an independent VM BLE registration.
+ */
+var RootManager = /*#__PURE__*/function () {
+  function RootManager(runtime, extensionId, callbacks) {
+    _classCallCheck$1(this, RootManager);
+    this.runtime = runtime;
+    this.extensionId = extensionId;
+    this.callbacks = callbacks;
+    this.sessions = new Map();
+    this.activeSessionId = null;
+    this.pendingScanSessionId = null;
+    this.nextSessionId = 1;
+    runtime.registerPeripheralExtension(extensionId, this);
+    this.createSession();
+  }
+  return _createClass$1(RootManager, [{
+    key: "createSession",
+    value: function createSession() {
+      var id = this.nextSessionId++;
+      var session = new RootSession(this, id);
+      this.sessions.set(session.id, session);
+      if (this.activeSessionId === null) this.activeSessionId = session.id;
+      return session;
+    }
+  }, {
+    key: "getSession",
+    value: function getSession(id) {
+      return this.sessions.get(Number(id)) || null;
+    }
+  }, {
+    key: "getActiveSession",
+    value: function getActiveSession() {
+      return this.getSession(this.activeSessionId) || this.createSession();
+    }
+  }, {
+    key: "setActiveSession",
+    value: function setActiveSession(id) {
+      if (this.sessions.has(Number(id))) this.activeSessionId = Number(id);
+      return this.getActiveSession();
+    }
+  }, {
+    key: "enumerateSessions",
+    value: function enumerateSessions() {
+      return Array.from(this.sessions.values());
+    }
+  }, {
+    key: "getMenu",
+    value: function getMenu() {
+      return this.enumerateSessions().map(function (session) {
+        return {
+          text: session.displayName,
+          value: String(session.id)
+        };
+      });
+    }
+
+    /**
+     * Start a scan without interrupting any connected session. The first scan
+     * reuses the default disconnected session; subsequent scans create a new
+     * session and therefore a new BLE adapter/socket.
+     */
+  }, {
+    key: "scan",
+    value: function scan() {
+      var session = this.getSession(this.pendingScanSessionId);
+      if (!session || session.isConnected()) session = this.getActiveSession();
+      if (session.isConnected()) session = this.createSession();
+      this.pendingScanSessionId = session.id;
+      session.transport.scan();
+    }
+  }, {
+    key: "connect",
+    value: function connect(peripheralId) {
+      var session = this.getSession(this.pendingScanSessionId) || this.getActiveSession();
+      session.peripheralId = peripheralId;
+      session.transport.connect(peripheralId);
+    }
+  }, {
+    key: "disconnect",
+    value: function disconnect() {
+      var sessionId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.activeSessionId;
+      this.getSession(sessionId).transport.disconnect();
+    }
+  }, {
+    key: "isConnected",
+    value: function isConnected() {
+      var sessionId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.activeSessionId;
+      return this.getSession(sessionId).isConnected();
+    }
+  }, {
+    key: "transportMode",
+    value: function transportMode() {
+      var sessionId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.activeSessionId;
+      return this.getSession(sessionId).transport.mode;
+    }
+  }, {
+    key: "lastConnectionError",
+    value: function lastConnectionError() {
+      var sessionId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.activeSessionId;
+      return this.getSession(sessionId).transport.lastError;
+    }
+  }, {
+    key: "onConnected",
+    value: function onConnected(session) {
+      session.displayName = "Root ".concat(session.id);
+      this.pendingScanSessionId = null;
+      this.activeSessionId = session.id;
+      if (this.callbacks.onConnected) this.callbacks.onConnected(session);
+    }
+  }, {
+    key: "onReset",
+    value: function onReset(session) {
+      if (this.pendingScanSessionId === session.id) this.pendingScanSessionId = null;
+      if (this.callbacks.onReset) this.callbacks.onReset(session);
+    }
+  }, {
+    key: "onData",
+    value: function onData(session, packet) {
+      if (this.callbacks.onData) this.callbacks.onData(session, packet);
     }
   }]);
 }();
@@ -5675,7 +5856,7 @@ var normalizeTurn = function normalizeTurn(degrees) {
 var midiNoteToFrequency = function midiNoteToFrequency(midiNote) {
   return Math.round(440 * Math.pow(2, (midiNote - 69) / 12));
 };
-var FIXED_EVENT_HAT_MESSAGES = [['whenLeftBumperPush', 'hat.leftBumperPush', 'when left bumper is pushed'], ['whenLeftBumperRelease', 'hat.leftBumperRelease', 'when left bumper is released'], ['whenRightBumperPush', 'hat.rightBumperPush', 'when right bumper is pushed'], ['whenRightBumperRelease', 'hat.rightBumperRelease', 'when right bumper is released'], ['whenBothBumpersPush', 'hat.bothBumpersPush', 'when both bumpers are pushed simultaneously'], ['whenBothBumpersRelease', 'hat.bothBumpersRelease', 'when both bumpers are released simultaneously'], ['whenFLTouch', 'hat.flTouch', 'when FL touch sensor is touched'], ['whenFLRelease', 'hat.flRelease', 'when FL touch sensor is released'], ['whenFRTouch', 'hat.frTouch', 'when FR touch sensor is touched'], ['whenFRRelease', 'hat.frRelease', 'when FR touch sensor is released'], ['whenRLTouch', 'hat.rlTouch', 'when RL touch sensor is touched'], ['whenRLRelease', 'hat.rlRelease', 'when RL touch sensor is released'], ['whenRRTouch', 'hat.rrTouch', 'when RR touch sensor is touched'], ['whenRRRelease', 'hat.rrRelease', 'when RR touch sensor is released']];
+var FIXED_EVENT_HAT_MESSAGES = [['whenLeftBumperPush', 'hat.leftBumperPush', 'when [ROOT] left bumper is pushed'], ['whenLeftBumperRelease', 'hat.leftBumperRelease', 'when [ROOT] left bumper is released'], ['whenRightBumperPush', 'hat.rightBumperPush', 'when [ROOT] right bumper is pushed'], ['whenRightBumperRelease', 'hat.rightBumperRelease', 'when [ROOT] right bumper is released'], ['whenBothBumpersPush', 'hat.bothBumpersPush', 'when [ROOT] both bumpers are pushed simultaneously'], ['whenBothBumpersRelease', 'hat.bothBumpersRelease', 'when [ROOT] both bumpers are released simultaneously'], ['whenFLTouch', 'hat.flTouch', 'when [ROOT] FL touch sensor is touched'], ['whenFLRelease', 'hat.flRelease', 'when [ROOT] FL touch sensor is released'], ['whenFRTouch', 'hat.frTouch', 'when [ROOT] FR touch sensor is touched'], ['whenFRRelease', 'hat.frRelease', 'when [ROOT] FR touch sensor is released'], ['whenRLTouch', 'hat.rlTouch', 'when [ROOT] RL touch sensor is touched'], ['whenRLRelease', 'hat.rlRelease', 'when [ROOT] RL touch sensor is released'], ['whenRRTouch', 'hat.rrTouch', 'when [ROOT] RR touch sensor is touched'], ['whenRRRelease', 'hat.rrRelease', 'when [ROOT] RR touch sensor is released']];
 var fixedEventHats = function fixedEventHats() {
   return FIXED_EVENT_HAT_MESSAGES.map(function (_ref) {
     var _ref2 = _slicedToArray$1(_ref, 3),
@@ -5687,7 +5868,13 @@ var fixedEventHats = function fixedEventHats() {
       func: 'whenFixedEvent',
       blockType: BlockType.HAT,
       text: _translate(id, defaultText),
-      isEdgeActivated: false
+      isEdgeActivated: false,
+      arguments: {
+        ROOT: {
+          type: ArgumentType.STRING,
+          menu: 'rootMenu'
+        }
+      }
     };
   });
 };
@@ -5719,13 +5906,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     // editable while preserving the visual picker in enhanced editors.
     this.supportsRootMotionPicker = Boolean(runtime && runtime[ROOT_MOTION_PICKER_CAPABILITY]);
     if (runtime.formatMessage) formatMessage = runtime.formatMessage;
-    this.protocol = new RootProtocol();
-    this.pendingCommands = new Map();
-    this.transport = new RootTransport(runtime, EXTENSION_ID, function (packet) {
-      return _this._receive(packet);
-    }, function () {
-      return _this._cancelPendingCommands(new Error('Root connection was reset'));
+    this.rootManager = new RootManager(runtime, EXTENSION_ID, {
+      onData: function onData(session, packet) {
+        return _this._receive(packet, session);
+      },
+      onReset: function onReset(session) {
+        return _this._cancelPendingCommands(new Error('Root connection was reset'), session);
+      }
     });
+    this._hatDispatchSessionId = null;
     // Preserve the established extension behaviour for existing projects.
     // New projects can opt into Auto (simulator while disconnected) or
     // Simulator fixed explicitly; this default will be reconsidered only
@@ -5750,23 +5939,95 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         if (typeof _this.runtime.stopAll === 'function') _this.runtime.stopAll();
       }
     });
-    this.last = {};
-    this.lastDetailedEvent = '';
-    this.currentEvent = null;
-    this.bumperState = 0;
-    this.touchState = 0;
-    // Root rt0/rt1 navigation is implemented in the client, as in the
-    // official Python SDK. Heading uses the conventional xy plane: 90° is
-    // forward (+y), and a positive Root rotation turns clockwise.
-    this.navigationPosition = {
-      x: 0,
-      y: 0,
-      heading: 90
-    };
     this._playNoteForPicker = this._playNoteForPicker.bind(this);
     if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
   }
   return _createClass$1(IrobotRootBlocks, [{
+    key: "_activeSession",
+    value: function _activeSession() {
+      var util = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var sessionId = util && util.thread && util.thread.irobotRootSessionId !== undefined ? util.thread.irobotRootSessionId : this._hatDispatchSessionId;
+      return this.rootManager.getSession(sessionId) || this.rootManager.getActiveSession();
+    }
+  }, {
+    key: "_setThreadSession",
+    value: function _setThreadSession(util, session) {
+      if (util && util.thread) util.thread.irobotRootSessionId = session.id;
+      return session;
+    }
+  }, {
+    key: "_matchesThreadSession",
+    value: function _matchesThreadSession(args, util) {
+      var requested = args && args.ROOT;
+      if (requested === undefined || requested === null || requested === '') return true;
+      var sessionId = util && util.thread && util.thread.irobotRootEventSessionId !== undefined ? util.thread.irobotRootEventSessionId : this._hatDispatchSessionId;
+      if (sessionId === undefined || sessionId === null) return true;
+      return Number(requested) === Number(sessionId);
+    }
+  }, {
+    key: "protocol",
+    get: function get() {
+      return this._activeSession().protocol;
+    }
+  }, {
+    key: "pendingCommands",
+    get: function get() {
+      return this._activeSession().pendingCommands;
+    }
+  }, {
+    key: "transport",
+    get: function get() {
+      return this._activeSession().transport;
+    }
+  }, {
+    key: "last",
+    get: function get() {
+      return this._activeSession().last;
+    },
+    set: function set(value) {
+      this._activeSession().last = value;
+    }
+  }, {
+    key: "lastDetailedEvent",
+    get: function get() {
+      return this._activeSession().lastDetailedEvent;
+    },
+    set: function set(value) {
+      this._activeSession().lastDetailedEvent = value;
+    }
+  }, {
+    key: "currentEvent",
+    get: function get() {
+      return this._activeSession().currentEvent;
+    },
+    set: function set(value) {
+      this._activeSession().currentEvent = value;
+    }
+  }, {
+    key: "bumperState",
+    get: function get() {
+      return this._activeSession().bumperState;
+    },
+    set: function set(value) {
+      this._activeSession().bumperState = value;
+    }
+  }, {
+    key: "touchState",
+    get: function get() {
+      return this._activeSession().touchState;
+    },
+    set: function set(value) {
+      this._activeSession().touchState = value;
+    }
+  }, {
+    key: "navigationPosition",
+    get: function get() {
+      return this._activeSession().navigationPosition;
+    },
+    set: function set(value) {
+      this._activeSession().navigationPosition = value;
+    }
+  }, {
     key: "getInfo",
     value: function getInfo() {
       var _this2 = this;
@@ -5785,9 +6046,27 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           blockType: BlockType.COMMAND,
           text: _translate('block.connect', 'connect to Root')
         }, {
+          opcode: 'addRoot',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.addRoot', 'connect another Root')
+        }, {
           opcode: 'disconnect',
           blockType: BlockType.COMMAND,
           text: _translate('block.disconnect', 'disconnect Root')
+        }, {
+          opcode: 'selectRoot',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.selectRoot', 'use [ROOT]'),
+          arguments: {
+            ROOT: {
+              type: ArgumentType.STRING,
+              menu: 'rootMenu'
+            }
+          }
+        }, {
+          opcode: 'activeRoot',
+          blockType: BlockType.REPORTER,
+          text: _translate('block.activeRoot', 'selected Root')
         }, {
           opcode: 'isConnected',
           blockType: BlockType.BOOLEAN,
@@ -6027,9 +6306,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenEvent',
           blockType: BlockType.HAT,
-          text: _translate('block.whenEvent', 'when [EVENT] changes'),
+          text: _translate('block.whenEvent', 'when [ROOT] [EVENT] changes'),
           isEdgeActivated: false,
           arguments: {
+            ROOT: {
+              type: ArgumentType.STRING,
+              menu: 'rootMenu'
+            },
             EVENT: {
               type: ArgumentType.STRING,
               menu: 'eventMenu'
@@ -6038,9 +6321,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenBumper',
           blockType: BlockType.HAT,
-          text: _translate('block.whenBumper', 'when [BUMPER] bumper is [ACTION]'),
+          text: _translate('block.whenBumper', 'when [ROOT] [BUMPER] bumper is [ACTION]'),
           isEdgeActivated: false,
           arguments: {
+            ROOT: {
+              type: ArgumentType.STRING,
+              menu: 'rootMenu'
+            },
             BUMPER: {
               type: ArgumentType.STRING,
               menu: 'bumperMenu'
@@ -6053,9 +6340,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenTouchSensor',
           blockType: BlockType.HAT,
-          text: _translate('block.whenTouchSensor', 'when [SENSOR] touch sensor is [ACTION]'),
+          text: _translate('block.whenTouchSensor', 'when [ROOT] [SENSOR] touch sensor is [ACTION]'),
           isEdgeActivated: false,
           arguments: {
+            ROOT: {
+              type: ArgumentType.STRING,
+              menu: 'rootMenu'
+            },
             SENSOR: {
               type: ArgumentType.STRING,
               menu: 'touchSensorMenu'
@@ -6244,6 +6535,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
               text: _translate('menu.controlMode.physical', 'physical Root'),
               value: CONTROL_MODE_PHYSICAL
             }]
+          },
+          rootMenu: {
+            acceptReporters: true,
+            items: 'getRootMenu'
           }
         }
       };
@@ -6251,36 +6546,51 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "connect",
     value: function connect() {
-      this.navigationPosition = {
-        x: 0,
-        y: 0,
-        heading: 90
-      };
       if (this.controlMode === CONTROL_MODE_SIMULATOR) {
         this.simulator.open();
         return;
       }
-      this.transport.scan();
+      this.rootManager.scan();
+    }
+  }, {
+    key: "addRoot",
+    value: function addRoot() {
+      this.rootManager.scan();
     }
   }, {
     key: "disconnect",
-    value: function disconnect() {
-      this.transport.disconnect();
+    value: function disconnect(args, util) {
+      this.rootManager.disconnect(this._activeSession(util).id);
+    }
+  }, {
+    key: "selectRoot",
+    value: function selectRoot(args, util) {
+      this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
+    }
+  }, {
+    key: "activeRoot",
+    value: function activeRoot(args, util) {
+      return this._activeSession(util).displayName;
+    }
+  }, {
+    key: "getRootMenu",
+    value: function getRootMenu() {
+      return this.rootManager.getMenu();
     }
   }, {
     key: "isConnected",
-    value: function isConnected() {
-      return this.transport.isConnected();
+    value: function isConnected(args, util) {
+      return this.rootManager.isConnected(this._activeSession(util).id);
     }
   }, {
     key: "transportMode",
-    value: function transportMode() {
-      return this.transport.mode;
+    value: function transportMode(args, util) {
+      return this.rootManager.transportMode(this._activeSession(util).id);
     }
   }, {
     key: "lastConnectionError",
-    value: function lastConnectionError() {
-      return this.transport.lastError;
+    value: function lastConnectionError(args, util) {
+      return this.rootManager.lastConnectionError(this._activeSession(util).id);
     }
   }, {
     key: "setControlMode",
@@ -6291,7 +6601,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       this.controlMode = mode;
       if (this._isSimulatorActive()) {
         if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
-        this._cancelPendingCommands(new Error('Root control target changed to simulator'));
+        this._cancelPendingCommands(new Error('Root control target changed to simulator'), this._activeSession());
         this.simulator.reset();
         this.simulator.open();
       }
@@ -6299,8 +6609,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     }
   }, {
     key: "controlTarget",
-    value: function controlTarget() {
-      return this._isSimulatorActive() ? 'Simulator' : 'Physical Root';
+    value: function controlTarget(args, util) {
+      return this._isSimulatorActive(util) ? 'Simulator' : 'Physical Root';
     }
   }, {
     key: "openSimulator",
@@ -6316,66 +6626,76 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_isSimulatorActive",
     value: function _isSimulatorActive() {
-      return this.controlMode === CONTROL_MODE_SIMULATOR || this.controlMode === CONTROL_MODE_AUTO && !this.transport.isConnected();
+      var util = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession(util);
+      return this.controlMode === CONTROL_MODE_SIMULATOR || this.controlMode === CONTROL_MODE_AUTO && !session.isConnected();
     }
   }, {
     key: "motors",
-    value: function motors(args) {
-      this.navigationPosition = null;
-      if (this._isSimulatorActive()) return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
-      return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)));
+    value: function motors(args, util) {
+      var session = this._activeSession(util);
+      session.navigationPosition = null;
+      if (this._isSimulatorActive(util, session)) {
+        return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
+      }
+      return this._send(session.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)), session);
     }
   }, {
     key: "drive",
-    value: function drive(args) {
+    value: function drive(args, util) {
       var distance = Cast.toNumber(args.MM);
-      this.navigationPosition = null;
-      if (this._isSimulatorActive()) return this.simulator.move(distance);
-      return this._sendAndWait(this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
+      var session = this._activeSession(util);
+      session.navigationPosition = null;
+      if (this._isSimulatorActive(util, session)) return this.simulator.move(distance);
+      return this._sendAndWait(session.protocol.driveDistance(distance), linearMotionWatchdogMs(distance), session);
     }
   }, {
     key: "turn",
-    value: function turn(args) {
+    value: function turn(args, util) {
       var degrees = Cast.toNumber(args.DEGREES);
-      if (this._isSimulatorActive()) return this.simulator.turn(degrees);
-      return this._sendAndWait(this.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees));
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this.simulator.turn(degrees);
+      return this._sendAndWait(session.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees), session);
     }
   }, {
     key: "arc",
-    value: function arc(args) {
+    value: function arc(args, util) {
       var degrees = Cast.toNumber(args.DEGREES);
       var radius = Cast.toNumber(args.RADIUS);
-      this.navigationPosition = null;
-      if (this._isSimulatorActive()) return this.simulator.arc(radius, degrees);
-      return this._sendAndWait(this.protocol.driveArc(degrees * 10, radius), arcMotionWatchdogMs(degrees, radius));
+      var session = this._activeSession(util);
+      session.navigationPosition = null;
+      if (this._isSimulatorActive(util, session)) return this.simulator.arc(radius, degrees);
+      return this._sendAndWait(session.protocol.driveArc(degrees * 10, radius), arcMotionWatchdogMs(degrees, radius), session);
     }
   }, {
     key: "resetNavigation",
-    value: function resetNavigation() {
+    value: function resetNavigation(args, util) {
       // The official SDK keeps Root rt0/rt1 pose on the client. Native
       // Reset Position / Navigate to Position packets are not accepted by
       // every Root firmware even though they exist in the shared protocol.
-      this.navigationPosition = {
+      var session = this._activeSession(util);
+      session.navigationPosition = {
         x: 0,
         y: 0,
         heading: 90
       };
-      if (this._isSimulatorActive()) this.simulator.resetNavigation();
+      if (this._isSimulatorActive(util, session)) this.simulator.resetNavigation();
     }
   }, {
     key: "navigateTo",
-    value: function navigateTo(args) {
+    value: function navigateTo(args, util) {
       var _this3 = this;
       var target = {
         x: Math.round(Cast.toNumber(args.X) * 10),
         y: Math.round(Cast.toNumber(args.Y) * 10)
       };
-      var origin = this.navigationPosition || {
+      var session = this._activeSession(util);
+      var origin = session.navigationPosition || {
         x: 0,
         y: 0,
         heading: 90
       };
-      if (this._isSimulatorActive()) return this.simulator.navigateTo(target.x, target.y);
+      if (this._isSimulatorActive(util, session)) return this.simulator.navigateTo(target.x, target.y);
       var deltaX = target.x - origin.x;
       var deltaY = target.y - origin.y;
       var distance = Math.round(Math.hypot(deltaX, deltaY));
@@ -6385,7 +6705,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // xy headings increase counter-clockwise.
       var turn = normalizeTurn(origin.heading - targetHeading);
       var needsRotation = Math.abs(turn) >= 0.05;
-      var rotation = needsRotation ? this._sendAndWait(this.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn)) : Promise.resolve();
+      var rotation = needsRotation ? this._sendAndWait(session.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn), session) : Promise.resolve();
       // A completed finite movement is followed by a zero-speed motor packet
       // to suppress residual closed-loop corrections. Scratch Link/Scrub does
       // not provide a dependable write-completion promise, so sending the next
@@ -6398,90 +6718,99 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         });
       }) : rotation;
       return settledRotation.then(function () {
-        return _this3._sendAndWait(_this3.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
+        return _this3._sendAndWait(session.protocol.driveDistance(distance), linearMotionWatchdogMs(distance), session);
       }).then(function () {
-        _this3.navigationPosition = {
+        session.navigationPosition = {
           x: target.x,
           y: target.y,
           heading: targetHeading
         };
       }).catch(function (error) {
-        _this3.navigationPosition = null;
+        session.navigationPosition = null;
         throw error;
       });
     }
   }, {
     key: "stop",
-    value: function stop() {
-      if (this._isSimulatorActive()) return this.simulator.stop();
-      return this._send(this.protocol.packet(0, 3));
+    value: function stop(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this.simulator.stop();
+      return this._send(session.protocol.packet(0, 3), session);
     }
   }, {
     key: "marker",
-    value: function marker(args) {
-      if (this._isSimulatorActive()) return this.simulator.setMarker(args.POSITION);
-      return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]));
+    value: function marker(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this.simulator.setMarker(args.POSITION);
+      return this._send(session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]), session);
     }
   }, {
     key: "ledColor",
-    value: function ledColor(args) {
+    value: function ledColor(args, util) {
       var _Cast$toRgbColorList = Cast.toRgbColorList(args.COLOR),
         _Cast$toRgbColorList2 = _slicedToArray$1(_Cast$toRgbColorList, 3),
         red = _Cast$toRgbColorList2[0],
         green = _Cast$toRgbColorList2[1],
         blue = _Cast$toRgbColorList2[2];
-      if (this._isSimulatorActive()) return this.simulator.setLed(1, red, green, blue);
-      return this._send(this.protocol.led(1, red, green, blue));
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this.simulator.setLed(1, red, green, blue);
+      return this._send(session.protocol.led(1, red, green, blue), session);
     }
   }, {
     key: "ledAnimationColor",
-    value: function ledAnimationColor(args) {
+    value: function ledAnimationColor(args, util) {
       var _Cast$toRgbColorList3 = Cast.toRgbColorList(args.COLOR),
         _Cast$toRgbColorList4 = _slicedToArray$1(_Cast$toRgbColorList3, 3),
         red = _Cast$toRgbColorList4[0],
         green = _Cast$toRgbColorList4[1],
         blue = _Cast$toRgbColorList4[2];
-      if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
-      return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue));
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
+      return this._send(session.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue), session);
     }
   }, {
     key: "led",
-    value: function led(args) {
-      if (this._isSimulatorActive()) return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
-      return this._send(this.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
+    value: function led(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) {
+        return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
+      }
+      return this._send(session.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)), session);
     }
   }, {
     key: "ledAnimation",
-    value: function ledAnimation(args) {
-      if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
-      return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
+    value: function ledAnimation(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this.simulator.setLed(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
+      return this._send(session.protocol.led(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)), session);
     }
   }, {
     key: "playNote",
-    value: function playNote(args) {
+    value: function playNote(args, util) {
       var midiNote = Math.min(127, Math.max(0, Math.round(Cast.toNumber(args.NOTE))));
-      return this._playFrequency(midiNoteToFrequency(midiNote), args.MS);
+      return this._playFrequency(midiNoteToFrequency(midiNote), args.MS, util);
     }
   }, {
     key: "note",
-    value: function note(args) {
-      return this._playFrequency(Cast.toNumber(args.HZ), args.MS);
+    value: function note(args, util) {
+      return this._playFrequency(Cast.toNumber(args.HZ), args.MS, util);
     }
   }, {
     key: "_playFrequency",
-    value: function _playFrequency(frequency, milliseconds) {
+    value: function _playFrequency(frequency, milliseconds, util) {
       // Root's sound command stores the duration in an unsigned 16-bit
       // field. Wait for Root's matching Play Note Finished packet rather
       // than a browser timer, so BLE latency cannot make the next note
       // interrupt this one just before it actually finishes.
       var durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
-      if (this._isSimulatorActive()) return this.simulator.playNote(frequency, durationMs);
-      var packet = this.protocol.note(frequency, durationMs);
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this.simulator.playNote(frequency, durationMs);
+      var packet = session.protocol.note(frequency, durationMs);
       if (durationMs === 0) {
-        this._send(packet);
+        this._send(packet, session);
         return Promise.resolve();
       }
-      return this._sendSoundAndWait(packet, durationMs);
+      return this._sendSoundAndWait(packet, durationMs, session);
     }
   }, {
     key: "_playNoteForPicker",
@@ -6496,87 +6825,91 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     }
   }, {
     key: "sayPhrase",
-    value: function sayPhrase(args) {
-      if (this._isSimulatorActive()) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
-      return this._sendSoundCommandAndWait(this.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase');
+    value: function sayPhrase(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
+      return this._sendSoundCommandAndWait(session.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase', session);
     }
   }, {
     key: "refreshSensor",
-    value: function refreshSensor(args) {
-      if (this._isSimulatorActive()) return;
+    value: function refreshSensor(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return;
       var commands = {
         battery: [14, 1],
         light: [13, 1],
         accel: [16, 1]
       };
       var command = commands[args.SENSOR];
-      return command ? this._send(this.protocol.packet(command[0], command[1])) : undefined;
+      return command ? this._send(session.protocol.packet(command[0], command[1]), session) : undefined;
     }
   }, {
     key: "sensor",
-    value: function sensor(args) {
-      if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
-      return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
+    value: function sensor(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this.simulator.getSensor(args.VALUE);
+      return session.last[args.VALUE] === undefined ? 0 : session.last[args.VALUE];
     }
   }, {
     key: "whenEvent",
-    value: function whenEvent(args) {
-      return String(args.EVENT).toUpperCase() === this.currentEvent;
+    value: function whenEvent(args, util) {
+      return this._matchesThreadSession(args, util) && String(args.EVENT).toUpperCase() === this._activeSession(util).currentEvent;
     }
 
     // These hats are selected by runtime.startHats match fields before their
     // primitives run, so the primitive itself must allow the selected thread.
   }, {
     key: "whenBumper",
-    value: function whenBumper() {
-      return true;
+    value: function whenBumper(args, util) {
+      return this._matchesThreadSession(args, util);
     }
   }, {
     key: "whenTouchSensor",
-    value: function whenTouchSensor() {
-      return true;
+    value: function whenTouchSensor(args, util) {
+      return this._matchesThreadSession(args, util);
     }
   }, {
     key: "whenFixedEvent",
-    value: function whenFixedEvent() {
-      return true;
+    value: function whenFixedEvent(args, util) {
+      return this._matchesThreadSession(args, util);
     }
   }, {
     key: "raw",
-    value: function raw(args) {
-      if (this._isSimulatorActive()) {
-        this.transport.setError(new Error('Raw BLE packets are unavailable in simulator mode'));
+    value: function raw(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) {
+        session.transport.setError(new Error('Raw BLE packets are unavailable in simulator mode'));
         return;
       }
-      return this._send(this.protocol.packet(Cast.toNumber(args.DEVICE), Cast.toNumber(args.COMMAND), RootProtocol.hexToBytes(args.PAYLOAD)));
+      return this._send(session.protocol.packet(Cast.toNumber(args.DEVICE), Cast.toNumber(args.COMMAND), RootProtocol.hexToBytes(args.PAYLOAD)), session);
     }
   }, {
     key: "lastPacket",
-    value: function lastPacket() {
-      return this.last.raw || '';
+    value: function lastPacket(args, util) {
+      return this._activeSession(util).last.raw || '';
     }
   }, {
     key: "detailedEvent",
-    value: function detailedEvent() {
-      return this.lastDetailedEvent;
+    value: function detailedEvent(args, util) {
+      return this._activeSession(util).lastDetailedEvent;
     }
   }, {
     key: "_send",
     value: function _send(packet) {
-      var _this4 = this;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       // Hardware writes are fire-and-forget from Scratch's point of view.
       // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
       // after CoreBluetooth accepted the bytes; returning that promise would
       // leave the command block and the rest of its stack permanently waiting.
       try {
-        var pendingWrite = this.transport.write(packet);
+        var pendingWrite = session.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this4.transport.setError(error);
+            return session.transport.setError(error);
           });
         }
       } catch (error) {
-        this.transport.setError(error);
+        session.transport.setError(error);
       }
     }
   }, {
@@ -6587,19 +6920,20 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendAndWait",
     value: function _sendAndWait(packet, motionWatchdogMs) {
-      var _this5 = this;
+      var _this4 = this;
+      var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._activeSession();
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this5.pendingCommands.get(key);
+          var pending = session.pendingCommands.get(key);
           if (!pending) return;
-          _this5._clearPendingCommand(key, pending);
+          _this4._clearPendingCommand(key, pending, session);
           var error = new Error("Root command timed out (command ".concat(packet[1], ", packet ").concat(packet[2], ")"));
-          _this5.transport.setError(error);
+          session.transport.setError(error);
           reject(error);
         }, COMMAND_FINISH_TIMEOUT_MS);
         var watchdog = setTimeout(function () {
-          var pending = _this5.pendingCommands.get(key);
+          var pending = session.pendingCommands.get(key);
           if (!pending || pending.settling) return;
           pending.settling = true;
 
@@ -6610,15 +6944,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           // interrupted movement also produces its matching Finished
           // response. Resolve after a short BLE settling interval even if
           // old firmware omits that response.
-          _this5._sendMotionStop(key);
+          _this4._sendMotionStop(key, session);
           pending.settle = setTimeout(function () {
-            if (_this5.pendingCommands.get(key) !== pending) return;
-            _this5._clearPendingCommand(key, pending);
-            _this5.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
+            if (session.pendingCommands.get(key) !== pending) return;
+            _this4._clearPendingCommand(key, pending, session);
+            session.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
             resolve();
           }, MOTION_WATCHDOG_SETTLE_MS);
         }, motionWatchdogMs);
-        _this5.pendingCommands.set(key, {
+        session.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6633,38 +6967,40 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // versions leave it pending after CoreBluetooth has accepted the bytes.
       // The Scratch block waits only for Root's own matching Finished packet.
       try {
-        var pendingWrite = this.transport.write(packet);
+        var pendingWrite = session.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this5._rejectPendingCommand(key, error);
+            return _this4._rejectPendingCommand(key, error, session);
           });
         }
       } catch (error) {
-        this._rejectPendingCommand(key, error);
+        this._rejectPendingCommand(key, error, session);
       }
       return completion;
     }
   }, {
     key: "_sendSoundAndWait",
     value: function _sendSoundAndWait(packet, durationMs) {
-      return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound');
+      var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._activeSession();
+      return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound', session);
     }
   }, {
     key: "_sendSoundCommandAndWait",
     value: function _sendSoundCommandAndWait(packet, timeoutMs, description) {
-      var _this6 = this;
+      var _this5 = this;
+      var session = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this._activeSession();
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this6.pendingCommands.get(key);
+          var pending = session.pendingCommands.get(key);
           if (!pending) return;
-          _this6._clearPendingCommand(key, pending);
-          _this6.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
+          _this5._clearPendingCommand(key, pending, session);
+          session.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
           // Do not leave a Scratch stack stuck if a single notification
           // was lost after Root had enough time to finish the sound.
           resolve();
         }, timeoutMs);
-        _this6.pendingCommands.set(key, {
+        session.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6675,75 +7011,80 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         });
       });
       try {
-        var pendingWrite = this.transport.write(packet);
+        var pendingWrite = session.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this6._rejectPendingCommand(key, error);
+            return _this5._rejectPendingCommand(key, error, session);
           });
         }
       } catch (error) {
-        this._rejectPendingCommand(key, error);
+        this._rejectPendingCommand(key, error, session);
       }
       return completion;
     }
   }, {
     key: "_resolvePendingCommand",
     value: function _resolvePendingCommand(decoded) {
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       var key = this._commandKey(decoded.device, decoded.command, decoded.packetId);
-      var pending = this.pendingCommands.get(key);
+      var pending = session.pendingCommands.get(key);
       if (!pending) return false;
       // Explicitly zero the wheel speeds even after Root reports completion.
       // This prevents a residual velocity/controller correction from leaking
       // into the following Scratch command.
-      if (pending.stopMotion && !pending.settling) this._sendMotionStop(key);
-      this._clearPendingCommand(key, pending);
+      if (pending.stopMotion && !pending.settling) this._sendMotionStop(key, session);
+      this._clearPendingCommand(key, pending, session);
       pending.resolve();
       return true;
     }
   }, {
     key: "_sendMotionStop",
     value: function _sendMotionStop(pendingKey) {
-      var _this7 = this;
+      var _this6 = this;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       try {
-        var pendingWrite = this.transport.write(this.protocol.motors(0, 0));
+        var pendingWrite = session.transport.write(session.protocol.motors(0, 0));
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this7._rejectPendingCommand(pendingKey, error);
+            return _this6._rejectPendingCommand(pendingKey, error, session);
           });
         }
       } catch (error) {
-        this._rejectPendingCommand(pendingKey, error);
+        this._rejectPendingCommand(pendingKey, error, session);
       }
     }
   }, {
     key: "_clearPendingCommand",
     value: function _clearPendingCommand(key, pending) {
+      var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._activeSession();
       clearTimeout(pending.timeout);
       if (pending.watchdog) clearTimeout(pending.watchdog);
       if (pending.settle) clearTimeout(pending.settle);
-      this.pendingCommands.delete(key);
+      session.pendingCommands.delete(key);
     }
   }, {
     key: "_rejectPendingCommand",
     value: function _rejectPendingCommand(key, error) {
-      var pending = this.pendingCommands.get(key);
+      var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._activeSession();
+      var pending = session.pendingCommands.get(key);
       if (!pending) return false;
-      this._clearPendingCommand(key, pending);
-      this.transport.setError(error);
+      this._clearPendingCommand(key, pending, session);
+      session.transport.setError(error);
       pending.reject(error);
       return true;
     }
   }, {
     key: "_cancelPendingCommands",
     value: function _cancelPendingCommands(error) {
-      var _iterator = _createForOfIteratorHelper(this.pendingCommands),
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      var _iterator = _createForOfIteratorHelper(session.pendingCommands),
         _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var _step$value = _slicedToArray$1(_step.value, 2),
             key = _step$value[0],
             pending = _step$value[1];
-          this._clearPendingCommand(key, pending);
+          this._clearPendingCommand(key, pending, session);
           pending.reject(error);
         }
       } catch (err) {
@@ -6755,108 +7096,125 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_startEventHat",
     value: function _startEventHat(opcode, property, event) {
-      this[property] = event;
+      var session = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this._activeSession();
+      var matchFields = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {};
+      if (property) session[property] = event;
+      var previousDispatchSessionId = this._hatDispatchSessionId;
+      this._hatDispatchSessionId = session.id;
       try {
-        this.runtime.startHats("".concat(EXTENSION_ID, "_").concat(opcode));
+        var hatOpcode = "".concat(EXTENSION_ID, "_").concat(opcode);
+        var threads = Object.keys(matchFields).length > 0 ? this.runtime.startHats(hatOpcode, matchFields) || [] : this.runtime.startHats(hatOpcode) || [];
+        threads.forEach(function (thread) {
+          thread.irobotRootSessionId = session.id;
+          thread.irobotRootEventSessionId = session.id;
+        });
+        return threads;
       } finally {
-        this[property] = null;
+        if (property) session[property] = null;
+        this._hatDispatchSessionId = previousDispatchSessionId;
       }
     }
   }, {
     key: "_startBumperHat",
     value: function _startBumperHat(event) {
-      this.lastDetailedEvent = event;
-      this._startFixedEventHat(event);
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      session.lastDetailedEvent = event;
+      this._startFixedEventHat(event, session);
       var _event$split = event.split('_'),
         _event$split2 = _slicedToArray$1(_event$split, 2),
         bumper = _event$split2[0],
         action = _event$split2[1];
       try {
-        this.runtime.startHats("".concat(EXTENSION_ID, "_whenBumper"), {
+        this._startEventHat('whenBumper', null, event, session, {
           BUMPER: bumper,
           ACTION: action
         });
       } catch (error) {
         // A parameterized hat saved by an older extension version can have
         // stale/missing fields. It must not prevent fixed hats or BLE I/O.
-        this.transport.setError(error);
+        session.transport.setError(error);
       }
     }
   }, {
     key: "_startTouchHat",
     value: function _startTouchHat(event) {
-      this.lastDetailedEvent = event;
-      this._startFixedEventHat(event);
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      session.lastDetailedEvent = event;
+      this._startFixedEventHat(event, session);
       var _event$split3 = event.split('_'),
         _event$split4 = _slicedToArray$1(_event$split3, 2),
         sensor = _event$split4[0],
         action = _event$split4[1];
       try {
-        this.runtime.startHats("".concat(EXTENSION_ID, "_whenTouchSensor"), {
+        this._startEventHat('whenTouchSensor', null, event, session, {
           SENSOR: sensor,
           ACTION: action
         });
       } catch (error) {
-        this.transport.setError(error);
+        session.transport.setError(error);
       }
     }
   }, {
     key: "_startFixedEventHat",
     value: function _startFixedEventHat(event) {
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       var opcode = FIXED_EVENT_OPCODES[event];
-      if (opcode) this.runtime.startHats("".concat(EXTENSION_ID, "_").concat(opcode));
+      if (opcode) this._startEventHat(opcode, null, event, session);
     }
   }, {
     key: "_receiveBumperEvent",
     value: function _receiveBumperEvent(decoded) {
-      var previous = this.bumperState;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      var previous = session.bumperState;
       var next = (decoded.leftBumper ? 0x80 : 0) | (decoded.rightBumper ? 0x40 : 0);
-      this.bumperState = next;
+      session.bumperState = next;
       if (previous === 0 && next === 0xC0) {
-        this._startBumperHat('BOTH_PUSH');
+        this._startBumperHat('BOTH_PUSH', session);
         return;
       }
       if (previous === 0xC0 && next === 0) {
-        this._startBumperHat('BOTH_RELEASE');
+        this._startBumperHat('BOTH_RELEASE', session);
         return;
       }
       if ((previous ^ next) & 0x80) {
-        this._startBumperHat(next & 0x80 ? 'LEFT_PUSH' : 'LEFT_RELEASE');
+        this._startBumperHat(next & 0x80 ? 'LEFT_PUSH' : 'LEFT_RELEASE', session);
       }
       if ((previous ^ next) & 0x40) {
-        this._startBumperHat(next & 0x40 ? 'RIGHT_PUSH' : 'RIGHT_RELEASE');
+        this._startBumperHat(next & 0x40 ? 'RIGHT_PUSH' : 'RIGHT_RELEASE', session);
       }
     }
   }, {
     key: "_receiveTouchEvent",
     value: function _receiveTouchEvent(decoded) {
-      var previous = this.touchState;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      var previous = session.touchState;
       var next = decoded.touchMask;
-      this.touchState = next;
+      session.touchState = next;
       var sensors = [['FL', 0x8], ['FR', 0x4], ['RR', 0x2], ['RL', 0x1]];
       for (var _i = 0, _sensors = sensors; _i < _sensors.length; _i++) {
         var _sensors$_i = _slicedToArray$1(_sensors[_i], 2),
           sensor = _sensors$_i[0],
           mask = _sensors$_i[1];
         if ((previous ^ next) & mask) {
-          this._startTouchHat("".concat(sensor, "_").concat(next & mask ? 'TOUCH' : 'RELEASE'));
+          this._startTouchHat("".concat(sensor, "_").concat(next & mask ? 'TOUCH' : 'RELEASE'), session);
         }
       }
     }
   }, {
     key: "_receive",
     value: function _receive(packet) {
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       // A connected physical Root may keep sending sensor notifications while
       // the student deliberately works in simulator-fixed mode. Never let
       // those events launch scripts for the virtual Root.
-      if (this._isSimulatorActive()) return;
-      var decoded = this.protocol.decode(packet);
+      if (this.controlMode === CONTROL_MODE_SIMULATOR || this.controlMode === CONTROL_MODE_AUTO && !session.isConnected()) return;
+      var decoded = session.protocol.decode(packet);
       if (!decoded) return;
-      this.last = Object.assign({}, this.last, decoded);
-      this._resolvePendingCommand(decoded);
+      session.last = Object.assign({}, session.last, decoded);
+      this._resolvePendingCommand(decoded, session);
       if (decoded.command !== 0) return;
-      if (decoded.device === 12) this._receiveBumperEvent(decoded);
-      if (decoded.device === 17) this._receiveTouchEvent(decoded);
+      if (decoded.device === 12) this._receiveBumperEvent(decoded, session);
+      if (decoded.device === 17) this._receiveTouchEvent(decoded, session);
       var names = {
         12: 'BUMPER',
         17: 'TOUCH',
@@ -6864,7 +7222,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         14: 'BATTERY'
       };
       var name = names[decoded.device];
-      if (name) this._startEventHat('whenEvent', 'currentEvent', name);
+      if (name) this._startEventHat('whenEvent', 'currentEvent', name, session);
     }
   }, {
     key: "_receiveSimulatorEvent",
