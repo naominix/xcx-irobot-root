@@ -46,6 +46,7 @@ describe('iRobot Root extension', () => {
         expect(block).toBeInstanceOf(blockClass);
         expect(block.getInfo().id).toBe('irobotRoot');
         expect(block.getInfo().blocks.some(item => item.opcode === 'connect')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'resetRootConnections')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'setControlMode')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'openSimulator')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'motors').arguments.LEFT.type)
@@ -153,6 +154,39 @@ describe('iRobot Root extension', () => {
 
         expect(rootA.transport.scan).toHaveBeenCalledTimes(1);
         expect(rootA.connectionState).toBe(false);
+    });
+
+    test('disconnects every Root and clears connection state without removing numbered slots', () => {
+        const block = new blockClass(runtime);
+        const rootA = block.rootManager.getSession(1);
+        const rootB = block.rootManager.createSession();
+        for (const session of [rootA, rootB]) {
+            session.connectionState = true;
+            session.peripheralId = `peripheral-${session.id}`;
+            session.last = {batteryPercent: 50};
+            session.bumperState = 0x80;
+            session.touchState = 0x8;
+            session.navigationPosition = {x: 10, y: 20, heading: 30};
+            session.protocol.packet(3, 2);
+            session.transport.disconnect = jest.fn(() => block.rootManager.onReset(session));
+        }
+
+        block.resetRootConnections();
+
+        expect(rootA.transport.disconnect).toHaveBeenCalledTimes(1);
+        expect(rootB.transport.disconnect).toHaveBeenCalledTimes(1);
+        expect(rootA.connectionState).toBe(false);
+        expect(rootB.connectionState).toBe(false);
+        expect(rootA.peripheralId).toBeNull();
+        expect(rootB.peripheralId).toBeNull();
+        expect(rootA.last).toEqual({});
+        expect(rootB.last).toEqual({});
+        expect(rootA.protocol.packetId).toBe(0);
+        expect(rootB.protocol.packetId).toBe(0);
+        expect(block.rootManager.activeSessionId).toBe(rootA.id);
+        expect(block.getRootMenu()).toEqual([
+            {text: 'Root 1', value: '1'}, {text: 'Root 2', value: '2'}
+        ]);
     });
 
     test('keeps a selected Root bound to each parallel Scratch thread', async () => {

@@ -68,25 +68,25 @@ var entry = {
   translationMap: translations$1
 };
 
-function _arrayLikeToArray$6(r, a) {
+function _arrayLikeToArray$7(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles$1(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$6(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$7(r);
 }
 
 function _iterableToArray$1(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$6(r, a) {
+function _unsupportedIterableToArray$7(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$6(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$7(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$6(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$7(r, a) : void 0;
   }
 }
 
@@ -95,7 +95,7 @@ function _nonIterableSpread$1() {
 }
 
 function _toConsumableArray$1(r) {
-  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$6(r) || _nonIterableSpread$1();
+  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$7(r) || _nonIterableSpread$1();
 }
 
 function _classCallCheck$1(a, n) {
@@ -177,7 +177,7 @@ function _nonIterableRest$1() {
 }
 
 function _slicedToArray$1(r, e) {
-  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$6(r, e) || _nonIterableRest$1();
+  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$7(r, e) || _nonIterableRest$1();
 }
 
 function getDefaultExportFromCjs (x) {
@@ -846,6 +846,7 @@ var en = {
 	"irobotRoot.block.connect": "connect to Root",
 	"irobotRoot.block.addRoot": "connect another Root",
 	"irobotRoot.block.disconnect": "disconnect Root",
+	"irobotRoot.block.resetRootConnections": "disconnect all Roots and reset connections",
 	"irobotRoot.block.selectRoot": "use [ROOT]",
 	"irobotRoot.block.activeRoot": "selected Root",
 	"irobotRoot.block.isConnected": "Root is connected?",
@@ -960,6 +961,7 @@ var ja = {
 	"irobotRoot.block.connect": "Rootに接続する",
 	"irobotRoot.block.addRoot": "別のRootを接続する",
 	"irobotRoot.block.disconnect": "Rootを切断する",
+	"irobotRoot.block.resetRootConnections": "すべてのRootを切断して接続状態をリセットする",
 	"irobotRoot.block.selectRoot": "[ROOT]を操作する",
 	"irobotRoot.block.activeRoot": "選択中のRoot",
 	"irobotRoot.block.isConnected": "Rootは接続済み",
@@ -1077,6 +1079,7 @@ var translations = {
 	"irobotRoot.block.connect": "るーとにつなぐ",
 	"irobotRoot.block.addRoot": "べつのるーとをつなぐ",
 	"irobotRoot.block.disconnect": "るーとをきりはなす",
+	"irobotRoot.block.resetRootConnections": "すべてのるーとをきりはなしてせつぞくじょうたいをりせっとする",
 	"irobotRoot.block.selectRoot": "[ROOT]をそうさする",
 	"irobotRoot.block.activeRoot": "せんたくちゅうのるーと",
 	"irobotRoot.block.isConnected": "るーとはつながっている",
@@ -1424,25 +1427,25 @@ function requireJsonrpc() {
   return jsonrpc;
 }
 
-function _arrayLikeToArray$5(r, a) {
+function _arrayLikeToArray$6(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$5(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$6(r);
 }
 
 function _iterableToArray(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$5(r, a) {
+function _unsupportedIterableToArray$6(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$5(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$6(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$6(r, a) : void 0;
   }
 }
 
@@ -1451,7 +1454,7 @@ function _nonIterableSpread() {
 }
 
 function _toConsumableArray(r) {
-  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$5(r) || _nonIterableSpread();
+  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$6(r) || _nonIterableSpread();
 }
 
 function _defineProperty(e, r, t) {
@@ -1516,7 +1519,7 @@ function _nonIterableRest() {
 }
 
 function _slicedToArray(r, e) {
-  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$5(r, e) || _nonIterableRest();
+  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$6(r, e) || _nonIterableRest();
 }
 
 var urlToObj = {};
@@ -1753,9 +1756,9 @@ var errorUtils = {};
 
 var stackTrace = {};
 
-function _createForOfIteratorHelper$4(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$4(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$4(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$4(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0; } }
-function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$5(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$5(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$5(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$5(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0; } }
+function _arrayLikeToArray$5(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var hasRequiredStackTrace;
 function requireStackTrace() {
   if (hasRequiredStackTrace) return stackTrace;
@@ -1791,7 +1794,7 @@ function requireStackTrace() {
   }
   function toStackFrames(lines, parseLine) {
     var frames = [];
-    var _iterator = _createForOfIteratorHelper$4(lines),
+    var _iterator = _createForOfIteratorHelper$5(lines),
       _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2449,9 +2452,9 @@ function requireInterfaces() {
   return interfaces;
 }
 
-function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
-function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$4(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$4(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$4(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$4(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0; } }
+function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys$2(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$2(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$2(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var hasRequiredBaseLogger;
@@ -2779,7 +2782,7 @@ function requireBaseLogger() {
       function tokensToCss(tokens) {
         var seen = new Set();
         var cssParts = [];
-        var _iterator = _createForOfIteratorHelper$3(tokens),
+        var _iterator = _createForOfIteratorHelper$4(tokens),
           _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2889,7 +2892,7 @@ function requireBaseLogger() {
         var withoutDrive = drivePrefix ? replaced.slice(drivePrefix.length) : replaced;
         var segments = withoutDrive.split("/");
         var normalizedSegments = [];
-        var _iterator2 = _createForOfIteratorHelper$3(segments),
+        var _iterator2 = _createForOfIteratorHelper$4(segments),
           _step2;
         try {
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -3321,7 +3324,7 @@ function requireBaseLogger() {
             if (typeof source === "string") {
               var _this$settings4;
               var modifiedSource = source;
-              var _iterator3 = _createForOfIteratorHelper$3(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
+              var _iterator3 = _createForOfIteratorHelper$4(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
                 _step3;
               try {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -4169,9 +4172,9 @@ function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t =
 function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
-function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
-function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
+function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var ROOT_SERVICE = '48c5d828-ac2a-442d-97a3-0c9822b04979';
 var UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 var RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -4194,7 +4197,7 @@ var clamp$1 = function clamp(value, min, max) {
 };
 var crc8 = function crc8(bytes) {
   var crc = 0;
-  var _iterator = _createForOfIteratorHelper$2(bytes),
+  var _iterator = _createForOfIteratorHelper$3(bytes),
     _step;
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -4221,7 +4224,7 @@ var bytesToHex = function bytesToHex(bytes) {
 // in both Web Bluetooth and Scrub.
 var bytesToBase64 = function bytesToBase64(bytes) {
   var binary = '';
-  var _iterator2 = _createForOfIteratorHelper$2(bytes),
+  var _iterator2 = _createForOfIteratorHelper$3(bytes),
     _step2;
   try {
     for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -4419,7 +4422,7 @@ var RootProtocol = /*#__PURE__*/function () {
       // Protocol payloads are limited to 16 UTF-8 bytes. Add complete
       // Unicode code points only, so truncation never leaves malformed
       // Japanese text or half of an emoji in the packet.
-      var _iterator3 = _createForOfIteratorHelper$2(String(phrase)),
+      var _iterator3 = _createForOfIteratorHelper$3(String(phrase)),
         _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -4639,6 +4642,10 @@ var RootTransport = /*#__PURE__*/function () {
   }]);
 }();
 
+function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
+function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
 /**
  * State and transport for one physical Root. Keeping this state together is
  * important because packet ids and command completion ids restart per Root.
@@ -4682,6 +4689,26 @@ var RootSession = /*#__PURE__*/function () {
       var connected = this.transport.isConnected();
       if (connected) this.connectionState = true;
       return connected;
+    }
+  }, {
+    key: "clearConnectionState",
+    value: function clearConnectionState() {
+      // Keep the numbered session itself so projects already containing a
+      // "use Root 2" block remain valid after the reset. Only the physical
+      // connection and data tied to the former robot are discarded.
+      this.peripheralId = null;
+      this.connectionState = false;
+      this.protocol = new RootProtocol();
+      this.last = {};
+      this.lastDetailedEvent = '';
+      this.currentEvent = null;
+      this.bumperState = 0;
+      this.touchState = 0;
+      this.navigationPosition = {
+        x: 0,
+        y: 0,
+        heading: 90
+      };
     }
   }]);
 }();
@@ -4781,6 +4808,41 @@ var RootManager = /*#__PURE__*/function () {
       if (!session) return;
       session.connectionState = false;
       session.transport.disconnect();
+    }
+  }, {
+    key: "resetConnections",
+    value: function resetConnections() {
+      var sessions = this.enumerateSessions();
+      // Disconnect every session before clearing state. RootTransport.reset
+      // invokes the extension callback, allowing pending Scratch commands to
+      // be cancelled rather than left waiting for a completion packet.
+      var _iterator = _createForOfIteratorHelper$2(sessions),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var session = _step.value;
+          this.disconnect(session.id);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      var _iterator2 = _createForOfIteratorHelper$2(sessions),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var _session = _step2.value;
+          _session.clearConnectionState();
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      this.pendingScanSessionId = null;
+      this.activeSessionId = sessions.length ? sessions[0].id : null;
+      if (this.activeSessionId === null) this.createSession();
     }
   }, {
     key: "isConnected",
@@ -6129,6 +6191,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           blockType: BlockType.COMMAND,
           text: _translate('block.disconnect', 'disconnect Root')
         }, {
+          opcode: 'resetRootConnections',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.resetRootConnections', 'disconnect all Roots and reset connections')
+        }, {
           opcode: 'selectRoot',
           blockType: BlockType.COMMAND,
           text: _translate('block.selectRoot', 'use [ROOT]'),
@@ -6636,6 +6702,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     key: "disconnect",
     value: function disconnect(args, util) {
       this.rootManager.disconnect(this._activeSession(util).id);
+    }
+  }, {
+    key: "resetRootConnections",
+    value: function resetRootConnections() {
+      this.rootManager.resetConnections();
     }
   }, {
     key: "selectRoot",

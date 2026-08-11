@@ -258,6 +258,8 @@ class IrobotRootBlocks {
                     text: translate('block.addRoot', 'connect another Root')},
                 {opcode: 'disconnect', blockType: BlockType.COMMAND,
                     text: translate('block.disconnect', 'disconnect Root')},
+                {opcode: 'resetRootConnections', blockType: BlockType.COMMAND,
+                    text: translate('block.resetRootConnections', 'disconnect all Roots and reset connections')},
                 {opcode: 'selectRoot', blockType: BlockType.COMMAND,
                     text: translate('block.selectRoot', 'use [ROOT]'), arguments: {
                         ROOT: {type: ArgumentType.STRING, menu: 'rootMenu'}
@@ -456,6 +458,7 @@ class IrobotRootBlocks {
 
     addRoot () { this.rootManager.scan(); }
     disconnect (args, util) { this.rootManager.disconnect(this._activeSession(util).id); }
+    resetRootConnections () { this.rootManager.resetConnections(); }
     selectRoot (args, util) {
         this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
     }

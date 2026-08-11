@@ -37,6 +37,21 @@ class RootSession {
         if (connected) this.connectionState = true;
         return connected;
     }
+
+    clearConnectionState () {
+        // Keep the numbered session itself so projects already containing a
+        // "use Root 2" block remain valid after the reset. Only the physical
+        // connection and data tied to the former robot are discarded.
+        this.peripheralId = null;
+        this.connectionState = false;
+        this.protocol = new RootProtocol();
+        this.last = {};
+        this.lastDetailedEvent = '';
+        this.currentEvent = null;
+        this.bumperState = 0;
+        this.touchState = 0;
+        this.navigationPosition = {x: 0, y: 0, heading: 90};
+    }
 }
 
 /**
@@ -120,6 +135,18 @@ class RootManager {
         if (!session) return;
         session.connectionState = false;
         session.transport.disconnect();
+    }
+
+    resetConnections () {
+        const sessions = this.enumerateSessions();
+        // Disconnect every session before clearing state. RootTransport.reset
+        // invokes the extension callback, allowing pending Scratch commands to
+        // be cancelled rather than left waiting for a completion packet.
+        for (const session of sessions) this.disconnect(session.id);
+        for (const session of sessions) session.clearConnectionState();
+        this.pendingScanSessionId = null;
+        this.activeSessionId = sessions.length ? sessions[0].id : null;
+        if (this.activeSessionId === null) this.createSession();
     }
 
     isConnected (sessionId = this.activeSessionId) {
