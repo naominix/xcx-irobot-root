@@ -161,6 +161,20 @@ describe('iRobot Root extension', () => {
         expect(block.simulator.robots.get(2).pose).toEqual({x: 600, y: 0, heading: 90});
     });
 
+    test('uses a dragged virtual Root position as its new navigation origin', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.addRoot();
+
+        block.simulator.placeRobot(2, 360, -240);
+        expect(block.simulator.robots.get(2).pose).toEqual({x: 360, y: -240, heading: 90});
+
+        block.simulator.resetNavigation(2);
+        expect(block.simulator.robots.get(2).pose).toEqual({x: 360, y: -240, heading: 90});
+        expect(block.simulator.toggleRootPlacementMode()).toBe(true);
+        expect(block.simulator.toggleRootPlacementMode()).toBe(false);
+    });
+
     test('reuses a disconnected Root slot when scanning again', () => {
         const block = new blockClass(runtime);
         const rootA = block.rootManager.getSession(1);

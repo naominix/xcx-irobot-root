@@ -22,6 +22,8 @@ class RootSimulator {
     constructor (onEvent, controls = {}) {
         this.onEvent = onEvent;
         this.controls = controls;
+        this.enableRootPlacement = Boolean(controls.enableRootPlacement);
+        this.placementMode = false;
         this.speedMultiplier = 1;
         // Display zoom only changes the viewport.  Root coordinates, collision
         // geometry, and motion timing remain in millimetres.
@@ -39,6 +41,7 @@ class RootSimulator {
         this._collisionPoint = null;
         this._runButton = null;
         this._stopButton = null;
+        this._placementButton = null;
         this._localizedElements = [];
         this.reset();
     }
@@ -112,6 +115,12 @@ class RootSimulator {
         if (this._zoomValue) this._zoomValue.textContent = `${Math.round(this.viewZoom * 100)}%`;
         this._draw();
         return this.viewZoom;
+    }
+
+    toggleRootPlacementMode () {
+        this.placementMode = !this.placementMode;
+        this._draw();
+        return this.placementMode;
     }
 
     runProject () {
@@ -446,6 +455,9 @@ class RootSimulator {
         addButton('addBlock', '+ Block', () => this.addObstacle('block'));
         addButton('delete', 'Delete', () => this.deleteSelectedObstacle());
         addButton('clearObstacles', 'Clear obstacles', () => this.clearObstacles());
+        if (this.enableRootPlacement) {
+            this._placementButton = addButton('rootPlacement', '▣ Place Roots', () => this.toggleRootPlacementMode());
+        }
         const speedLabel = document.createElement('label');
         speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
         const speedText = document.createElement('span');

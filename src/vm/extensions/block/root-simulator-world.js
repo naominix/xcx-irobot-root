@@ -22,9 +22,12 @@ class RootSimulatorWorld {
         this.onEvent = onEvent;
         this.controls = controls;
         this.robots = new Map();
+        this.navigationOrigins = new Map();
         this.obstacles = [];
         this.activeId = 1;
-        this.host = new RootSimulator(null, controls);
+        this.placementMode = false;
+        this._rootDrag = null;
+        this.host = new RootSimulator(null, Object.assign({}, controls, {enableRootPlacement: true}));
         this.host._draw = () => this._draw();
         this.host._pointerDown = event => this._pointerDown(event);
         this.host._pointerMove = event => this._pointerMove(event);
@@ -38,6 +41,7 @@ class RootSimulatorWorld {
         this.host.stopProject = () => this.stopProject();
         this.host.setViewZoom = zoom => this.setViewZoom(zoom);
         this.host.setSpeedMultiplier = multiplier => this.setSpeedMultiplier(multiplier);
+        this.host.toggleRootPlacementMode = () => this.toggleRootPlacementMode();
         this.ensureRobot(1);
     }
 
@@ -77,6 +81,8 @@ class RootSimulatorWorld {
     }
 
     _initialPose (id) {
+        const existing = this.navigationOrigins.get(Number(id));
+        if (existing) return Object.assign({}, existing);
         const positions = [
             {x: 0, y: 0},
             {x: INITIAL_ROOT_SPACING_MM, y: 0},
@@ -99,6 +105,14 @@ class RootSimulatorWorld {
         robot.pose = this._initialPose(id);
     }
 
+    _setNavigationOrigin (id, pose) {
+        this.navigationOrigins.set(Number(id), {
+            x: Number(pose.x) || 0,
+            y: Number(pose.y) || 0,
+            heading: Number.isFinite(Number(pose.heading)) ? Number(pose.heading) : 90
+        });
+    }
+
     open () { this.host.open(); this._draw(); }
     close () { this.host.close(); }
     isOpen () { return this.host.isOpen(); }
@@ -107,8 +121,25 @@ class RootSimulatorWorld {
     clearRobots () {
         for (const robot of this.robots.values()) robot.stop();
         this.robots.clear();
+        this.navigationOrigins.clear();
         this.activeId = null;
         this._draw();
+    }
+    toggleRootPlacementMode () {
+        this.placementMode = !this.placementMode;
+        this.host.placementMode = this.placementMode;
+        this._draw();
+        return this.placementMode;
+    }
+    placeRobot (id, x, y) {
+        const robot = this.ensureRobot(id);
+        robot.stop();
+        const pose = {x: Number(x) || 0, y: Number(y) || 0, heading: robot.pose.heading};
+        robot.pose = pose;
+        robot._setBumpers(false, false);
+        this._setNavigationOrigin(id, pose);
+        this._draw();
+        return Object.assign({}, pose);
     }
     setSpeedMultiplier (multiplier) {
         this.host.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
@@ -226,6 +257,17 @@ class RootSimulatorWorld {
         if (nearest) {
             this.activeId = nearest.id;
             const robot = nearest.robot;
+            if (this.placementMode) {
+                robot.stop();
+                this._rootDrag = {
+                    id: nearest.id,
+                    pointerId: event.pointerId,
+                    offset: {x: point.x - robot.pose.x, y: point.y - robot.pose.y}
+                };
+                this.host._canvas.setPointerCapture(event.pointerId);
+                this._draw();
+                return;
+            }
             const dx = point.x - robot.pose.x;
             const dy = point.y - robot.pose.y;
             const heading = headingRadians(robot.pose.heading);
@@ -250,6 +292,15 @@ class RootSimulatorWorld {
         this._draw();
     }
     _pointerMove (event) {
+        if (this._rootDrag && this._rootDrag.pointerId === event.pointerId) {
+            const point = this._eventWorld(event);
+            this.placeRobot(
+                this._rootDrag.id,
+                point.x - this._rootDrag.offset.x,
+                point.y - this._rootDrag.offset.y
+            );
+            return;
+        }
         if (!this.host._dragOffset || this.host._selectedObstacle < 0) return;
         const point = this._eventWorld(event);
         const obstacle = this.obstacles[this.host._selectedObstacle];
@@ -258,6 +309,7 @@ class RootSimulatorWorld {
         this._draw();
     }
     _pointerUp (event) {
+        if (this._rootDrag && this._rootDrag.pointerId === event.pointerId) this._rootDrag = null;
         for (const robot of this.robots.values()) {
             if (robot._activeTouchPointer === event.pointerId) {
                 robot._activeTouchPointer = null;
@@ -294,6 +346,10 @@ class RootSimulatorWorld {
     }
     _draw () {
         if (!this.host._context || !this.host._canvas) return;
+        if (this.host._placementButton) {
+            this.host._placementButton.style.background = this.placementMode ? '#f2c94c' : 'white';
+            this.host._placementButton.setAttribute('aria-pressed', this.placementMode ? 'true' : 'false');
+        }
         const context = this.host._context; const {width, height} = this.host._canvas; const scale = SCALE * this.host.viewZoom;
         const point = ({x, y}) => ({x: width / 2 + x * scale, y: height / 2 - y * scale});
         context.clearRect(0, 0, width, height); context.fillStyle = '#fcfdfd'; context.fillRect(0, 0, width, height);

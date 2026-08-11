@@ -935,6 +935,7 @@ var en = {
 	"irobotRoot.simulator.addBlock": "+ Block",
 	"irobotRoot.simulator.delete": "Delete",
 	"irobotRoot.simulator.clearObstacles": "Clear obstacles",
+	"irobotRoot.simulator.rootPlacement": "▣ Place Roots",
 	"irobotRoot.simulator.speed": "Speed ",
 	"irobotRoot.simulator.help": "Drag obstacles · Tap Root sensors",
 	"irobotRoot.simulator.x": "x",
@@ -1050,6 +1051,7 @@ var ja = {
 	"irobotRoot.simulator.addBlock": "+ 障害物",
 	"irobotRoot.simulator.delete": "削除",
 	"irobotRoot.simulator.clearObstacles": "障害物を全消去",
+	"irobotRoot.simulator.rootPlacement": "▣ Rootを配置",
 	"irobotRoot.simulator.speed": "速度 ",
 	"irobotRoot.simulator.help": "障害物をドラッグ・Rootのセンサーをタップ",
 	"irobotRoot.simulator.x": "x",
@@ -1168,6 +1170,7 @@ var translations = {
 	"irobotRoot.simulator.addBlock": "+ しょうがいぶつ",
 	"irobotRoot.simulator.delete": "けす",
 	"irobotRoot.simulator.clearObstacles": "しょうがいぶつをぜんぶけす",
+	"irobotRoot.simulator.rootPlacement": "▣ るーとをはいち",
 	"irobotRoot.simulator.speed": "はやさ ",
 	"irobotRoot.simulator.help": "しょうがいぶつをうごかす・るーとのせんさーをおす",
 	"irobotRoot.simulator.x": "x",
@@ -4919,6 +4922,8 @@ var RootSimulator = /*#__PURE__*/function () {
     _classCallCheck$1(this, RootSimulator);
     this.onEvent = onEvent;
     this.controls = controls;
+    this.enableRootPlacement = Boolean(controls.enableRootPlacement);
+    this.placementMode = false;
     this.speedMultiplier = 1;
     // Display zoom only changes the viewport.  Root coordinates, collision
     // geometry, and motion timing remain in millimetres.
@@ -4936,6 +4941,7 @@ var RootSimulator = /*#__PURE__*/function () {
     this._collisionPoint = null;
     this._runButton = null;
     this._stopButton = null;
+    this._placementButton = null;
     this._localizedElements = [];
     this.reset();
   }
@@ -5040,6 +5046,13 @@ var RootSimulator = /*#__PURE__*/function () {
       if (this._zoomValue) this._zoomValue.textContent = "".concat(Math.round(this.viewZoom * 100), "%");
       this._draw();
       return this.viewZoom;
+    }
+  }, {
+    key: "toggleRootPlacementMode",
+    value: function toggleRootPlacementMode() {
+      this.placementMode = !this.placementMode;
+      this._draw();
+      return this.placementMode;
     }
   }, {
     key: "runProject",
@@ -5482,6 +5495,11 @@ var RootSimulator = /*#__PURE__*/function () {
       addButton('clearObstacles', 'Clear obstacles', function () {
         return _this9.clearObstacles();
       });
+      if (this.enableRootPlacement) {
+        this._placementButton = addButton('rootPlacement', '▣ Place Roots', function () {
+          return _this9.toggleRootPlacementMode();
+        });
+      }
       var speedLabel = document.createElement('label');
       speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
       var speedText = document.createElement('span');
@@ -5876,9 +5894,14 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
     this.onEvent = onEvent;
     this.controls = controls;
     this.robots = new Map();
+    this.navigationOrigins = new Map();
     this.obstacles = [];
     this.activeId = 1;
-    this.host = new RootSimulator(null, controls);
+    this.placementMode = false;
+    this._rootDrag = null;
+    this.host = new RootSimulator(null, Object.assign({}, controls, {
+      enableRootPlacement: true
+    }));
     this.host._draw = function () {
       return _this._draw();
     };
@@ -5915,6 +5938,9 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
     };
     this.host.setSpeedMultiplier = function (multiplier) {
       return _this.setSpeedMultiplier(multiplier);
+    };
+    this.host.toggleRootPlacementMode = function () {
+      return _this.toggleRootPlacementMode();
     };
     this.ensureRobot(1);
   }
@@ -6023,6 +6049,8 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
   }, {
     key: "_initialPose",
     value: function _initialPose(id) {
+      var existing = this.navigationOrigins.get(Number(id));
+      if (existing) return Object.assign({}, existing);
       var positions = [{
         x: 0,
         y: 0
@@ -6053,6 +6081,15 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
     key: "_setInitialPose",
     value: function _setInitialPose(robot, id) {
       robot.pose = this._initialPose(id);
+    }
+  }, {
+    key: "_setNavigationOrigin",
+    value: function _setNavigationOrigin(id, pose) {
+      this.navigationOrigins.set(Number(id), {
+        x: Number(pose.x) || 0,
+        y: Number(pose.y) || 0,
+        heading: Number.isFinite(Number(pose.heading)) ? Number(pose.heading) : 90
+      });
     }
   }, {
     key: "open",
@@ -6098,8 +6135,33 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
         _iterator.f();
       }
       this.robots.clear();
+      this.navigationOrigins.clear();
       this.activeId = null;
       this._draw();
+    }
+  }, {
+    key: "toggleRootPlacementMode",
+    value: function toggleRootPlacementMode() {
+      this.placementMode = !this.placementMode;
+      this.host.placementMode = this.placementMode;
+      this._draw();
+      return this.placementMode;
+    }
+  }, {
+    key: "placeRobot",
+    value: function placeRobot(id, x, y) {
+      var robot = this.ensureRobot(id);
+      robot.stop();
+      var pose = {
+        x: Number(x) || 0,
+        y: Number(y) || 0,
+        heading: robot.pose.heading
+      };
+      robot.pose = pose;
+      robot._setBumpers(false, false);
+      this._setNavigationOrigin(id, pose);
+      this._draw();
+      return Object.assign({}, pose);
     }
   }, {
     key: "setSpeedMultiplier",
@@ -6369,6 +6431,20 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
       if (nearest) {
         this.activeId = nearest.id;
         var robot = nearest.robot;
+        if (this.placementMode) {
+          robot.stop();
+          this._rootDrag = {
+            id: nearest.id,
+            pointerId: event.pointerId,
+            offset: {
+              x: point.x - robot.pose.x,
+              y: point.y - robot.pose.y
+            }
+          };
+          this.host._canvas.setPointerCapture(event.pointerId);
+          this._draw();
+          return;
+        }
         var dx = point.x - robot.pose.x;
         var dy = point.y - robot.pose.y;
         var heading = headingRadians(robot.pose.heading);
@@ -6398,6 +6474,11 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
   }, {
     key: "_pointerMove",
     value: function _pointerMove(event) {
+      if (this._rootDrag && this._rootDrag.pointerId === event.pointerId) {
+        var _point = this._eventWorld(event);
+        this.placeRobot(this._rootDrag.id, _point.x - this._rootDrag.offset.x, _point.y - this._rootDrag.offset.y);
+        return;
+      }
       if (!this.host._dragOffset || this.host._selectedObstacle < 0) return;
       var point = this._eventWorld(event);
       var obstacle = this.obstacles[this.host._selectedObstacle];
@@ -6408,6 +6489,7 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
   }, {
     key: "_pointerUp",
     value: function _pointerUp(event) {
+      if (this._rootDrag && this._rootDrag.pointerId === event.pointerId) this._rootDrag = null;
       var _iterator8 = _createForOfIteratorHelper$1(this.robots.values()),
         _step8;
       try {
@@ -6516,6 +6598,10 @@ var RootSimulatorWorld = /*#__PURE__*/function () {
     value: function _draw() {
       var _this3 = this;
       if (!this.host._context || !this.host._canvas) return;
+      if (this.host._placementButton) {
+        this.host._placementButton.style.background = this.placementMode ? '#f2c94c' : 'white';
+        this.host._placementButton.setAttribute('aria-pressed', this.placementMode ? 'true' : 'false');
+      }
       var context = this.host._context;
       var _this$host$_canvas = this.host._canvas,
         width = _this$host$_canvas.width,
