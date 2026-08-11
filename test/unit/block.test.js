@@ -12,6 +12,7 @@ import {
     RootScratchLinkBLE,
     RootTransport,
     SCRUB_DISCOVERY_ACK_TIMEOUT_MS,
+    UART_WRITE_GAP_MS,
     base64ToBytes,
     bytesToBase64,
     crc8,
@@ -895,6 +896,37 @@ describe('iRobot Root extension', () => {
             'base64',
             false
         );
+    });
+
+    test('serializes UART writes within one Root without coupling Root sessions', async () => {
+        jest.useFakeTimers();
+        const transportA = Object.create(RootTransport.prototype);
+        const transportB = Object.create(RootTransport.prototype);
+        transportA.lastError = '';
+        transportB.lastError = '';
+        transportA.ble = {isConnected: () => true, write: jest.fn(() => Promise.resolve('a'))};
+        transportB.ble = {isConnected: () => true, write: jest.fn(() => Promise.resolve('b'))};
+
+        const firstA = transportA.write(Uint8Array.from([1]));
+        const secondA = transportA.write(Uint8Array.from([2]));
+        const firstB = transportB.write(Uint8Array.from([3]));
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(transportA.ble.write).toHaveBeenCalledTimes(1);
+        expect(transportB.ble.write).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(UART_WRITE_GAP_MS);
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(transportA.ble.write).toHaveBeenCalledTimes(2);
+        await expect(firstA).resolves.toBe('a');
+        await expect(secondA).resolves.toBe('a');
+        await expect(firstB).resolves.toBe('b');
+        jest.useRealTimers();
     });
 
     test('converts Root packets to and from base64 without Node Buffer', () => {

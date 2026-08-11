@@ -11,6 +11,11 @@ const ROOT_DISCOVERY_OPTIONS = {
 };
 const SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
 const SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
+// Web Bluetooth and the Scrub bridge both expose a write promise, but some
+// Scratch Link/Scrub versions leave that promise pending after CoreBluetooth
+// accepted the packet. Keep the transport-level ordering without making the
+// Scratch command wait on that promise forever.
+const UART_WRITE_GAP_MS = 60;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value)));
 
@@ -223,6 +228,7 @@ class RootTransport {
         this.onReset = onReset;
         this.onConnected = onConnected;
         this.ble = null;
+        this._writeTail = Promise.resolve();
         this.mode = supportsWebBluetooth() ? 'Web Bluetooth' : 'Scratch Link / Scrub';
         this.lastError = '';
         this.runtime.registerPeripheralExtension(extensionId, this);
@@ -268,11 +274,55 @@ class RootTransport {
 
     write (bytes) {
         if (!this.isConnected()) return Promise.reject(new Error('Rootに接続してください'));
-        return this.ble.write(UART_SERVICE, RX, bytesToBase64(bytes), 'base64', false)
-            .catch(error => {
+        const encoded = bytesToBase64(bytes);
+        let resolveWrite;
+        let rejectWrite;
+        const result = new Promise((resolve, reject) => {
+            resolveWrite = resolve;
+            rejectWrite = reject;
+        });
+
+        // Each RootTransport has its own tail, so one Root cannot reorder or
+        // suppress another Root's packets. Release the queue on either the
+        // adapter's completion or a short bounded interval. The latter is
+        // required for Scrub/Scratch Link implementations whose JSON-RPC
+        // write request may remain pending after the BLE bytes were accepted.
+        const previous = this._writeTail || Promise.resolve();
+        const queued = previous.then(() => new Promise(resolveQueue => {
+            let released = false;
+            const release = () => {
+                if (released) return;
+                released = true;
+                resolveQueue();
+            };
+            const setTimer = typeof window === 'undefined' ? setTimeout : window.setTimeout.bind(window);
+            const clearTimer = typeof window === 'undefined' ? clearTimeout : window.clearTimeout.bind(window);
+            const releaseTimer = setTimer(release, UART_WRITE_GAP_MS);
+            let pendingWrite;
+            try {
+                pendingWrite = this.ble.write(UART_SERVICE, RX, encoded, 'base64', false);
+            } catch (error) {
+                clearTimer(releaseTimer);
                 this.setError(error);
-                throw error;
+                rejectWrite(error);
+                release();
+                return;
+            }
+            Promise.resolve(pendingWrite).then(value => {
+                clearTimer(releaseTimer);
+                resolveWrite(value);
+                release();
+            }).catch(error => {
+                clearTimer(releaseTimer);
+                this.setError(error);
+                rejectWrite(error);
+                release();
             });
+        }));
+        // A failed packet must not poison the following packets in this
+        // session. The returned `result` still reports that individual error.
+        this._writeTail = queued.catch(() => undefined);
+        return result;
     }
 
     disconnect () {
@@ -319,6 +369,7 @@ export {
     RootProtocol,
     RootScratchLinkBLE,
     RootTransport,
+    UART_WRITE_GAP_MS,
     SCRUB_DISCOVERY_ACK_ATTEMPTS,
     SCRUB_DISCOVERY_ACK_TIMEOUT_MS,
     base64ToBytes,
