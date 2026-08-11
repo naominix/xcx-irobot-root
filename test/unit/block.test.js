@@ -118,6 +118,25 @@ describe('iRobot Root extension', () => {
         ]);
     });
 
+    test('reuses a disconnected Root slot when scanning again', () => {
+        const block = new blockClass(runtime);
+        const rootA = block.rootManager.getSession(1);
+        const rootB = block.rootManager.createSession();
+        rootA.transport.ble = {isConnected: () => false};
+        rootB.transport.ble = {isConnected: () => true};
+        rootA.transport.scan = jest.fn();
+        rootB.transport.scan = jest.fn();
+        block.rootManager.activeSessionId = rootB.id;
+
+        block.rootManager.scan();
+
+        expect(rootA.transport.scan).toHaveBeenCalledTimes(1);
+        expect(rootB.transport.scan).not.toHaveBeenCalled();
+        expect(block.getRootMenu()).toEqual([
+            {text: 'Root 1', value: '1'}, {text: 'Root 2', value: '2'}
+        ]);
+    });
+
     test('keeps a selected Root bound to each parallel Scratch thread', async () => {
         const block = new blockClass(runtime);
         const rootB = block.rootManager.createSession();

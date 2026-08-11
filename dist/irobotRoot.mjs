@@ -4746,8 +4746,16 @@ var RootManager = /*#__PURE__*/function () {
     key: "scan",
     value: function scan() {
       var session = this.getSession(this.pendingScanSessionId);
-      if (!session || session.isConnected()) session = this.getActiveSession();
-      if (session.isConnected()) session = this.createSession();
+      if (!session || session.isConnected()) {
+        var active = this.getActiveSession();
+        session = active.isConnected() ? this.enumerateSessions().find(function (candidate) {
+          return !candidate.isConnected();
+        }) : active;
+      }
+      // Reuse a disconnected slot so reconnecting a Root does not grow the
+      // menu from Root 1/2 to Root 3/4. A new session is created only when
+      // every existing Root is currently connected.
+      if (!session) session = this.createSession();
       this.pendingScanSessionId = session.id;
       session.transport.scan();
     }
