@@ -1,5 +1,6 @@
 import ScratchLinkBLE from '../../io/ble';
 import WebBLE from '../../io/ble-web';
+import JSONRPC from '../../util/jsonrpc';
 
 const ROOT_SERVICE = '48c5d828-ac2a-442d-97a3-0c9822b04979';
 const UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
@@ -73,16 +74,36 @@ const getScrubSocketClass = (scope = typeof self === 'undefined' ? null : self) 
     }
 };
 
-class RootScratchLinkBLE extends ScratchLinkBLE {
+/**
+ * Scrub's injected Socket supports multiple independent BLE sessions. Do not
+ * inherit the VM's default BLE export here: that CommonJS module selects its
+ * implementation when the editor bundle loads, and certain WKWebViews expose
+ * a partial navigator.bluetooth object. In that situation the default export
+ * can be WebBLE even though Scrub's Scratch Link bridge is the usable
+ * transport. This self-contained adapter always uses the injected Socket and
+ * therefore opens one native BLE session per Root.
+ */
+class RootScratchLinkBLE extends JSONRPC {
     constructor (runtime, extensionId, peripheralOptions, connectCallback, resetCallback, SocketClass) {
-        const isolatedRuntime = {
-            constructor: runtime.constructor,
-            emit: runtime.emit.bind(runtime),
-            getScratchLinkSocket: type => new SocketClass(type)
-        };
-        super(isolatedRuntime, extensionId, peripheralOptions, connectCallback, resetCallback);
+        super();
+        this._runtime = runtime;
+        this._extensionId = extensionId;
+        this._peripheralOptions = peripheralOptions;
+        this._connectCallback = connectCallback;
+        this._resetCallback = resetCallback;
+        this._availablePeripherals = {};
+        this._connected = false;
+        this._characteristicDidChangeCallback = null;
+        this._discoverTimeoutID = null;
         this._scrubDiscoveryAckTimer = null;
         this._scrubDiscoveryAttempt = 0;
+        this._socket = new SocketClass('BLE');
+        this._socket.setOnOpen(this.requestPeripheral.bind(this));
+        this._socket.setOnClose(this.handleDisconnectError.bind(this));
+        this._socket.setOnError(this._handleRequestError.bind(this));
+        this._socket.setHandleMessage(this._handleMessage.bind(this));
+        this._sendMessage = this._socket.sendMessage.bind(this._socket);
+        this._socket.open();
     }
 
     requestPeripheral () {
@@ -124,7 +145,82 @@ class RootScratchLinkBLE extends ScratchLinkBLE {
             window.clearTimeout(this._scrubDiscoveryAckTimer);
             this._scrubDiscoveryAckTimer = null;
         }
-        super.disconnect();
+        this._connected = false;
+        if (this._socket.isOpen()) this._socket.close();
+        if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+        this._runtime.emit(this._runtime.constructor.PERIPHERAL_DISCONNECTED);
+    }
+
+    isConnected () {
+        return this._connected;
+    }
+
+    connectPeripheral (id) {
+        this.sendRemoteRequest('connect', {peripheralId: id}).then(() => {
+            this._connected = true;
+            this._runtime.emit(this._runtime.constructor.PERIPHERAL_CONNECTED);
+            this._connectCallback();
+        }).catch(error => this._handleRequestError(error));
+    }
+
+    startNotifications (serviceId, characteristicId, onCharacteristicChanged = null) {
+        this._characteristicDidChangeCallback = onCharacteristicChanged;
+        return this.sendRemoteRequest('startNotifications', {serviceId, characteristicId})
+            .catch(error => this.handleDisconnectError(error));
+    }
+
+    write (serviceId, characteristicId, message, encoding = null, withResponse = null) {
+        const params = {serviceId, characteristicId, message};
+        if (encoding) params.encoding = encoding;
+        if (withResponse !== null) params.withResponse = withResponse;
+        return this.sendRemoteRequest('write', params).catch(error => {
+            this.handleDisconnectError(error);
+            throw error;
+        });
+    }
+
+    didReceiveCall (method, params) {
+        switch (method) {
+        case 'didDiscoverPeripheral':
+            this._availablePeripherals[params.peripheralId] = params;
+            this._runtime.emit(this._runtime.constructor.PERIPHERAL_LIST_UPDATE, this._availablePeripherals);
+            if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+            break;
+        case 'userDidPickPeripheral':
+            this._availablePeripherals[params.peripheralId] = params;
+            this._runtime.emit(this._runtime.constructor.USER_PICKED_PERIPHERAL, this._availablePeripherals);
+            if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+            break;
+        case 'userDidNotPickPeripheral':
+            this._runtime.emit(this._runtime.constructor.PERIPHERAL_SCAN_TIMEOUT);
+            if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+            break;
+        case 'characteristicDidChange':
+            if (this._characteristicDidChangeCallback) this._characteristicDidChangeCallback(params.message);
+            break;
+        case 'ping':
+            return 42;
+        }
+    }
+
+    handleDisconnectError () {
+        if (!this._connected) return;
+        this.disconnect();
+        if (this._resetCallback) this._resetCallback();
+        this._runtime.emit(this._runtime.constructor.PERIPHERAL_CONNECTION_LOST_ERROR, {
+            message: 'Scratch lost connection to', extensionId: this._extensionId
+        });
+    }
+
+    _handleRequestError () {
+        this._runtime.emit(this._runtime.constructor.PERIPHERAL_REQUEST_ERROR, {
+            message: 'Scratch lost connection to', extensionId: this._extensionId
+        });
+    }
+
+    _handleDiscoverTimeout () {
+        if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+        this._runtime.emit(this._runtime.constructor.PERIPHERAL_SCAN_TIMEOUT);
     }
 }
 

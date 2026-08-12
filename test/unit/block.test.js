@@ -194,6 +194,35 @@ describe('iRobot Root extension', () => {
         ]);
     });
 
+    test('routes the public Scratch Link connection dialog to the pending additional Root', () => {
+        const peripheralExtensions = {};
+        const scratchLinkRuntime = {
+            formatMessage,
+            irobotRootMotionPickerSupported: false,
+            registerPeripheralExtension: (extensionId, extension) => {
+                peripheralExtensions[extensionId] = extension;
+            },
+            startHats: jest.fn(),
+            greenFlag: jest.fn(),
+            stopAll: jest.fn()
+        };
+        const block = new blockClass(scratchLinkRuntime);
+        const root1 = block.rootManager.getSession(1);
+        const root2 = block.rootManager.createSession();
+        block.rootManager.pendingScanSessionId = root2.id;
+        root1.transport.scan = jest.fn();
+
+        // This is the exact path used by Scratch/Xcratch's connection modal:
+        // the modal addresses the public extension id, not an internal session
+        // id. The manager must retain the newly scanned Root as its destination.
+        root2.transport.connect = jest.fn();
+        peripheralExtensions.irobotRoot.connect('root-2-peripheral');
+
+        expect(root1.transport.scan).not.toHaveBeenCalled();
+        expect(root2.transport.connect).toHaveBeenCalledWith('root-2-peripheral');
+        expect(root2.peripheralId).toBe('root-2-peripheral');
+    });
+
     test('marks an explicitly disconnected slot reusable even if the adapter reports stale state', () => {
         const block = new blockClass(runtime);
         const rootA = block.rootManager.getSession(1);
@@ -722,6 +751,49 @@ describe('iRobot Root extension', () => {
         } finally {
             global.window = originalWindow;
             global.CloseEvent = originalCloseEvent;
+            jest.useRealTimers();
+        }
+    });
+
+    test('opens an independent Scrub BLE socket for each Root session', () => {
+        jest.useFakeTimers();
+        const originalWindow = global.window;
+        global.window = global;
+        class FakeSocket {
+            static instances = [];
+            constructor (type) {
+                this.type = type;
+                this.opened = false;
+                this.messages = [];
+                FakeSocket.instances.push(this);
+            }
+            setOnOpen (callback) { this.onOpen = callback; }
+            setOnClose (callback) { this.onClose = callback; }
+            setOnError (callback) { this.onError = callback; }
+            setHandleMessage (callback) { this.onMessage = callback; }
+            open () { this.opened = true; window.setTimeout(this.onOpen, 100); }
+            close () { this.opened = false; }
+            isOpen () { return this.opened; }
+            sendMessage (message) { this.messages.push(message); }
+        }
+        const RuntimeClass = {
+            PERIPHERAL_CONNECTED: 'connected', PERIPHERAL_DISCONNECTED: 'disconnected',
+            PERIPHERAL_LIST_UPDATE: 'list', PERIPHERAL_REQUEST_ERROR: 'requestError',
+            PERIPHERAL_SCAN_TIMEOUT: 'scanTimeout', USER_PICKED_PERIPHERAL: 'picked',
+            PERIPHERAL_CONNECTION_LOST_ERROR: 'lost'
+        };
+        const runtime = {constructor: RuntimeClass, emit: jest.fn()};
+        try {
+            new RootScratchLinkBLE(runtime, 'irobotRoot:session:1', ROOT_DISCOVERY_OPTIONS, jest.fn(), jest.fn(), FakeSocket);
+            new RootScratchLinkBLE(runtime, 'irobotRoot:session:2', ROOT_DISCOVERY_OPTIONS, jest.fn(), jest.fn(), FakeSocket);
+            jest.advanceTimersByTime(100);
+
+            expect(FakeSocket.instances).toHaveLength(2);
+            expect(FakeSocket.instances[0]).not.toBe(FakeSocket.instances[1]);
+            expect(FakeSocket.instances.map(socket => socket.type)).toEqual(['BLE', 'BLE']);
+            expect(FakeSocket.instances.map(socket => socket.messages[0].method)).toEqual(['discover', 'discover']);
+        } finally {
+            global.window = originalWindow;
             jest.useRealTimers();
         }
     });

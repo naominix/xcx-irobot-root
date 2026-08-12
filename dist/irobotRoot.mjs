@@ -1222,21 +1222,6 @@ function _getPrototypeOf$1(t) {
   }, _getPrototypeOf$1(t);
 }
 
-function _superPropBase$1(t, o) {
-  for (; !{}.hasOwnProperty.call(t, o) && null !== (t = _getPrototypeOf$1(t)););
-  return t;
-}
-
-function _get$1() {
-  return _get$1 = "undefined" != typeof Reflect && Reflect.get ? Reflect.get.bind() : function (e, t, r) {
-    var p = _superPropBase$1(e, t);
-    if (p) {
-      var n = Object.getOwnPropertyDescriptor(p, t);
-      return n.get ? n.get.call(arguments.length < 3 ? e : r) : n.value;
-    }
-  }, _get$1.apply(null, arguments);
-}
-
 function _setPrototypeOf$1(t, e) {
   return _setPrototypeOf$1 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) {
     return t.__proto__ = e, t;
@@ -3491,7 +3476,7 @@ function ownKeys$1(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymb
 function _objectSpread$1(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$1(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$1(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _callSuper$2(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$2() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct$2() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$2 = function _isNativeReflectConstruct() { return !!t; })(); }
-function _superPropGet$1(t, o, e, r) { var p = _get(_getPrototypeOf(t.prototype ), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
+function _superPropGet(t, o, e, r) { var p = _get(_getPrototypeOf(t.prototype ), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
 var hasRequiredCjs;
 function requireCjs() {
   if (hasRequiredCjs) return cjs;
@@ -3542,7 +3527,7 @@ function requireCjs() {
           for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
             args[_key - 2] = arguments[_key];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([logLevelId, logLevelName].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([logLevelId, logLevelName].concat(args));
         }
       }, {
         key: "silly",
@@ -3550,7 +3535,7 @@ function requireCjs() {
           for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
             args[_key2] = arguments[_key2];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([0, "SILLY"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([0, "SILLY"].concat(args));
         }
       }, {
         key: "trace",
@@ -3558,7 +3543,7 @@ function requireCjs() {
           for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
             args[_key3] = arguments[_key3];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([1, "TRACE"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([1, "TRACE"].concat(args));
         }
       }, {
         key: "debug",
@@ -3566,7 +3551,7 @@ function requireCjs() {
           for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
             args[_key4] = arguments[_key4];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([2, "DEBUG"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([2, "DEBUG"].concat(args));
         }
       }, {
         key: "info",
@@ -3574,7 +3559,7 @@ function requireCjs() {
           for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
             args[_key5] = arguments[_key5];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([3, "INFO"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([3, "INFO"].concat(args));
         }
       }, {
         key: "warn",
@@ -3582,7 +3567,7 @@ function requireCjs() {
           for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
             args[_key6] = arguments[_key6];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([4, "WARN"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([4, "WARN"].concat(args));
         }
       }, {
         key: "error",
@@ -3590,7 +3575,7 @@ function requireCjs() {
           for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
             args[_key7] = arguments[_key7];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([5, "ERROR"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([5, "ERROR"].concat(args));
         }
       }, {
         key: "fatal",
@@ -3598,12 +3583,12 @@ function requireCjs() {
           for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
             args[_key8] = arguments[_key8];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([6, "FATAL"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([6, "FATAL"].concat(args));
         }
       }, {
         key: "getSubLogger",
         value: function getSubLogger(settings, logObj) {
-          return _superPropGet$1(Logger, "getSubLogger", this, 3)([settings, logObj]);
+          return _superPropGet(Logger, "getSubLogger", this, 3)([settings, logObj]);
         }
       }]);
     }(BaseLogger_js_1.BaseLogger);
@@ -4170,11 +4155,13 @@ var ScratchLinkBLE = /*@__PURE__*/getDefaultExportFromCjs(bleExports);
 var bleWebExports = requireBleWeb();
 var WebBLE = /*@__PURE__*/getDefaultExportFromCjs(bleWebExports);
 
+var jsonrpcExports = requireJsonrpc();
+var JSONRPC = /*@__PURE__*/getDefaultExportFromCjs(jsonrpcExports);
+
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), true).forEach(function (r) { _defineProperty$1(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
+function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
 function _createForOfIteratorHelper$4(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$4(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray$4(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$4(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0; } }
 function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
@@ -4274,23 +4261,42 @@ var getScrubSocketClass = function getScrubSocketClass() {
     return null;
   }
 };
-var RootScratchLinkBLE = /*#__PURE__*/function (_ScratchLinkBLE) {
+
+/**
+ * Scrub's injected Socket supports multiple independent BLE sessions. Do not
+ * inherit the VM's default BLE export here: that CommonJS module selects its
+ * implementation when the editor bundle loads, and certain WKWebViews expose
+ * a partial navigator.bluetooth object. In that situation the default export
+ * can be WebBLE even though Scrub's Scratch Link bridge is the usable
+ * transport. This self-contained adapter always uses the injected Socket and
+ * therefore opens one native BLE session per Root.
+ */
+var RootScratchLinkBLE = /*#__PURE__*/function (_JSONRPC) {
   function RootScratchLinkBLE(runtime, extensionId, peripheralOptions, connectCallback, resetCallback, SocketClass) {
     var _this;
     _classCallCheck$1(this, RootScratchLinkBLE);
-    var isolatedRuntime = {
-      constructor: runtime.constructor,
-      emit: runtime.emit.bind(runtime),
-      getScratchLinkSocket: function getScratchLinkSocket(type) {
-        return new SocketClass(type);
-      }
-    };
-    _this = _callSuper(this, RootScratchLinkBLE, [isolatedRuntime, extensionId, peripheralOptions, connectCallback, resetCallback]);
+    _this = _callSuper(this, RootScratchLinkBLE);
+    _this._runtime = runtime;
+    _this._extensionId = extensionId;
+    _this._peripheralOptions = peripheralOptions;
+    _this._connectCallback = connectCallback;
+    _this._resetCallback = resetCallback;
+    _this._availablePeripherals = {};
+    _this._connected = false;
+    _this._characteristicDidChangeCallback = null;
+    _this._discoverTimeoutID = null;
     _this._scrubDiscoveryAckTimer = null;
     _this._scrubDiscoveryAttempt = 0;
+    _this._socket = new SocketClass('BLE');
+    _this._socket.setOnOpen(_this.requestPeripheral.bind(_this));
+    _this._socket.setOnClose(_this.handleDisconnectError.bind(_this));
+    _this._socket.setOnError(_this._handleRequestError.bind(_this));
+    _this._socket.setHandleMessage(_this._handleMessage.bind(_this));
+    _this._sendMessage = _this._socket.sendMessage.bind(_this._socket);
+    _this._socket.open();
     return _this;
   }
-  _inherits$1(RootScratchLinkBLE, _ScratchLinkBLE);
+  _inherits$1(RootScratchLinkBLE, _JSONRPC);
   return _createClass$1(RootScratchLinkBLE, [{
     key: "requestPeripheral",
     value: function requestPeripheral() {
@@ -4333,10 +4339,113 @@ var RootScratchLinkBLE = /*#__PURE__*/function (_ScratchLinkBLE) {
         window.clearTimeout(this._scrubDiscoveryAckTimer);
         this._scrubDiscoveryAckTimer = null;
       }
-      _superPropGet(RootScratchLinkBLE, "disconnect", this)([]);
+      this._connected = false;
+      if (this._socket.isOpen()) this._socket.close();
+      if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+      this._runtime.emit(this._runtime.constructor.PERIPHERAL_DISCONNECTED);
+    }
+  }, {
+    key: "isConnected",
+    value: function isConnected() {
+      return this._connected;
+    }
+  }, {
+    key: "connectPeripheral",
+    value: function connectPeripheral(id) {
+      var _this3 = this;
+      this.sendRemoteRequest('connect', {
+        peripheralId: id
+      }).then(function () {
+        _this3._connected = true;
+        _this3._runtime.emit(_this3._runtime.constructor.PERIPHERAL_CONNECTED);
+        _this3._connectCallback();
+      }).catch(function (error) {
+        return _this3._handleRequestError(error);
+      });
+    }
+  }, {
+    key: "startNotifications",
+    value: function startNotifications(serviceId, characteristicId) {
+      var _this4 = this;
+      var onCharacteristicChanged = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      this._characteristicDidChangeCallback = onCharacteristicChanged;
+      return this.sendRemoteRequest('startNotifications', {
+        serviceId: serviceId,
+        characteristicId: characteristicId
+      }).catch(function (error) {
+        return _this4.handleDisconnectError(error);
+      });
+    }
+  }, {
+    key: "write",
+    value: function write(serviceId, characteristicId, message) {
+      var _this5 = this;
+      var encoding = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+      var withResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
+      var params = {
+        serviceId: serviceId,
+        characteristicId: characteristicId,
+        message: message
+      };
+      if (encoding) params.encoding = encoding;
+      if (withResponse !== null) params.withResponse = withResponse;
+      return this.sendRemoteRequest('write', params).catch(function (error) {
+        _this5.handleDisconnectError(error);
+        throw error;
+      });
+    }
+  }, {
+    key: "didReceiveCall",
+    value: function didReceiveCall(method, params) {
+      switch (method) {
+        case 'didDiscoverPeripheral':
+          this._availablePeripherals[params.peripheralId] = params;
+          this._runtime.emit(this._runtime.constructor.PERIPHERAL_LIST_UPDATE, this._availablePeripherals);
+          if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+          break;
+        case 'userDidPickPeripheral':
+          this._availablePeripherals[params.peripheralId] = params;
+          this._runtime.emit(this._runtime.constructor.USER_PICKED_PERIPHERAL, this._availablePeripherals);
+          if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+          break;
+        case 'userDidNotPickPeripheral':
+          this._runtime.emit(this._runtime.constructor.PERIPHERAL_SCAN_TIMEOUT);
+          if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+          break;
+        case 'characteristicDidChange':
+          if (this._characteristicDidChangeCallback) this._characteristicDidChangeCallback(params.message);
+          break;
+        case 'ping':
+          return 42;
+      }
+    }
+  }, {
+    key: "handleDisconnectError",
+    value: function handleDisconnectError() {
+      if (!this._connected) return;
+      this.disconnect();
+      if (this._resetCallback) this._resetCallback();
+      this._runtime.emit(this._runtime.constructor.PERIPHERAL_CONNECTION_LOST_ERROR, {
+        message: 'Scratch lost connection to',
+        extensionId: this._extensionId
+      });
+    }
+  }, {
+    key: "_handleRequestError",
+    value: function _handleRequestError() {
+      this._runtime.emit(this._runtime.constructor.PERIPHERAL_REQUEST_ERROR, {
+        message: 'Scratch lost connection to',
+        extensionId: this._extensionId
+      });
+    }
+  }, {
+    key: "_handleDiscoverTimeout",
+    value: function _handleDiscoverTimeout() {
+      if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+      this._runtime.emit(this._runtime.constructor.PERIPHERAL_SCAN_TIMEOUT);
     }
   }]);
-}(ScratchLinkBLE);
+}(JSONRPC);
 var RootProtocol = /*#__PURE__*/function () {
   function RootProtocol() {
     _classCallCheck$1(this, RootProtocol);
@@ -4528,16 +4637,16 @@ var RootTransport = /*#__PURE__*/function () {
   }, {
     key: "onConnect",
     value: function onConnect() {
-      var _this3 = this;
+      var _this6 = this;
       this.ble.startNotifications(UART_SERVICE, TX, function (message) {
-        _this3.onData(base64ToBytes(message));
+        _this6.onData(base64ToBytes(message));
       });
       if (this.onConnected) this.onConnected();
     }
   }, {
     key: "write",
     value: function write(bytes) {
-      var _this4 = this;
+      var _this7 = this;
       if (!this.isConnected()) return Promise.reject(new Error('Rootに接続してください'));
       var encoded = bytesToBase64(bytes);
       var resolveWrite;
@@ -4566,10 +4675,10 @@ var RootTransport = /*#__PURE__*/function () {
           var releaseTimer = setTimer(release, UART_WRITE_GAP_MS);
           var pendingWrite;
           try {
-            pendingWrite = _this4.ble.write(UART_SERVICE, RX, encoded, 'base64', false);
+            pendingWrite = _this7.ble.write(UART_SERVICE, RX, encoded, 'base64', false);
           } catch (error) {
             clearTimer(releaseTimer);
-            _this4.setError(error);
+            _this7.setError(error);
             rejectWrite(error);
             release();
             return;
@@ -4580,7 +4689,7 @@ var RootTransport = /*#__PURE__*/function () {
             release();
           }).catch(function (error) {
             clearTimer(releaseTimer);
-            _this4.setError(error);
+            _this7.setError(error);
             rejectWrite(error);
             release();
           });
@@ -4613,27 +4722,27 @@ var RootTransport = /*#__PURE__*/function () {
   }, {
     key: "_registerRuntimeDiagnostics",
     value: function _registerRuntimeDiagnostics() {
-      var _this5 = this;
+      var _this8 = this;
       if (!this.runtime.on) return;
       var RuntimeClass = this.runtime.constructor;
       this.runtime.on(RuntimeClass.PERIPHERAL_CONNECTED, function () {
-        _this5.lastError = '';
+        _this8.lastError = '';
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_REQUEST_ERROR, function (details) {
-        if (!details || !details.extensionId || details.extensionId === _this5.extensionId) {
-          _this5.lastError = "".concat(_this5.mode, ": BLE\u63A5\u7D9A\u8981\u6C42\u306B\u5931\u6557\u3057\u307E\u3057\u305F");
+        if (!details || !details.extensionId || details.extensionId === _this8.extensionId) {
+          _this8.lastError = "".concat(_this8.mode, ": BLE\u63A5\u7D9A\u8981\u6C42\u306B\u5931\u6557\u3057\u307E\u3057\u305F");
         }
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_SCAN_TIMEOUT, function () {
         // Scratch VM does not include extensionId in this legacy event.
         // Session transports must not turn another Root's scan timeout
         // into their own connection error.
-        if (_this5.extensionId.includes(':session:')) return;
-        _this5.lastError = "".concat(_this5.mode, ": Root\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3067\u3057\u305F");
+        if (_this8.extensionId.includes(':session:')) return;
+        _this8.lastError = "".concat(_this8.mode, ": Root\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3067\u3057\u305F");
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_CONNECTION_LOST_ERROR, function (details) {
-        if (!details || !details.extensionId || details.extensionId === _this5.extensionId) {
-          _this5.lastError = "".concat(_this5.mode, ": Root\u3068\u306E\u63A5\u7D9A\u304C\u5931\u308F\u308C\u307E\u3057\u305F");
+        if (!details || !details.extensionId || details.extensionId === _this8.extensionId) {
+          _this8.lastError = "".concat(_this8.mode, ": Root\u3068\u306E\u63A5\u7D9A\u304C\u5931\u308F\u308C\u307E\u3057\u305F");
         }
       });
     }
