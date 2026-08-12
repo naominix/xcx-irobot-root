@@ -120,7 +120,7 @@ describe('iRobot Root extension', () => {
         ]);
     });
 
-    test('keeps multi-root simulator pose and LED state independent in one world', () => {
+    test('keeps one clearly-labelled simulator for the selected Root', () => {
         const block = new blockClass(runtime);
         const rootB = block.rootManager.createSession();
         block.setControlMode({MODE: 'simulator'});
@@ -129,51 +129,20 @@ describe('iRobot Root extension', () => {
         block.simulator.pose = {x: 20, y: 30, heading: 90};
         block.selectRoot({ROOT: String(rootB.id)});
         block.led({RED: 255, GREEN: 80, BLUE: 0});
-        block.simulator.pose = {x: -40, y: 10, heading: 180};
 
-        expect(block.simulator.robots.get(1).pose).toEqual({x: 20, y: 30, heading: 90});
-        expect(block.simulator.robots.get(1).led).toEqual({effect: 1, red: 0, green: 0, blue: 255});
-        expect(block.simulator.robots.get(2).pose).toEqual({x: -40, y: 10, heading: 180});
-        expect(block.simulator.robots.get(2).led).toEqual({effect: 1, red: 255, green: 80, blue: 0});
+        expect(block.simulatedSessionId).toBe(rootB.id);
+        expect(block.simulator.rootLabel).toBe('Root 2');
+        expect(block.simulator.pose).toEqual({x: 20, y: 30, heading: 90});
+        expect(block.simulator.led).toEqual({effect: 1, red: 255, green: 80, blue: 0});
     });
 
-    test('adds virtual Roots from the simulator mode without starting a BLE scan', () => {
+    test('does not add virtual Roots from simulator mode', () => {
         const block = new blockClass(runtime);
         const scan = jest.spyOn(block.transport, 'scan');
         block.setControlMode({MODE: 'simulator'});
-        expect(block.addRoot()).toBe('Root 2');
-        expect(block.getRootMenu()).toEqual([
-            {text: 'Root 1', value: '1'}, {text: 'Root 2', value: '2'}
-        ]);
-        expect(block.simulator.robots.has(2)).toBe(true);
+        expect(block.addRoot()).toBe('Root 1');
+        expect(block.getRootMenu()).toEqual([{text: 'Root 1', value: '1'}]);
         expect(scan).not.toHaveBeenCalled();
-    });
-
-    test('places each additional virtual Root at its own resettable world origin', () => {
-        const block = new blockClass(runtime);
-        block.setControlMode({MODE: 'simulator'});
-        block.addRoot();
-
-        expect(block.simulator.robots.get(1).pose).toEqual({x: 0, y: 0, heading: 90});
-        expect(block.simulator.robots.get(2).pose).toEqual({x: 600, y: 0, heading: 90});
-
-        block.simulator.robots.get(2).pose = {x: 10, y: 20, heading: 180};
-        block.simulator.resetRoot(2);
-        expect(block.simulator.robots.get(2).pose).toEqual({x: 600, y: 0, heading: 90});
-    });
-
-    test('uses a dragged virtual Root position as its new navigation origin', () => {
-        const block = new blockClass(runtime);
-        block.setControlMode({MODE: 'simulator'});
-        block.addRoot();
-
-        block.simulator.placeRobot(2, 360, -240);
-        expect(block.simulator.robots.get(2).pose).toEqual({x: 360, y: -240, heading: 90});
-
-        block.simulator.resetNavigation(2);
-        expect(block.simulator.robots.get(2).pose).toEqual({x: 360, y: -240, heading: 90});
-        expect(block.simulator.toggleRootPlacementMode()).toBe(true);
-        expect(block.simulator.toggleRootPlacementMode()).toBe(false);
     });
 
     test('reuses a disconnected Root slot when scanning again', () => {
@@ -282,16 +251,15 @@ describe('iRobot Root extension', () => {
         ]);
     });
 
-    test('clears every virtual Root from the simulator on connection reset', () => {
+    test('resets the single simulator on connection reset', () => {
         const block = new blockClass(runtime);
         block.setControlMode({MODE: 'simulator'});
-        block.addRoot();
-        expect(block.simulator.robots.size).toBe(2);
+        block.simulator.pose = {x: 50, y: 60, heading: 180};
 
         block.resetRootConnections();
 
-        expect(block.simulator.robots.size).toBe(0);
-        expect(block.simulator.activeId).toBeNull();
+        expect(block.simulator.pose).toEqual({x: 0, y: 0, heading: 90});
+        expect(block.simulator.rootLabel).toBe('Root 1');
     });
 
     test('keeps a selected Root bound to each parallel Scratch thread', async () => {
@@ -421,7 +389,7 @@ describe('iRobot Root extension', () => {
         }
     });
 
-    test('does not reset one Root marker or trail when a parallel script selects simulator mode', () => {
+    test('shows and accepts simulator commands only for the selected Root', () => {
         const block = new blockClass(runtime);
         const rootB = block.rootManager.createSession();
         const utilA = {thread: {}};
@@ -429,16 +397,15 @@ describe('iRobot Root extension', () => {
         block.setControlMode({MODE: 'simulator'});
         block.selectRoot({ROOT: '1'}, utilA);
         block.marker({POSITION: '1'}, utilA);
-        block.simulator.robots.get(1).trail.push({x1: 0, y1: 0, x2: 50, y2: 0});
+        block.simulator.trail.push({x1: 0, y1: 0, x2: 50, y2: 0});
         block.selectRoot({ROOT: String(rootB.id)}, utilB);
 
-        // This mirrors a second green-flag script containing the same mode
-        // block. It must not wipe Root 1's in-progress drawing.
-        block.setControlMode({MODE: 'simulator'});
+        block.setControlMode({MODE: 'simulator'}, utilB);
+        block.marker({POSITION: '0'}, utilA);
 
-        expect(block.simulator.robots.get(1).marker).toBe(1);
-        expect(block.simulator.robots.get(1).trail).toHaveLength(1);
-        expect(block.simulator.robots.get(rootB.id).marker).toBe(0);
+        expect(block.simulator.rootLabel).toBe('Root 2');
+        expect(block.simulator.marker).toBe(1);
+        expect(block.simulator.trail).toHaveLength(1);
     });
 
     test('navigation reset preserves simulator marker and LED state', () => {

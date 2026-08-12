@@ -43,6 +43,9 @@ class RootSimulator {
         this._stopButton = null;
         this._placementButton = null;
         this._localizedElements = [];
+        // In the multi-Root extension build this remains one virtual robot.
+        // The label makes the physical Root selected for rehearsal explicit.
+        this.rootLabel = 'Root 1';
         this.reset();
     }
 
@@ -167,6 +170,11 @@ class RootSimulator {
     }
 
     refresh () {
+        this._draw();
+    }
+
+    setRootLabel (label) {
+        this.rootLabel = String(label || 'Root 1');
         this._draw();
     }
 
@@ -689,16 +697,18 @@ class RootSimulator {
         }
         context.fillStyle = '#f2d941'; context.beginPath(); context.arc(0, -27, 6, 0, Math.PI * 2); context.fill();
         context.restore();
-        context.fillStyle = '#26353a'; context.font = '18px Arial';
-        context.fillText(`${this._t('x', 'x')}: ${this.pose.x.toFixed(1)} mm   ${this._t('y', 'y')}: ${this.pose.y.toFixed(1)} mm   ${this._t('heading', 'heading')}: ${this.pose.heading.toFixed(1)}°`, 18, 30);
+        context.fillStyle = '#26353a'; context.font = 'bold 18px Arial';
+        context.fillText(`${this._t('simulating', 'Simulating')}: ${this.rootLabel}`, 18, 30);
+        context.font = '18px Arial';
+        context.fillText(`${this._t('x', 'x')}: ${this.pose.x.toFixed(1)} mm   ${this._t('y', 'y')}: ${this.pose.y.toFixed(1)} mm   ${this._t('heading', 'heading')}: ${this.pose.heading.toFixed(1)}°`, 18, 57);
         const markerStates = [this._t('up', 'up'), this._t('down', 'down'), this._t('eraser', 'eraser')];
         const ledStates = [this._t('off', 'off'), this._t('on', 'on'), this._t('blink', 'blink'), this._t('spin', 'spin')];
-        context.fillText(`${this._t('marker', 'marker')}: ${markerStates[this.marker]}   LED: ${ledStates[this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 57);
+        context.fillText(`${this._t('marker', 'marker')}: ${markerStates[this.marker]}   LED: ${ledStates[this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 84);
         const bumper = this.last.leftBumper && this.last.rightBumper ? this._t('bothPush', 'BOTH PUSH') :
             (this.last.leftBumper ? this._t('leftPush', 'LEFT PUSH') :
                 (this.last.rightBumper ? this._t('rightPush', 'RIGHT PUSH') : this._t('none', 'none')));
-        context.fillText(`${this._t('bumper', 'bumper')}: ${bumper}   ${this._t('touchMask', 'touch mask')}: ${this.last.touchMask.toString(2).padStart(4, '0')}`, 18, 84);
-        if (this.phrase) context.fillText(`${this._t('say', 'say')}: ${this.phrase}`, 18, 111);
+        context.fillText(`${this._t('bumper', 'bumper')}: ${bumper}   ${this._t('touchMask', 'touch mask')}: ${this.last.touchMask.toString(2).padStart(4, '0')}`, 18, 111);
+        if (this.phrase) context.fillText(`${this._t('say', 'say')}: ${this.phrase}`, 18, 138);
     }
 }
 

@@ -5,7 +5,7 @@ import translations from './translations.json';
 import blockIcon from './block-icon.png';
 import {RootProtocol, supportsWebBluetooth} from './root-ble';
 import {RootManager} from './root-manager';
-import RootSimulatorWorld from './root-simulator-world';
+import RootSimulator from './root-simulator';
 
 let formatMessage = message => message.default;
 const setupTranslations = () => {
@@ -197,7 +197,13 @@ class IrobotRootBlocks {
         // Simulator fixed explicitly; this default will be reconsidered only
         // after the simulator has completed classroom validation.
         this.controlMode = CONTROL_MODE_PHYSICAL;
-        this.simulator = new RootSimulatorWorld((event, sessionId) => this._receiveSimulatorEvent(event, sessionId), {
+        // The multi-Root connection layer deliberately shares one virtual
+        // Root. Simulating several independent robots in a single classroom
+        // canvas made the drawing and collision model ambiguous, whereas a
+        // selected, clearly-labelled Root remains a dependable rehearsal for
+        // its physical counterpart.
+        this.simulatedSessionId = this.rootManager.activeSessionId;
+        this.simulator = new RootSimulator(event => this._receiveSimulatorEvent(event, this.simulatedSessionId), {
             isActive: () => this._isSimulatorActive(),
             translate: (id, defaultText) => {
                 setupTranslations();
@@ -212,6 +218,7 @@ class IrobotRootBlocks {
                 if (typeof this.runtime.stopAll === 'function') this.runtime.stopAll();
             }
         });
+        this._setSimulatedSession(this._activeSession());
         this._playNoteForPicker = this._playNoteForPicker.bind(this);
         if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
     }
@@ -469,11 +476,8 @@ class IrobotRootBlocks {
 
     addRoot () {
         if (this.controlMode === CONTROL_MODE_SIMULATOR) {
-            const session = this.rootManager.createSession();
-            this.rootManager.setActiveSession(session.id);
-            this.simulator.setActiveRoot(session.id);
             this.simulator.open();
-            return session.displayName;
+            return this._activeSession().displayName;
         }
         // Web Bluetooth opens its device picker from scan(). Scratch Link and
         // Scrub use Xcratch's connection modal, whose scanning step calls the
@@ -483,15 +487,12 @@ class IrobotRootBlocks {
     disconnect (args, util) { this.rootManager.disconnect(this._activeSession(util).id); }
     resetRootConnections () {
         this.rootManager.resetConnections();
-        // The connection reset is also a clean boundary for the shared
-        // simulator world. Keep no stale virtual Roots after all physical
-        // Roots have been disconnected; selecting/using a Root creates its
-        // corresponding virtual robot again when simulator mode is used.
-        this.simulator.clearRobots();
+        this._setSimulatedSession(this._activeSession());
+        this.simulator.reset();
     }
     selectRoot (args, util) {
         const session = this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
-        this.simulator.setActiveRoot(session.id);
+        if (this._isSimulatorActive(util, session)) this._setSimulatedSession(session);
     }
     activeRoot (args, util) { return this._activeSession(util).displayName; }
     getRootMenu () { return this.rootManager.getMenu(); }
@@ -500,20 +501,21 @@ class IrobotRootBlocks {
     lastConnectionError (args, util) {
         return this.rootManager.lastConnectionError(this._activeSession(util).id);
     }
-    setControlMode (args) {
+    setControlMode (args, util) {
         const requested = String(args.MODE || CONTROL_MODE_AUTO);
         const mode = [CONTROL_MODE_AUTO, CONTROL_MODE_SIMULATOR, CONTROL_MODE_PHYSICAL].includes(requested) ?
             requested : CONTROL_MODE_AUTO;
         const wasSimulatorActive = this._isSimulatorActive();
         this.controlMode = mode;
+        const session = this._activeSession(util);
         const isSimulatorActive = this._isSimulatorActive();
-        // Multiple green-flag scripts commonly start by selecting simulator
-        // mode. Only the transition into simulator mode may reset the shared
-        // world; resetting on every identical block invocation clears another
-        // Root's marker/trail halfway through a parallel drawing.
+        if (isSimulatorActive) this._setSimulatedSession(session);
+        // A green-flag program can contain several mode blocks. Reset only on
+        // entering simulator mode, so a later selector block does not wipe
+        // the selected Root's in-progress rehearsal.
         if (isSimulatorActive && !wasSimulatorActive) {
             if (this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
-            this._cancelPendingCommands(new Error('Root control target changed to simulator'), this._activeSession());
+            this._cancelPendingCommands(new Error('Root control target changed to simulator'), session);
             this.simulator.reset();
             this.simulator.open();
         }
@@ -530,11 +532,22 @@ class IrobotRootBlocks {
             (this.controlMode === CONTROL_MODE_AUTO && !session.isConnected());
     }
 
+    _setSimulatedSession (session) {
+        const target = session || this._activeSession();
+        this.simulatedSessionId = target.id;
+        this.simulator.setRootLabel(target.displayName);
+    }
+
+    _isSimulatedSession (session) {
+        return Number(session.id) === Number(this.simulatedSessionId);
+    }
+
     motors (args, util) {
         const session = this._activeSession(util);
         session.navigationPosition = null;
         if (this._isSimulatorActive(util, session)) {
-            return this.simulator.motors(session.id, Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
+            if (!this._isSimulatedSession(session)) return;
+            return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
         }
         return this._send(session.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)), session);
     }
@@ -542,13 +555,13 @@ class IrobotRootBlocks {
         const distance = Cast.toNumber(args.MM);
         const session = this._activeSession(util);
         session.navigationPosition = null;
-        if (this._isSimulatorActive(util, session)) return this.simulator.move(session.id, distance);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.move(distance) : undefined;
         return this._sendAndWait(session.protocol.driveDistance(distance), linearMotionWatchdogMs(distance), session);
     }
     turn (args, util) {
         const degrees = Cast.toNumber(args.DEGREES);
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.turn(session.id, degrees);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.turn(degrees) : undefined;
         return this._sendAndWait(session.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees), session);
     }
     arc (args, util) {
@@ -556,7 +569,7 @@ class IrobotRootBlocks {
         const radius = Cast.toNumber(args.RADIUS);
         const session = this._activeSession(util);
         session.navigationPosition = null;
-        if (this._isSimulatorActive(util, session)) return this.simulator.arc(session.id, radius, degrees);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.arc(radius, degrees) : undefined;
         return this._sendAndWait(
             session.protocol.driveArc(degrees * 10, radius),
             arcMotionWatchdogMs(degrees, radius), session
@@ -568,7 +581,7 @@ class IrobotRootBlocks {
         // every Root firmware even though they exist in the shared protocol.
         const session = this._activeSession(util);
         session.navigationPosition = {x: 0, y: 0, heading: 90};
-        if (this._isSimulatorActive(util, session)) this.simulator.resetNavigation(session.id);
+        if (this._isSimulatorActive(util, session) && this._isSimulatedSession(session)) this.simulator.resetNavigation();
     }
     navigateTo (args, util) {
         const target = {
@@ -577,7 +590,7 @@ class IrobotRootBlocks {
         };
         const session = this._activeSession(util);
         const origin = session.navigationPosition || {x: 0, y: 0, heading: 90};
-        if (this._isSimulatorActive(util, session)) return this.simulator.navigateTo(session.id, target.x, target.y);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.navigateTo(target.x, target.y) : undefined;
         const deltaX = target.x - origin.x;
         const deltaY = target.y - origin.y;
         const distance = Math.round(Math.hypot(deltaX, deltaY));
@@ -611,38 +624,40 @@ class IrobotRootBlocks {
     }
     stop (args, util) {
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.stop(session.id);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.stop() : undefined;
         return this._send(session.protocol.packet(0, 3), session);
     }
     marker (args, util) {
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.setMarker(session.id, args.POSITION);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.setMarker(args.POSITION) : undefined;
         return this._send(session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]), session);
     }
     ledColor (args, util) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(session.id, 1, red, green, blue);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.setLed(1, red, green, blue) : undefined;
         return this._send(session.protocol.led(1, red, green, blue), session);
     }
     ledAnimationColor (args, util) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(session.id, Cast.toNumber(args.EFFECT), red, green, blue);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue) : undefined;
         return this._send(session.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue), session);
     }
     led (args, util) {
         const session = this._activeSession(util);
         if (this._isSimulatorActive(util, session)) {
-            return this.simulator.setLed(session.id, 1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
+            return this._isSimulatedSession(session) ? this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)) : undefined;
         }
         return this._send(session.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)), session);
     }
     ledAnimation (args, util) {
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.setLed(
-            session.id, Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
-        );
+        if (this._isSimulatorActive(util, session)) {
+            return this._isSimulatedSession(session) ? this.simulator.setLed(
+                Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
+            ) : undefined;
+        }
         return this._send(session.protocol.led(
             Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)
         ), session);
@@ -661,7 +676,7 @@ class IrobotRootBlocks {
         // interrupt this one just before it actually finishes.
         const durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.playNote(session.id, frequency, durationMs);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.playNote(frequency, durationMs) : undefined;
         const packet = session.protocol.note(frequency, durationMs);
         if (durationMs === 0) {
             this._send(packet, session);
@@ -672,8 +687,8 @@ class IrobotRootBlocks {
 
     _playNoteForPicker (midiNote, category) {
         if (category !== this.getInfo().name) return;
-        if (this._isSimulatorActive()) {
-            this.simulator.playNote(this._activeSession().id, midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
+        if (this._isSimulatorActive() && this._isSimulatedSession(this._activeSession())) {
+            this.simulator.playNote(midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
             return;
         }
         if (!this.transport.isConnected()) return;
@@ -682,7 +697,7 @@ class IrobotRootBlocks {
 
     sayPhrase (args, util) {
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.sayPhrase(session.id, Cast.toString(args.PHRASE));
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.sayPhrase(Cast.toString(args.PHRASE)) : undefined;
         return this._sendSoundCommandAndWait(
             session.protocol.sayPhrase(Cast.toString(args.PHRASE)),
             SAY_PHRASE_TIMEOUT_MS,
@@ -700,7 +715,7 @@ class IrobotRootBlocks {
 
     sensor (args, util) {
         const session = this._activeSession(util);
-        if (this._isSimulatorActive(util, session)) return this.simulator.getSensor(session.id, args.VALUE);
+        if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.getSensor(args.VALUE) : 0;
         return session.last[args.VALUE] === undefined ? 0 : session.last[args.VALUE];
     }
 
