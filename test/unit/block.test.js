@@ -4,7 +4,8 @@ import {
     MOTION_WATCHDOG_SETTLE_MS,
     blockClass,
     linearMotionWatchdogMs,
-    navigationMotionWatchdogMs
+    navigationMotionWatchdogMs,
+    openRootConnectionDialog
 } from '../../src/vm/extensions/block/index.js';
 import {
     ROOT_DISCOVERY_OPTIONS,
@@ -221,6 +222,13 @@ describe('iRobot Root extension', () => {
         expect(root1.transport.scan).not.toHaveBeenCalled();
         expect(root2.transport.connect).toHaveBeenCalledWith('root-2-peripheral');
         expect(root2.peripheralId).toBe('root-2-peripheral');
+    });
+
+    test('opens the host Xcratch Scratch Link picker for another physical Root', () => {
+        const openConnectionModal = jest.fn();
+        expect(openRootConnectionDialog({Xcratch: {openConnectionModal}})).toBe(true);
+        expect(openConnectionModal).toHaveBeenCalledWith('irobotRoot');
+        expect(openRootConnectionDialog({})).toBe(false);
     });
 
     test('marks an explicitly disconnected slot reusable even if the adapter reports stale state', () => {

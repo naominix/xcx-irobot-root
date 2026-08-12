@@ -6842,6 +6842,18 @@ var CONTROL_MODE_SIMULATOR = 'simulator';
 var CONTROL_MODE_PHYSICAL = 'physical';
 var ROOT_MOTION_PICKER_CAPABILITY = 'irobotRootMotionPickerSupported';
 var extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
+
+// Scratch Link discovers peripherals in the editor's connection modal. Unlike
+// Web Bluetooth, a scan started from an extension command cannot display that
+// modal by itself. The Root Xcratch build publishes this narrow bridge so the
+// "connect another Root" command can open the standard picker on Scrub too.
+var openRootConnectionDialog = function openRootConnectionDialog() {
+  var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : typeof globalThis === 'undefined' ? null : globalThis;
+  var open = scope && scope.Xcratch && scope.Xcratch.openConnectionModal;
+  if (typeof open !== 'function') return false;
+  open(EXTENSION_ID);
+  return true;
+};
 var rootMotionField = function rootMotionField(mode) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   return {
@@ -7663,7 +7675,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         this.simulator.open();
         return session.displayName;
       }
-      this.rootManager.scan();
+      // Web Bluetooth opens its device picker from scan(). Scratch Link and
+      // Scrub use Xcratch's connection modal, whose scanning step calls the
+      // same manager after the dialog has become visible.
+      if (supportsWebBluetooth() || !openRootConnectionDialog()) this.rootManager.scan();
     }
   }, {
     key: "disconnect",
@@ -8396,5 +8411,5 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }]);
 }();
 
-export { COMMAND_FINISH_TIMEOUT_MS, MOTION_COMMAND_GAP_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, navigationMotionWatchdogMs, turnMotionWatchdogMs };
+export { COMMAND_FINISH_TIMEOUT_MS, MOTION_COMMAND_GAP_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, navigationMotionWatchdogMs, openRootConnectionDialog, turnMotionWatchdogMs };
 //# sourceMappingURL=irobotRoot.mjs.map

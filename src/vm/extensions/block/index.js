@@ -3,7 +3,7 @@ import ArgumentType from '../../extension-support/argument-type';
 import Cast from '../../util/cast';
 import translations from './translations.json';
 import blockIcon from './block-icon.png';
-import {RootProtocol} from './root-ble';
+import {RootProtocol, supportsWebBluetooth} from './root-ble';
 import {RootManager} from './root-manager';
 import RootSimulatorWorld from './root-simulator-world';
 
@@ -39,6 +39,17 @@ const CONTROL_MODE_SIMULATOR = 'simulator';
 const CONTROL_MODE_PHYSICAL = 'physical';
 const ROOT_MOTION_PICKER_CAPABILITY = 'irobotRootMotionPickerSupported';
 let extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
+
+// Scratch Link discovers peripherals in the editor's connection modal. Unlike
+// Web Bluetooth, a scan started from an extension command cannot display that
+// modal by itself. The Root Xcratch build publishes this narrow bridge so the
+// "connect another Root" command can open the standard picker on Scrub too.
+const openRootConnectionDialog = (scope = typeof globalThis === 'undefined' ? null : globalThis) => {
+    const open = scope && scope.Xcratch && scope.Xcratch.openConnectionModal;
+    if (typeof open !== 'function') return false;
+    open(EXTENSION_ID);
+    return true;
+};
 
 const rootMotionField = (mode, options = {}) => ({
     output: 'Number',
@@ -464,7 +475,10 @@ class IrobotRootBlocks {
             this.simulator.open();
             return session.displayName;
         }
-        this.rootManager.scan();
+        // Web Bluetooth opens its device picker from scan(). Scratch Link and
+        // Scrub use Xcratch's connection modal, whose scanning step calls the
+        // same manager after the dialog has become visible.
+        if (supportsWebBluetooth() || !openRootConnectionDialog()) this.rootManager.scan();
     }
     disconnect (args, util) { this.rootManager.disconnect(this._activeSession(util).id); }
     resetRootConnections () {
@@ -988,5 +1002,6 @@ export {
     MOTION_WATCHDOG_SETTLE_MS,
     MOTION_COMMAND_GAP_MS,
     navigationMotionWatchdogMs,
+    openRootConnectionDialog,
     turnMotionWatchdogMs
 };
