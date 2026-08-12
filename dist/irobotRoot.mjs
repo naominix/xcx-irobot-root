@@ -6851,7 +6851,9 @@ var openRootConnectionDialog = function openRootConnectionDialog() {
   var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : typeof globalThis === 'undefined' ? null : globalThis;
   var open = scope && scope.Xcratch && scope.Xcratch.openConnectionModal;
   if (typeof open !== 'function') return false;
-  open(EXTENSION_ID);
+  open(EXTENSION_ID, {
+    additionalRoot: true
+  });
   return true;
 };
 var rootMotionField = function rootMotionField(mode) {

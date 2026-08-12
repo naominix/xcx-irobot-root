@@ -227,7 +227,7 @@ describe('iRobot Root extension', () => {
     test('opens the host Xcratch Scratch Link picker for another physical Root', () => {
         const openConnectionModal = jest.fn();
         expect(openRootConnectionDialog({Xcratch: {openConnectionModal}})).toBe(true);
-        expect(openConnectionModal).toHaveBeenCalledWith('irobotRoot');
+        expect(openConnectionModal).toHaveBeenCalledWith('irobotRoot', {additionalRoot: true});
         expect(openRootConnectionDialog({})).toBe(false);
     });
 

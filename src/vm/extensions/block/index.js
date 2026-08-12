@@ -47,7 +47,7 @@ let extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
 const openRootConnectionDialog = (scope = typeof globalThis === 'undefined' ? null : globalThis) => {
     const open = scope && scope.Xcratch && scope.Xcratch.openConnectionModal;
     if (typeof open !== 'function') return false;
-    open(EXTENSION_ID);
+    open(EXTENSION_ID, {additionalRoot: true});
     return true;
 };
 
