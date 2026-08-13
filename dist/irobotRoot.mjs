@@ -68,25 +68,25 @@ var entry = {
   translationMap: translations$1
 };
 
-function _arrayLikeToArray$6(r, a) {
+function _arrayLikeToArray$7(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles$1(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$6(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$7(r);
 }
 
 function _iterableToArray$1(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$6(r, a) {
+function _unsupportedIterableToArray$7(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$6(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$7(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$6(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$7(r, a) : void 0;
   }
 }
 
@@ -95,7 +95,7 @@ function _nonIterableSpread$1() {
 }
 
 function _toConsumableArray$1(r) {
-  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$6(r) || _nonIterableSpread$1();
+  return _arrayWithoutHoles$1(r) || _iterableToArray$1(r) || _unsupportedIterableToArray$7(r) || _nonIterableSpread$1();
 }
 
 function _classCallCheck$1(a, n) {
@@ -177,7 +177,7 @@ function _nonIterableRest$1() {
 }
 
 function _slicedToArray$1(r, e) {
-  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$6(r, e) || _nonIterableRest$1();
+  return _arrayWithHoles$1(r) || _iterableToArrayLimit$1(r, e) || _unsupportedIterableToArray$7(r, e) || _nonIterableRest$1();
 }
 
 function getDefaultExportFromCjs (x) {
@@ -844,7 +844,11 @@ var Cast = /*@__PURE__*/getDefaultExportFromCjs(castExports);
 var en = {
 	"irobotRoot.name": "iRobot Root",
 	"irobotRoot.block.connect": "connect to Root",
+	"irobotRoot.block.addRoot": "connect another Root",
 	"irobotRoot.block.disconnect": "disconnect Root",
+	"irobotRoot.block.resetRootConnections": "disconnect all Roots and reset connections",
+	"irobotRoot.block.selectRoot": "use [ROOT]",
+	"irobotRoot.block.activeRoot": "selected Root",
 	"irobotRoot.block.isConnected": "Root is connected?",
 	"irobotRoot.block.transportMode": "Root connection method",
 	"irobotRoot.block.lastConnectionError": "last connection error",
@@ -869,26 +873,26 @@ var en = {
 	"irobotRoot.block.sayPhrase": "say [PHRASE]",
 	"irobotRoot.block.refreshSensor": "read [SENSOR]",
 	"irobotRoot.block.sensor": "[VALUE] value",
-	"irobotRoot.block.whenEvent": "when [EVENT] changes",
-	"irobotRoot.block.whenBumper": "when [BUMPER] bumper is [ACTION]",
-	"irobotRoot.block.whenTouchSensor": "when [SENSOR] touch sensor is [ACTION]",
+	"irobotRoot.block.whenEvent": "when [ROOT] [EVENT] changes",
+	"irobotRoot.block.whenBumper": "when [ROOT] [BUMPER] bumper is [ACTION]",
+	"irobotRoot.block.whenTouchSensor": "when [ROOT] [SENSOR] touch sensor is [ACTION]",
 	"irobotRoot.block.raw": "device [DEVICE] command [COMMAND] payload [PAYLOAD]",
 	"irobotRoot.block.lastPacket": "last received packet",
 	"irobotRoot.block.detailedEvent": "last detailed event",
-	"irobotRoot.hat.leftBumperPush": "when left bumper is pushed",
-	"irobotRoot.hat.leftBumperRelease": "when left bumper is released",
-	"irobotRoot.hat.rightBumperPush": "when right bumper is pushed",
-	"irobotRoot.hat.rightBumperRelease": "when right bumper is released",
-	"irobotRoot.hat.bothBumpersPush": "when both bumpers are pushed simultaneously",
-	"irobotRoot.hat.bothBumpersRelease": "when both bumpers are released simultaneously",
-	"irobotRoot.hat.flTouch": "when FL touch sensor is touched",
-	"irobotRoot.hat.flRelease": "when FL touch sensor is released",
-	"irobotRoot.hat.frTouch": "when FR touch sensor is touched",
-	"irobotRoot.hat.frRelease": "when FR touch sensor is released",
-	"irobotRoot.hat.rlTouch": "when RL touch sensor is touched",
-	"irobotRoot.hat.rlRelease": "when RL touch sensor is released",
-	"irobotRoot.hat.rrTouch": "when RR touch sensor is touched",
-	"irobotRoot.hat.rrRelease": "when RR touch sensor is released",
+	"irobotRoot.hat.leftBumperPush": "when [ROOT] left bumper is pushed",
+	"irobotRoot.hat.leftBumperRelease": "when [ROOT] left bumper is released",
+	"irobotRoot.hat.rightBumperPush": "when [ROOT] right bumper is pushed",
+	"irobotRoot.hat.rightBumperRelease": "when [ROOT] right bumper is released",
+	"irobotRoot.hat.bothBumpersPush": "when [ROOT] both bumpers are pushed simultaneously",
+	"irobotRoot.hat.bothBumpersRelease": "when [ROOT] both bumpers are released simultaneously",
+	"irobotRoot.hat.flTouch": "when [ROOT] FL touch sensor is touched",
+	"irobotRoot.hat.flRelease": "when [ROOT] FL touch sensor is released",
+	"irobotRoot.hat.frTouch": "when [ROOT] FR touch sensor is touched",
+	"irobotRoot.hat.frRelease": "when [ROOT] FR touch sensor is released",
+	"irobotRoot.hat.rlTouch": "when [ROOT] RL touch sensor is touched",
+	"irobotRoot.hat.rlRelease": "when [ROOT] RL touch sensor is released",
+	"irobotRoot.hat.rrTouch": "when [ROOT] RR touch sensor is touched",
+	"irobotRoot.hat.rrRelease": "when [ROOT] RR touch sensor is released",
 	"irobotRoot.menu.marker.up": "up",
 	"irobotRoot.menu.marker.down": "down",
 	"irobotRoot.menu.marker.eraser": "eraser",
@@ -924,6 +928,7 @@ var en = {
 	"irobotRoot.menu.controlMode.simulator": "simulator",
 	"irobotRoot.menu.controlMode.physical": "physical Root",
 	"irobotRoot.simulator.title": "iRobot Root Simulator",
+	"irobotRoot.simulator.simulating": "Simulating",
 	"irobotRoot.simulator.runAgain": "▶ Run again",
 	"irobotRoot.simulator.stop": "■ Stop",
 	"irobotRoot.simulator.reset": "↺ Reset",
@@ -931,6 +936,7 @@ var en = {
 	"irobotRoot.simulator.addBlock": "+ Block",
 	"irobotRoot.simulator.delete": "Delete",
 	"irobotRoot.simulator.clearObstacles": "Clear obstacles",
+	"irobotRoot.simulator.rootPlacement": "▣ Place Roots",
 	"irobotRoot.simulator.speed": "Speed ",
 	"irobotRoot.simulator.help": "Drag obstacles · Tap Root sensors",
 	"irobotRoot.simulator.x": "x",
@@ -955,7 +961,11 @@ var en = {
 var ja = {
 	"irobotRoot.name": "iRobot Root",
 	"irobotRoot.block.connect": "Rootに接続する",
+	"irobotRoot.block.addRoot": "別のRootを接続する",
 	"irobotRoot.block.disconnect": "Rootを切断する",
+	"irobotRoot.block.resetRootConnections": "すべてのRootを切断して接続状態をリセットする",
+	"irobotRoot.block.selectRoot": "[ROOT]を操作する",
+	"irobotRoot.block.activeRoot": "選択中のRoot",
 	"irobotRoot.block.isConnected": "Rootは接続済み",
 	"irobotRoot.block.transportMode": "Rootの通信方式",
 	"irobotRoot.block.lastConnectionError": "最後の接続エラー",
@@ -980,26 +990,26 @@ var ja = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] と言う",
 	"irobotRoot.block.refreshSensor": "[SENSOR] を読み取る",
 	"irobotRoot.block.sensor": "[VALUE] の値",
-	"irobotRoot.block.whenEvent": "[EVENT] が変化したとき",
-	"irobotRoot.block.whenBumper": "[BUMPER] バンパーが [ACTION] されたとき",
-	"irobotRoot.block.whenTouchSensor": "[SENSOR] タッチセンサーが [ACTION] されたとき",
+	"irobotRoot.block.whenEvent": "[ROOT] の [EVENT] が変化したとき",
+	"irobotRoot.block.whenBumper": "[ROOT] の [BUMPER] バンパーが [ACTION] されたとき",
+	"irobotRoot.block.whenTouchSensor": "[ROOT] の [SENSOR] タッチセンサーが [ACTION] されたとき",
 	"irobotRoot.block.raw": "デバイス [DEVICE] コマンド [COMMAND] ペイロード [PAYLOAD]",
 	"irobotRoot.block.lastPacket": "最後の受信パケット",
 	"irobotRoot.block.detailedEvent": "最後の詳細イベント",
-	"irobotRoot.hat.leftBumperPush": "左バンパーが押されたとき",
-	"irobotRoot.hat.leftBumperRelease": "左バンパーが離されたとき",
-	"irobotRoot.hat.rightBumperPush": "右バンパーが押されたとき",
-	"irobotRoot.hat.rightBumperRelease": "右バンパーが離されたとき",
-	"irobotRoot.hat.bothBumpersPush": "左右のバンパーが同時に押されたとき",
-	"irobotRoot.hat.bothBumpersRelease": "左右のバンパーが同時に離されたとき",
-	"irobotRoot.hat.flTouch": "FLタッチセンサーに触れたとき",
-	"irobotRoot.hat.flRelease": "FLタッチセンサーを離したとき",
-	"irobotRoot.hat.frTouch": "FRタッチセンサーに触れたとき",
-	"irobotRoot.hat.frRelease": "FRタッチセンサーを離したとき",
-	"irobotRoot.hat.rlTouch": "RLタッチセンサーに触れたとき",
-	"irobotRoot.hat.rlRelease": "RLタッチセンサーを離したとき",
-	"irobotRoot.hat.rrTouch": "RRタッチセンサーに触れたとき",
-	"irobotRoot.hat.rrRelease": "RRタッチセンサーを離したとき",
+	"irobotRoot.hat.leftBumperPush": "[ROOT] の左バンパーが押されたとき",
+	"irobotRoot.hat.leftBumperRelease": "[ROOT] の左バンパーが離されたとき",
+	"irobotRoot.hat.rightBumperPush": "[ROOT] の右バンパーが押されたとき",
+	"irobotRoot.hat.rightBumperRelease": "[ROOT] の右バンパーが離されたとき",
+	"irobotRoot.hat.bothBumpersPush": "[ROOT] の左右のバンパーが同時に押されたとき",
+	"irobotRoot.hat.bothBumpersRelease": "[ROOT] の左右のバンパーが同時に離されたとき",
+	"irobotRoot.hat.flTouch": "[ROOT] のFLタッチセンサーに触れたとき",
+	"irobotRoot.hat.flRelease": "[ROOT] のFLタッチセンサーを離したとき",
+	"irobotRoot.hat.frTouch": "[ROOT] のFRタッチセンサーに触れたとき",
+	"irobotRoot.hat.frRelease": "[ROOT] のFRタッチセンサーを離したとき",
+	"irobotRoot.hat.rlTouch": "[ROOT] のRLタッチセンサーに触れたとき",
+	"irobotRoot.hat.rlRelease": "[ROOT] のRLタッチセンサーを離したとき",
+	"irobotRoot.hat.rrTouch": "[ROOT] のRRタッチセンサーに触れたとき",
+	"irobotRoot.hat.rrRelease": "[ROOT] のRRタッチセンサーを離したとき",
 	"irobotRoot.menu.marker.up": "上げる",
 	"irobotRoot.menu.marker.down": "下げる",
 	"irobotRoot.menu.marker.eraser": "消しゴム",
@@ -1035,6 +1045,7 @@ var ja = {
 	"irobotRoot.menu.controlMode.simulator": "シミュレーター",
 	"irobotRoot.menu.controlMode.physical": "実機Root",
 	"irobotRoot.simulator.title": "iRobot Rootシミュレーター",
+	"irobotRoot.simulator.simulating": "シミュレート中",
 	"irobotRoot.simulator.runAgain": "▶ もう一度実行",
 	"irobotRoot.simulator.stop": "■ 停止",
 	"irobotRoot.simulator.reset": "↺ リセット",
@@ -1042,6 +1053,7 @@ var ja = {
 	"irobotRoot.simulator.addBlock": "+ 障害物",
 	"irobotRoot.simulator.delete": "削除",
 	"irobotRoot.simulator.clearObstacles": "障害物を全消去",
+	"irobotRoot.simulator.rootPlacement": "▣ Rootを配置",
 	"irobotRoot.simulator.speed": "速度 ",
 	"irobotRoot.simulator.help": "障害物をドラッグ・Rootのセンサーをタップ",
 	"irobotRoot.simulator.x": "x",
@@ -1069,7 +1081,11 @@ var translations = {
 	"ja-Hira": {
 	"irobotRoot.name": "iRobot Root",
 	"irobotRoot.block.connect": "るーとにつなぐ",
+	"irobotRoot.block.addRoot": "べつのるーとをつなぐ",
 	"irobotRoot.block.disconnect": "るーとをきりはなす",
+	"irobotRoot.block.resetRootConnections": "すべてのるーとをきりはなしてせつぞくじょうたいをりせっとする",
+	"irobotRoot.block.selectRoot": "[ROOT]をそうさする",
+	"irobotRoot.block.activeRoot": "せんたくちゅうのるーと",
 	"irobotRoot.block.isConnected": "るーとはつながっている",
 	"irobotRoot.block.transportMode": "るーとのつなぎかた",
 	"irobotRoot.block.lastConnectionError": "さいごのせつぞくのもんだい",
@@ -1094,26 +1110,26 @@ var translations = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] という",
 	"irobotRoot.block.refreshSensor": "[SENSOR] をよみとる",
 	"irobotRoot.block.sensor": "[VALUE] のあたい",
-	"irobotRoot.block.whenEvent": "[EVENT] がかわったとき",
-	"irobotRoot.block.whenBumper": "[BUMPER] ばんぱーが [ACTION] とき",
-	"irobotRoot.block.whenTouchSensor": "[SENSOR] たっちせんさーが [ACTION] とき",
+	"irobotRoot.block.whenEvent": "[ROOT] の [EVENT] がかわったとき",
+	"irobotRoot.block.whenBumper": "[ROOT] の [BUMPER] ばんぱーが [ACTION] とき",
+	"irobotRoot.block.whenTouchSensor": "[ROOT] の [SENSOR] たっちせんさーが [ACTION] とき",
 	"irobotRoot.block.raw": "でばいす [DEVICE] こまんど [COMMAND] ぺいろーど [PAYLOAD]",
 	"irobotRoot.block.lastPacket": "さいごにうけとったぱけっと",
 	"irobotRoot.block.detailedEvent": "さいごのくわしいいべんと",
-	"irobotRoot.hat.leftBumperPush": "ひだりばんぱーがおされたとき",
-	"irobotRoot.hat.leftBumperRelease": "ひだりばんぱーがはなされたとき",
-	"irobotRoot.hat.rightBumperPush": "みぎばんぱーがおされたとき",
-	"irobotRoot.hat.rightBumperRelease": "みぎばんぱーがはなされたとき",
-	"irobotRoot.hat.bothBumpersPush": "さゆうのばんぱーがどうじにおされたとき",
-	"irobotRoot.hat.bothBumpersRelease": "さゆうのばんぱーがどうじにはなされたとき",
-	"irobotRoot.hat.flTouch": "FLたっちせんさーにふれたとき",
-	"irobotRoot.hat.flRelease": "FLたっちせんさーをはなしたとき",
-	"irobotRoot.hat.frTouch": "FRたっちせんさーにふれたとき",
-	"irobotRoot.hat.frRelease": "FRたっちせんさーをはなしたとき",
-	"irobotRoot.hat.rlTouch": "RLたっちせんさーにふれたとき",
-	"irobotRoot.hat.rlRelease": "RLたっちせんさーをはなしたとき",
-	"irobotRoot.hat.rrTouch": "RRたっちせんさーにふれたとき",
-	"irobotRoot.hat.rrRelease": "RRたっちせんさーをはなしたとき",
+	"irobotRoot.hat.leftBumperPush": "[ROOT] のひだりばんぱーがおされたとき",
+	"irobotRoot.hat.leftBumperRelease": "[ROOT] のひだりばんぱーがはなされたとき",
+	"irobotRoot.hat.rightBumperPush": "[ROOT] のみぎばんぱーがおされたとき",
+	"irobotRoot.hat.rightBumperRelease": "[ROOT] のみぎばんぱーがはなされたとき",
+	"irobotRoot.hat.bothBumpersPush": "[ROOT] のさゆうのばんぱーがどうじにおされたとき",
+	"irobotRoot.hat.bothBumpersRelease": "[ROOT] のさゆうのばんぱーがどうじにはなされたとき",
+	"irobotRoot.hat.flTouch": "[ROOT] のFLたっちせんさーにふれたとき",
+	"irobotRoot.hat.flRelease": "[ROOT] のFLたっちせんさーをはなしたとき",
+	"irobotRoot.hat.frTouch": "[ROOT] のFRたっちせんさーにふれたとき",
+	"irobotRoot.hat.frRelease": "[ROOT] のFRたっちせんさーをはなしたとき",
+	"irobotRoot.hat.rlTouch": "[ROOT] のRLたっちせんさーにふれたとき",
+	"irobotRoot.hat.rlRelease": "[ROOT] のRLたっちせんさーをはなしたとき",
+	"irobotRoot.hat.rrTouch": "[ROOT] のRRたっちせんさーにふれたとき",
+	"irobotRoot.hat.rrRelease": "[ROOT] のRRたっちせんさーをはなしたとき",
 	"irobotRoot.menu.marker.up": "あげる",
 	"irobotRoot.menu.marker.down": "さげる",
 	"irobotRoot.menu.marker.eraser": "けしごむ",
@@ -1149,6 +1165,7 @@ var translations = {
 	"irobotRoot.menu.controlMode.simulator": "しみゅれーたー",
 	"irobotRoot.menu.controlMode.physical": "じっきるーと",
 	"irobotRoot.simulator.title": "iRobot Root しみゅれーたー",
+	"irobotRoot.simulator.simulating": "しみゅれーとちゅう",
 	"irobotRoot.simulator.runAgain": "▶ もういちどうごかす",
 	"irobotRoot.simulator.stop": "■ とめる",
 	"irobotRoot.simulator.reset": "↺ りせっと",
@@ -1156,6 +1173,7 @@ var translations = {
 	"irobotRoot.simulator.addBlock": "+ しょうがいぶつ",
 	"irobotRoot.simulator.delete": "けす",
 	"irobotRoot.simulator.clearObstacles": "しょうがいぶつをぜんぶけす",
+	"irobotRoot.simulator.rootPlacement": "▣ るーとをはいち",
 	"irobotRoot.simulator.speed": "はやさ ",
 	"irobotRoot.simulator.help": "しょうがいぶつをうごかす・るーとのせんさーをおす",
 	"irobotRoot.simulator.x": "x",
@@ -1205,21 +1223,6 @@ function _getPrototypeOf$1(t) {
   return _getPrototypeOf$1 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) {
     return t.__proto__ || Object.getPrototypeOf(t);
   }, _getPrototypeOf$1(t);
-}
-
-function _superPropBase$1(t, o) {
-  for (; !{}.hasOwnProperty.call(t, o) && null !== (t = _getPrototypeOf$1(t)););
-  return t;
-}
-
-function _get$1() {
-  return _get$1 = "undefined" != typeof Reflect && Reflect.get ? Reflect.get.bind() : function (e, t, r) {
-    var p = _superPropBase$1(e, t);
-    if (p) {
-      var n = Object.getOwnPropertyDescriptor(p, t);
-      return n.get ? n.get.call(arguments.length < 3 ? e : r) : n.value;
-    }
-  }, _get$1.apply(null, arguments);
 }
 
 function _setPrototypeOf$1(t, e) {
@@ -1415,25 +1418,25 @@ function requireJsonrpc() {
   return jsonrpc;
 }
 
-function _arrayLikeToArray$5(r, a) {
+function _arrayLikeToArray$6(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
   return n;
 }
 
 function _arrayWithoutHoles(r) {
-  if (Array.isArray(r)) return _arrayLikeToArray$5(r);
+  if (Array.isArray(r)) return _arrayLikeToArray$6(r);
 }
 
 function _iterableToArray(r) {
   if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
 }
 
-function _unsupportedIterableToArray$5(r, a) {
+function _unsupportedIterableToArray$6(r, a) {
   if (r) {
-    if ("string" == typeof r) return _arrayLikeToArray$5(r, a);
+    if ("string" == typeof r) return _arrayLikeToArray$6(r, a);
     var t = {}.toString.call(r).slice(8, -1);
-    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0;
+    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$6(r, a) : void 0;
   }
 }
 
@@ -1442,7 +1445,7 @@ function _nonIterableSpread() {
 }
 
 function _toConsumableArray(r) {
-  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$5(r) || _nonIterableSpread();
+  return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray$6(r) || _nonIterableSpread();
 }
 
 function _defineProperty(e, r, t) {
@@ -1507,7 +1510,7 @@ function _nonIterableRest() {
 }
 
 function _slicedToArray(r, e) {
-  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$5(r, e) || _nonIterableRest();
+  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray$6(r, e) || _nonIterableRest();
 }
 
 var urlToObj = {};
@@ -1744,9 +1747,9 @@ var errorUtils = {};
 
 var stackTrace = {};
 
-function _createForOfIteratorHelper$4(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$4(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$4(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$4(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0; } }
-function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$5(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$5(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$5(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$5(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$5(r, a) : void 0; } }
+function _arrayLikeToArray$5(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var hasRequiredStackTrace;
 function requireStackTrace() {
   if (hasRequiredStackTrace) return stackTrace;
@@ -1782,7 +1785,7 @@ function requireStackTrace() {
   }
   function toStackFrames(lines, parseLine) {
     var frames = [];
-    var _iterator = _createForOfIteratorHelper$4(lines),
+    var _iterator = _createForOfIteratorHelper$5(lines),
       _step;
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2440,9 +2443,9 @@ function requireInterfaces() {
   return interfaces;
 }
 
-function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
-function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$4(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$4(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$4(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$4(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$4(r, a) : void 0; } }
+function _arrayLikeToArray$4(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function ownKeys$2(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$2(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$2(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var hasRequiredBaseLogger;
@@ -2770,7 +2773,7 @@ function requireBaseLogger() {
       function tokensToCss(tokens) {
         var seen = new Set();
         var cssParts = [];
-        var _iterator = _createForOfIteratorHelper$3(tokens),
+        var _iterator = _createForOfIteratorHelper$4(tokens),
           _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -2880,7 +2883,7 @@ function requireBaseLogger() {
         var withoutDrive = drivePrefix ? replaced.slice(drivePrefix.length) : replaced;
         var segments = withoutDrive.split("/");
         var normalizedSegments = [];
-        var _iterator2 = _createForOfIteratorHelper$3(segments),
+        var _iterator2 = _createForOfIteratorHelper$4(segments),
           _step2;
         try {
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -3312,7 +3315,7 @@ function requireBaseLogger() {
             if (typeof source === "string") {
               var _this$settings4;
               var modifiedSource = source;
-              var _iterator3 = _createForOfIteratorHelper$3(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
+              var _iterator3 = _createForOfIteratorHelper$4(((_this$settings4 = this.settings) === null || _this$settings4 === void 0 ? void 0 : _this$settings4.maskValuesRegEx) || []),
                 _step3;
               try {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -3476,7 +3479,7 @@ function ownKeys$1(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymb
 function _objectSpread$1(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$1(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$1(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _callSuper$2(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$2() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct$2() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$2 = function _isNativeReflectConstruct() { return !!t; })(); }
-function _superPropGet$1(t, o, e, r) { var p = _get(_getPrototypeOf(t.prototype ), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
+function _superPropGet(t, o, e, r) { var p = _get(_getPrototypeOf(t.prototype ), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
 var hasRequiredCjs;
 function requireCjs() {
   if (hasRequiredCjs) return cjs;
@@ -3527,7 +3530,7 @@ function requireCjs() {
           for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
             args[_key - 2] = arguments[_key];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([logLevelId, logLevelName].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([logLevelId, logLevelName].concat(args));
         }
       }, {
         key: "silly",
@@ -3535,7 +3538,7 @@ function requireCjs() {
           for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
             args[_key2] = arguments[_key2];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([0, "SILLY"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([0, "SILLY"].concat(args));
         }
       }, {
         key: "trace",
@@ -3543,7 +3546,7 @@ function requireCjs() {
           for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
             args[_key3] = arguments[_key3];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([1, "TRACE"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([1, "TRACE"].concat(args));
         }
       }, {
         key: "debug",
@@ -3551,7 +3554,7 @@ function requireCjs() {
           for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
             args[_key4] = arguments[_key4];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([2, "DEBUG"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([2, "DEBUG"].concat(args));
         }
       }, {
         key: "info",
@@ -3559,7 +3562,7 @@ function requireCjs() {
           for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
             args[_key5] = arguments[_key5];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([3, "INFO"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([3, "INFO"].concat(args));
         }
       }, {
         key: "warn",
@@ -3567,7 +3570,7 @@ function requireCjs() {
           for (var _len6 = arguments.length, args = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
             args[_key6] = arguments[_key6];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([4, "WARN"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([4, "WARN"].concat(args));
         }
       }, {
         key: "error",
@@ -3575,7 +3578,7 @@ function requireCjs() {
           for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
             args[_key7] = arguments[_key7];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([5, "ERROR"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([5, "ERROR"].concat(args));
         }
       }, {
         key: "fatal",
@@ -3583,12 +3586,12 @@ function requireCjs() {
           for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
             args[_key8] = arguments[_key8];
           }
-          return _superPropGet$1(Logger, "log", this, 3)([6, "FATAL"].concat(args));
+          return _superPropGet(Logger, "log", this, 3)([6, "FATAL"].concat(args));
         }
       }, {
         key: "getSubLogger",
         value: function getSubLogger(settings, logObj) {
-          return _superPropGet$1(Logger, "getSubLogger", this, 3)([settings, logObj]);
+          return _superPropGet(Logger, "getSubLogger", this, 3)([settings, logObj]);
         }
       }]);
     }(BaseLogger_js_1.BaseLogger);
@@ -4155,14 +4158,16 @@ var ScratchLinkBLE = /*@__PURE__*/getDefaultExportFromCjs(bleExports);
 var bleWebExports = requireBleWeb();
 var WebBLE = /*@__PURE__*/getDefaultExportFromCjs(bleWebExports);
 
+var jsonrpcExports = requireJsonrpc();
+var JSONRPC = /*@__PURE__*/getDefaultExportFromCjs(jsonrpcExports);
+
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), true).forEach(function (r) { _defineProperty$1(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
+function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
-function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
-function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
+function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 var ROOT_SERVICE = '48c5d828-ac2a-442d-97a3-0c9822b04979';
 var UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 var RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -4175,12 +4180,17 @@ var ROOT_DISCOVERY_OPTIONS = {
 };
 var SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
 var SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
+// Web Bluetooth and the Scrub bridge both expose a write promise, but some
+// Scratch Link/Scrub versions leave that promise pending after CoreBluetooth
+// accepted the packet. Keep the transport-level ordering without making the
+// Scratch command wait on that promise forever.
+var UART_WRITE_GAP_MS = 60;
 var clamp$1 = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value)));
 };
 var crc8 = function crc8(bytes) {
   var crc = 0;
-  var _iterator = _createForOfIteratorHelper$2(bytes),
+  var _iterator = _createForOfIteratorHelper$3(bytes),
     _step;
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
@@ -4207,7 +4217,7 @@ var bytesToHex = function bytesToHex(bytes) {
 // in both Web Bluetooth and Scrub.
 var bytesToBase64 = function bytesToBase64(bytes) {
   var binary = '';
-  var _iterator2 = _createForOfIteratorHelper$2(bytes),
+  var _iterator2 = _createForOfIteratorHelper$3(bytes),
     _step2;
   try {
     for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -4254,23 +4264,42 @@ var getScrubSocketClass = function getScrubSocketClass() {
     return null;
   }
 };
-var RootScratchLinkBLE = /*#__PURE__*/function (_ScratchLinkBLE) {
+
+/**
+ * Scrub's injected Socket supports multiple independent BLE sessions. Do not
+ * inherit the VM's default BLE export here: that CommonJS module selects its
+ * implementation when the editor bundle loads, and certain WKWebViews expose
+ * a partial navigator.bluetooth object. In that situation the default export
+ * can be WebBLE even though Scrub's Scratch Link bridge is the usable
+ * transport. This self-contained adapter always uses the injected Socket and
+ * therefore opens one native BLE session per Root.
+ */
+var RootScratchLinkBLE = /*#__PURE__*/function (_JSONRPC) {
   function RootScratchLinkBLE(runtime, extensionId, peripheralOptions, connectCallback, resetCallback, SocketClass) {
     var _this;
     _classCallCheck$1(this, RootScratchLinkBLE);
-    var isolatedRuntime = {
-      constructor: runtime.constructor,
-      emit: runtime.emit.bind(runtime),
-      getScratchLinkSocket: function getScratchLinkSocket(type) {
-        return new SocketClass(type);
-      }
-    };
-    _this = _callSuper(this, RootScratchLinkBLE, [isolatedRuntime, extensionId, peripheralOptions, connectCallback, resetCallback]);
+    _this = _callSuper(this, RootScratchLinkBLE);
+    _this._runtime = runtime;
+    _this._extensionId = extensionId;
+    _this._peripheralOptions = peripheralOptions;
+    _this._connectCallback = connectCallback;
+    _this._resetCallback = resetCallback;
+    _this._availablePeripherals = {};
+    _this._connected = false;
+    _this._characteristicDidChangeCallback = null;
+    _this._discoverTimeoutID = null;
     _this._scrubDiscoveryAckTimer = null;
     _this._scrubDiscoveryAttempt = 0;
+    _this._socket = new SocketClass('BLE');
+    _this._socket.setOnOpen(_this.requestPeripheral.bind(_this));
+    _this._socket.setOnClose(_this.handleDisconnectError.bind(_this));
+    _this._socket.setOnError(_this._handleRequestError.bind(_this));
+    _this._socket.setHandleMessage(_this._handleMessage.bind(_this));
+    _this._sendMessage = _this._socket.sendMessage.bind(_this._socket);
+    _this._socket.open();
     return _this;
   }
-  _inherits$1(RootScratchLinkBLE, _ScratchLinkBLE);
+  _inherits$1(RootScratchLinkBLE, _JSONRPC);
   return _createClass$1(RootScratchLinkBLE, [{
     key: "requestPeripheral",
     value: function requestPeripheral() {
@@ -4313,10 +4342,113 @@ var RootScratchLinkBLE = /*#__PURE__*/function (_ScratchLinkBLE) {
         window.clearTimeout(this._scrubDiscoveryAckTimer);
         this._scrubDiscoveryAckTimer = null;
       }
-      _superPropGet(RootScratchLinkBLE, "disconnect", this)([]);
+      this._connected = false;
+      if (this._socket.isOpen()) this._socket.close();
+      if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+      this._runtime.emit(this._runtime.constructor.PERIPHERAL_DISCONNECTED);
+    }
+  }, {
+    key: "isConnected",
+    value: function isConnected() {
+      return this._connected;
+    }
+  }, {
+    key: "connectPeripheral",
+    value: function connectPeripheral(id) {
+      var _this3 = this;
+      this.sendRemoteRequest('connect', {
+        peripheralId: id
+      }).then(function () {
+        _this3._connected = true;
+        _this3._runtime.emit(_this3._runtime.constructor.PERIPHERAL_CONNECTED);
+        _this3._connectCallback();
+      }).catch(function (error) {
+        return _this3._handleRequestError(error);
+      });
+    }
+  }, {
+    key: "startNotifications",
+    value: function startNotifications(serviceId, characteristicId) {
+      var _this4 = this;
+      var onCharacteristicChanged = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      this._characteristicDidChangeCallback = onCharacteristicChanged;
+      return this.sendRemoteRequest('startNotifications', {
+        serviceId: serviceId,
+        characteristicId: characteristicId
+      }).catch(function (error) {
+        return _this4.handleDisconnectError(error);
+      });
+    }
+  }, {
+    key: "write",
+    value: function write(serviceId, characteristicId, message) {
+      var _this5 = this;
+      var encoding = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+      var withResponse = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
+      var params = {
+        serviceId: serviceId,
+        characteristicId: characteristicId,
+        message: message
+      };
+      if (encoding) params.encoding = encoding;
+      if (withResponse !== null) params.withResponse = withResponse;
+      return this.sendRemoteRequest('write', params).catch(function (error) {
+        _this5.handleDisconnectError(error);
+        throw error;
+      });
+    }
+  }, {
+    key: "didReceiveCall",
+    value: function didReceiveCall(method, params) {
+      switch (method) {
+        case 'didDiscoverPeripheral':
+          this._availablePeripherals[params.peripheralId] = params;
+          this._runtime.emit(this._runtime.constructor.PERIPHERAL_LIST_UPDATE, this._availablePeripherals);
+          if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+          break;
+        case 'userDidPickPeripheral':
+          this._availablePeripherals[params.peripheralId] = params;
+          this._runtime.emit(this._runtime.constructor.USER_PICKED_PERIPHERAL, this._availablePeripherals);
+          if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+          break;
+        case 'userDidNotPickPeripheral':
+          this._runtime.emit(this._runtime.constructor.PERIPHERAL_SCAN_TIMEOUT);
+          if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+          break;
+        case 'characteristicDidChange':
+          if (this._characteristicDidChangeCallback) this._characteristicDidChangeCallback(params.message);
+          break;
+        case 'ping':
+          return 42;
+      }
+    }
+  }, {
+    key: "handleDisconnectError",
+    value: function handleDisconnectError() {
+      if (!this._connected) return;
+      this.disconnect();
+      if (this._resetCallback) this._resetCallback();
+      this._runtime.emit(this._runtime.constructor.PERIPHERAL_CONNECTION_LOST_ERROR, {
+        message: 'Scratch lost connection to',
+        extensionId: this._extensionId
+      });
+    }
+  }, {
+    key: "_handleRequestError",
+    value: function _handleRequestError() {
+      this._runtime.emit(this._runtime.constructor.PERIPHERAL_REQUEST_ERROR, {
+        message: 'Scratch lost connection to',
+        extensionId: this._extensionId
+      });
+    }
+  }, {
+    key: "_handleDiscoverTimeout",
+    value: function _handleDiscoverTimeout() {
+      if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+      this._runtime.emit(this._runtime.constructor.PERIPHERAL_SCAN_TIMEOUT);
     }
   }]);
-}(ScratchLinkBLE);
+}(JSONRPC);
 var RootProtocol = /*#__PURE__*/function () {
   function RootProtocol() {
     _classCallCheck$1(this, RootProtocol);
@@ -4405,7 +4537,7 @@ var RootProtocol = /*#__PURE__*/function () {
       // Protocol payloads are limited to 16 UTF-8 bytes. Add complete
       // Unicode code points only, so truncation never leaves malformed
       // Japanese text or half of an emoji in the packet.
-      var _iterator3 = _createForOfIteratorHelper$2(String(phrase)),
+      var _iterator3 = _createForOfIteratorHelper$3(String(phrase)),
         _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
@@ -4469,12 +4601,15 @@ var RootProtocol = /*#__PURE__*/function () {
 var RootTransport = /*#__PURE__*/function () {
   function RootTransport(runtime, extensionId, onData) {
     var onReset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    var onConnected = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
     _classCallCheck$1(this, RootTransport);
     this.runtime = runtime;
     this.extensionId = extensionId;
     this.onData = onData;
     this.onReset = onReset;
+    this.onConnected = onConnected;
     this.ble = null;
+    this._writeTail = Promise.resolve();
     this.mode = supportsWebBluetooth() ? 'Web Bluetooth' : 'Scratch Link / Scrub';
     this.lastError = '';
     this.runtime.registerPeripheralExtension(extensionId, this);
@@ -4505,20 +4640,70 @@ var RootTransport = /*#__PURE__*/function () {
   }, {
     key: "onConnect",
     value: function onConnect() {
-      var _this3 = this;
+      var _this6 = this;
       this.ble.startNotifications(UART_SERVICE, TX, function (message) {
-        _this3.onData(base64ToBytes(message));
+        _this6.onData(base64ToBytes(message));
       });
+      if (this.onConnected) this.onConnected();
     }
   }, {
     key: "write",
     value: function write(bytes) {
-      var _this4 = this;
+      var _this7 = this;
       if (!this.isConnected()) return Promise.reject(new Error('Rootに接続してください'));
-      return this.ble.write(UART_SERVICE, RX, bytesToBase64(bytes), 'base64', false).catch(function (error) {
-        _this4.setError(error);
-        throw error;
+      var encoded = bytesToBase64(bytes);
+      var resolveWrite;
+      var rejectWrite;
+      var result = new Promise(function (resolve, reject) {
+        resolveWrite = resolve;
+        rejectWrite = reject;
       });
+
+      // Each RootTransport has its own tail, so one Root cannot reorder or
+      // suppress another Root's packets. Release the queue on either the
+      // adapter's completion or a short bounded interval. The latter is
+      // required for Scrub/Scratch Link implementations whose JSON-RPC
+      // write request may remain pending after the BLE bytes were accepted.
+      var previous = this._writeTail || Promise.resolve();
+      var queued = previous.then(function () {
+        return new Promise(function (resolveQueue) {
+          var released = false;
+          var release = function release() {
+            if (released) return;
+            released = true;
+            resolveQueue();
+          };
+          var setTimer = typeof window === 'undefined' ? setTimeout : window.setTimeout.bind(window);
+          var clearTimer = typeof window === 'undefined' ? clearTimeout : window.clearTimeout.bind(window);
+          var releaseTimer = setTimer(release, UART_WRITE_GAP_MS);
+          var pendingWrite;
+          try {
+            pendingWrite = _this7.ble.write(UART_SERVICE, RX, encoded, 'base64', false);
+          } catch (error) {
+            clearTimer(releaseTimer);
+            _this7.setError(error);
+            rejectWrite(error);
+            release();
+            return;
+          }
+          Promise.resolve(pendingWrite).then(function (value) {
+            clearTimer(releaseTimer);
+            resolveWrite(value);
+            release();
+          }).catch(function (error) {
+            clearTimer(releaseTimer);
+            _this7.setError(error);
+            rejectWrite(error);
+            release();
+          });
+        });
+      });
+      // A failed packet must not poison the following packets in this
+      // session. The returned `result` still reports that individual error.
+      this._writeTail = queued.catch(function () {
+        return undefined;
+      });
+      return result;
     }
   }, {
     key: "disconnect",
@@ -4540,23 +4725,27 @@ var RootTransport = /*#__PURE__*/function () {
   }, {
     key: "_registerRuntimeDiagnostics",
     value: function _registerRuntimeDiagnostics() {
-      var _this5 = this;
+      var _this8 = this;
       if (!this.runtime.on) return;
       var RuntimeClass = this.runtime.constructor;
       this.runtime.on(RuntimeClass.PERIPHERAL_CONNECTED, function () {
-        _this5.lastError = '';
+        _this8.lastError = '';
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_REQUEST_ERROR, function (details) {
-        if (!details || !details.extensionId || details.extensionId === _this5.extensionId) {
-          _this5.lastError = "".concat(_this5.mode, ": BLE\u63A5\u7D9A\u8981\u6C42\u306B\u5931\u6557\u3057\u307E\u3057\u305F");
+        if (!details || !details.extensionId || details.extensionId === _this8.extensionId) {
+          _this8.lastError = "".concat(_this8.mode, ": BLE\u63A5\u7D9A\u8981\u6C42\u306B\u5931\u6557\u3057\u307E\u3057\u305F");
         }
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_SCAN_TIMEOUT, function () {
-        _this5.lastError = "".concat(_this5.mode, ": Root\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3067\u3057\u305F");
+        // Scratch VM does not include extensionId in this legacy event.
+        // Session transports must not turn another Root's scan timeout
+        // into their own connection error.
+        if (_this8.extensionId.includes(':session:')) return;
+        _this8.lastError = "".concat(_this8.mode, ": Root\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\u3067\u3057\u305F");
       });
       this.runtime.on(RuntimeClass.PERIPHERAL_CONNECTION_LOST_ERROR, function (details) {
-        if (!details || !details.extensionId || details.extensionId === _this5.extensionId) {
-          _this5.lastError = "".concat(_this5.mode, ": Root\u3068\u306E\u63A5\u7D9A\u304C\u5931\u308F\u308C\u307E\u3057\u305F");
+        if (!details || !details.extensionId || details.extensionId === _this8.extensionId) {
+          _this8.lastError = "".concat(_this8.mode, ": Root\u3068\u306E\u63A5\u7D9A\u304C\u5931\u308F\u308C\u307E\u3057\u305F");
         }
       });
     }
@@ -4564,6 +4753,250 @@ var RootTransport = /*#__PURE__*/function () {
     key: "isConnected",
     value: function isConnected() {
       return Boolean(this.ble && this.ble.isConnected());
+    }
+  }]);
+}();
+
+function _createForOfIteratorHelper$2(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$2(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray$2(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$2(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$2(r, a) : void 0; } }
+function _arrayLikeToArray$2(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+/**
+ * State and transport for one physical Root. Keeping this state together is
+ * important because packet ids and command completion ids restart per Root.
+ */
+var RootSession = /*#__PURE__*/function () {
+  function RootSession(manager, id) {
+    var _this = this;
+    _classCallCheck$1(this, RootSession);
+    this.manager = manager;
+    this.id = id;
+    this.peripheralId = null;
+    // null means the adapter has not reported a lifecycle transition yet;
+    // explicit false prevents a stale adapter/socket state from making a
+    // disconnected slot look occupied during the next scan.
+    this.connectionState = null;
+    this.displayName = "Root ".concat(id);
+    this.protocol = new RootProtocol();
+    this.pendingCommands = new Map();
+    this.last = {};
+    this.lastDetailedEvent = '';
+    this.currentEvent = null;
+    this.bumperState = 0;
+    this.touchState = 0;
+    this.navigationPosition = {
+      x: 0,
+      y: 0,
+      heading: 90
+    };
+    this.transport = new RootTransport(manager.runtime, "".concat(manager.extensionId, ":session:").concat(id), function (packet) {
+      return manager.onData(_this, packet);
+    }, function () {
+      return manager.onReset(_this);
+    }, function () {
+      return manager.onConnected(_this);
+    });
+  }
+  return _createClass$1(RootSession, [{
+    key: "isConnected",
+    value: function isConnected() {
+      if (this.connectionState === false) return false;
+      var connected = this.transport.isConnected();
+      if (connected) this.connectionState = true;
+      return connected;
+    }
+  }, {
+    key: "clearConnectionState",
+    value: function clearConnectionState() {
+      // Keep the numbered session itself so projects already containing a
+      // "use Root 2" block remain valid after the reset. Only the physical
+      // connection and data tied to the former robot are discarded.
+      this.peripheralId = null;
+      this.connectionState = false;
+      this.protocol = new RootProtocol();
+      this.last = {};
+      this.lastDetailedEvent = '';
+      this.currentEvent = null;
+      this.bumperState = 0;
+      this.touchState = 0;
+      this.navigationPosition = {
+        x: 0,
+        y: 0,
+        heading: 90
+      };
+    }
+  }]);
+}();
+/**
+ * Facade registered under the public Scratch extension id plus a collection of
+ * uniquely registered transports. The facade keeps Scratch's one-extension-id
+ * API compatible while each Root gets an independent VM BLE registration.
+ */
+var RootManager = /*#__PURE__*/function () {
+  function RootManager(runtime, extensionId, callbacks) {
+    _classCallCheck$1(this, RootManager);
+    this.runtime = runtime;
+    this.extensionId = extensionId;
+    this.callbacks = callbacks;
+    this.sessions = new Map();
+    this.activeSessionId = null;
+    this.pendingScanSessionId = null;
+    this.nextSessionId = 1;
+    runtime.registerPeripheralExtension(extensionId, this);
+    this.createSession();
+  }
+  return _createClass$1(RootManager, [{
+    key: "createSession",
+    value: function createSession() {
+      var id = this.nextSessionId++;
+      var session = new RootSession(this, id);
+      this.sessions.set(session.id, session);
+      if (this.activeSessionId === null) this.activeSessionId = session.id;
+      return session;
+    }
+  }, {
+    key: "getSession",
+    value: function getSession(id) {
+      return this.sessions.get(Number(id)) || null;
+    }
+  }, {
+    key: "getActiveSession",
+    value: function getActiveSession() {
+      return this.getSession(this.activeSessionId) || this.createSession();
+    }
+  }, {
+    key: "setActiveSession",
+    value: function setActiveSession(id) {
+      if (this.sessions.has(Number(id))) this.activeSessionId = Number(id);
+      return this.getActiveSession();
+    }
+  }, {
+    key: "enumerateSessions",
+    value: function enumerateSessions() {
+      return Array.from(this.sessions.values());
+    }
+  }, {
+    key: "getMenu",
+    value: function getMenu() {
+      return this.enumerateSessions().map(function (session) {
+        return {
+          text: session.displayName,
+          value: String(session.id)
+        };
+      });
+    }
+
+    /**
+     * Start a scan without interrupting any connected session. The first scan
+     * reuses the default disconnected session; subsequent scans create a new
+     * session and therefore a new BLE adapter/socket.
+     */
+  }, {
+    key: "scan",
+    value: function scan() {
+      var session = this.getSession(this.pendingScanSessionId);
+      if (!session || session.isConnected()) {
+        var active = this.getActiveSession();
+        session = active.isConnected() ? this.enumerateSessions().find(function (candidate) {
+          return !candidate.isConnected();
+        }) : active;
+      }
+      // Reuse a disconnected slot so reconnecting a Root does not grow the
+      // menu from Root 1/2 to Root 3/4. A new session is created only when
+      // every existing Root is currently connected.
+      if (!session) session = this.createSession();
+      this.pendingScanSessionId = session.id;
+      session.transport.scan();
+    }
+  }, {
+    key: "connect",
+    value: function connect(peripheralId) {
+      var session = this.getSession(this.pendingScanSessionId) || this.getActiveSession();
+      session.peripheralId = peripheralId;
+      session.transport.connect(peripheralId);
+    }
+  }, {
+    key: "disconnect",
+    value: function disconnect() {
+      var sessionId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.activeSessionId;
+      var session = this.getSession(sessionId);
+      if (!session) return;
+      session.connectionState = false;
+      session.transport.disconnect();
+    }
+  }, {
+    key: "resetConnections",
+    value: function resetConnections() {
+      var sessions = this.enumerateSessions();
+      // Disconnect every session before clearing state. RootTransport.reset
+      // invokes the extension callback, allowing pending Scratch commands to
+      // be cancelled rather than left waiting for a completion packet.
+      var _iterator = _createForOfIteratorHelper$2(sessions),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var session = _step.value;
+          this.disconnect(session.id);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      var _iterator2 = _createForOfIteratorHelper$2(sessions),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var _session = _step2.value;
+          _session.clearConnectionState();
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      this.pendingScanSessionId = null;
+      this.activeSessionId = sessions.length ? sessions[0].id : null;
+      if (this.activeSessionId === null) this.createSession();
+    }
+  }, {
+    key: "isConnected",
+    value: function isConnected() {
+      var sessionId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.activeSessionId;
+      return this.getSession(sessionId).isConnected();
+    }
+  }, {
+    key: "transportMode",
+    value: function transportMode() {
+      var sessionId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.activeSessionId;
+      return this.getSession(sessionId).transport.mode;
+    }
+  }, {
+    key: "lastConnectionError",
+    value: function lastConnectionError() {
+      var sessionId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.activeSessionId;
+      return this.getSession(sessionId).transport.lastError;
+    }
+  }, {
+    key: "onConnected",
+    value: function onConnected(session) {
+      session.connectionState = true;
+      session.displayName = "Root ".concat(session.id);
+      this.pendingScanSessionId = null;
+      this.activeSessionId = session.id;
+      if (this.callbacks.onConnected) this.callbacks.onConnected(session);
+    }
+  }, {
+    key: "onReset",
+    value: function onReset(session) {
+      session.connectionState = false;
+      if (this.pendingScanSessionId === session.id) this.pendingScanSessionId = null;
+      if (this.callbacks.onReset) this.callbacks.onReset(session);
+    }
+  }, {
+    key: "onData",
+    value: function onData(session, packet) {
+      if (this.callbacks.onData) this.callbacks.onData(session, packet);
     }
   }]);
 }();
@@ -4601,6 +5034,8 @@ var RootSimulator = /*#__PURE__*/function () {
     _classCallCheck$1(this, RootSimulator);
     this.onEvent = onEvent;
     this.controls = controls;
+    this.enableRootPlacement = Boolean(controls.enableRootPlacement);
+    this.placementMode = false;
     this.speedMultiplier = 1;
     // Display zoom only changes the viewport.  Root coordinates, collision
     // geometry, and motion timing remain in millimetres.
@@ -4618,7 +5053,11 @@ var RootSimulator = /*#__PURE__*/function () {
     this._collisionPoint = null;
     this._runButton = null;
     this._stopButton = null;
+    this._placementButton = null;
     this._localizedElements = [];
+    // In the multi-Root extension build this remains one virtual robot.
+    // The label makes the physical Root selected for rehearsal explicit.
+    this.rootLabel = 'Root 1';
     this.reset();
   }
   return _createClass$1(RootSimulator, [{
@@ -4724,6 +5163,13 @@ var RootSimulator = /*#__PURE__*/function () {
       return this.viewZoom;
     }
   }, {
+    key: "toggleRootPlacementMode",
+    value: function toggleRootPlacementMode() {
+      this.placementMode = !this.placementMode;
+      this._draw();
+      return this.placementMode;
+    }
+  }, {
     key: "runProject",
     value: function runProject() {
       if (!this._canControlProject()) return false;
@@ -4786,6 +5232,12 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "refresh",
     value: function refresh() {
+      this._draw();
+    }
+  }, {
+    key: "setRootLabel",
+    value: function setRootLabel(label) {
+      this.rootLabel = String(label || 'Root 1');
       this._draw();
     }
   }, {
@@ -5164,6 +5616,11 @@ var RootSimulator = /*#__PURE__*/function () {
       addButton('clearObstacles', 'Clear obstacles', function () {
         return _this9.clearObstacles();
       });
+      if (this.enableRootPlacement) {
+        this._placementButton = addButton('rootPlacement', '▣ Place Roots', function () {
+          return _this9.toggleRootPlacementMode();
+        });
+      }
       var speedLabel = document.createElement('label');
       speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
       var speedText = document.createElement('span');
@@ -5515,14 +5972,16 @@ var RootSimulator = /*#__PURE__*/function () {
       context.fill();
       context.restore();
       context.fillStyle = '#26353a';
+      context.font = 'bold 18px Arial';
+      context.fillText("".concat(this._t('simulating', 'Simulating'), ": ").concat(this.rootLabel), 18, 30);
       context.font = '18px Arial';
-      context.fillText("".concat(this._t('x', 'x'), ": ").concat(this.pose.x.toFixed(1), " mm   ").concat(this._t('y', 'y'), ": ").concat(this.pose.y.toFixed(1), " mm   ").concat(this._t('heading', 'heading'), ": ").concat(this.pose.heading.toFixed(1), "\xB0"), 18, 30);
+      context.fillText("".concat(this._t('x', 'x'), ": ").concat(this.pose.x.toFixed(1), " mm   ").concat(this._t('y', 'y'), ": ").concat(this.pose.y.toFixed(1), " mm   ").concat(this._t('heading', 'heading'), ": ").concat(this.pose.heading.toFixed(1), "\xB0"), 18, 57);
       var markerStates = [this._t('up', 'up'), this._t('down', 'down'), this._t('eraser', 'eraser')];
       var ledStates = [this._t('off', 'off'), this._t('on', 'on'), this._t('blink', 'blink'), this._t('spin', 'spin')];
-      context.fillText("".concat(this._t('marker', 'marker'), ": ").concat(markerStates[this.marker], "   LED: ").concat(ledStates[this.led.effect], " rgb(").concat(this.led.red, ", ").concat(this.led.green, ", ").concat(this.led.blue, ")"), 18, 57);
+      context.fillText("".concat(this._t('marker', 'marker'), ": ").concat(markerStates[this.marker], "   LED: ").concat(ledStates[this.led.effect], " rgb(").concat(this.led.red, ", ").concat(this.led.green, ", ").concat(this.led.blue, ")"), 18, 84);
       var bumper = this.last.leftBumper && this.last.rightBumper ? this._t('bothPush', 'BOTH PUSH') : this.last.leftBumper ? this._t('leftPush', 'LEFT PUSH') : this.last.rightBumper ? this._t('rightPush', 'RIGHT PUSH') : this._t('none', 'none');
-      context.fillText("".concat(this._t('bumper', 'bumper'), ": ").concat(bumper, "   ").concat(this._t('touchMask', 'touch mask'), ": ").concat(this.last.touchMask.toString(2).padStart(4, '0')), 18, 84);
-      if (this.phrase) context.fillText("".concat(this._t('say', 'say'), ": ").concat(this.phrase), 18, 111);
+      context.fillText("".concat(this._t('bumper', 'bumper'), ": ").concat(bumper, "   ").concat(this._t('touchMask', 'touch mask'), ": ").concat(this.last.touchMask.toString(2).padStart(4, '0')), 18, 111);
+      if (this.phrase) context.fillText("".concat(this._t('say', 'say'), ": ").concat(this.phrase), 18, 138);
     }
   }]);
 }();
@@ -5564,6 +6023,20 @@ var CONTROL_MODE_SIMULATOR = 'simulator';
 var CONTROL_MODE_PHYSICAL = 'physical';
 var ROOT_MOTION_PICKER_CAPABILITY = 'irobotRootMotionPickerSupported';
 var extensionURL = 'https://naominix.github.io/xcx-irobot-root/irobotRoot.mjs';
+
+// Scratch Link discovers peripherals in the editor's connection modal. Unlike
+// Web Bluetooth, a scan started from an extension command cannot display that
+// modal by itself. The Root Xcratch build publishes this narrow bridge so the
+// "connect another Root" command can open the standard picker on Scrub too.
+var openRootConnectionDialog = function openRootConnectionDialog() {
+  var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : typeof globalThis === 'undefined' ? null : globalThis;
+  var open = scope && scope.Xcratch && scope.Xcratch.openConnectionModal;
+  if (typeof open !== 'function') return false;
+  open(EXTENSION_ID, {
+    additionalRoot: true
+  });
+  return true;
+};
 var rootMotionField = function rootMotionField(mode) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   return {
@@ -5675,7 +6148,7 @@ var normalizeTurn = function normalizeTurn(degrees) {
 var midiNoteToFrequency = function midiNoteToFrequency(midiNote) {
   return Math.round(440 * Math.pow(2, (midiNote - 69) / 12));
 };
-var FIXED_EVENT_HAT_MESSAGES = [['whenLeftBumperPush', 'hat.leftBumperPush', 'when left bumper is pushed'], ['whenLeftBumperRelease', 'hat.leftBumperRelease', 'when left bumper is released'], ['whenRightBumperPush', 'hat.rightBumperPush', 'when right bumper is pushed'], ['whenRightBumperRelease', 'hat.rightBumperRelease', 'when right bumper is released'], ['whenBothBumpersPush', 'hat.bothBumpersPush', 'when both bumpers are pushed simultaneously'], ['whenBothBumpersRelease', 'hat.bothBumpersRelease', 'when both bumpers are released simultaneously'], ['whenFLTouch', 'hat.flTouch', 'when FL touch sensor is touched'], ['whenFLRelease', 'hat.flRelease', 'when FL touch sensor is released'], ['whenFRTouch', 'hat.frTouch', 'when FR touch sensor is touched'], ['whenFRRelease', 'hat.frRelease', 'when FR touch sensor is released'], ['whenRLTouch', 'hat.rlTouch', 'when RL touch sensor is touched'], ['whenRLRelease', 'hat.rlRelease', 'when RL touch sensor is released'], ['whenRRTouch', 'hat.rrTouch', 'when RR touch sensor is touched'], ['whenRRRelease', 'hat.rrRelease', 'when RR touch sensor is released']];
+var FIXED_EVENT_HAT_MESSAGES = [['whenLeftBumperPush', 'hat.leftBumperPush', 'when [ROOT] left bumper is pushed'], ['whenLeftBumperRelease', 'hat.leftBumperRelease', 'when [ROOT] left bumper is released'], ['whenRightBumperPush', 'hat.rightBumperPush', 'when [ROOT] right bumper is pushed'], ['whenRightBumperRelease', 'hat.rightBumperRelease', 'when [ROOT] right bumper is released'], ['whenBothBumpersPush', 'hat.bothBumpersPush', 'when [ROOT] both bumpers are pushed simultaneously'], ['whenBothBumpersRelease', 'hat.bothBumpersRelease', 'when [ROOT] both bumpers are released simultaneously'], ['whenFLTouch', 'hat.flTouch', 'when [ROOT] FL touch sensor is touched'], ['whenFLRelease', 'hat.flRelease', 'when [ROOT] FL touch sensor is released'], ['whenFRTouch', 'hat.frTouch', 'when [ROOT] FR touch sensor is touched'], ['whenFRRelease', 'hat.frRelease', 'when [ROOT] FR touch sensor is released'], ['whenRLTouch', 'hat.rlTouch', 'when [ROOT] RL touch sensor is touched'], ['whenRLRelease', 'hat.rlRelease', 'when [ROOT] RL touch sensor is released'], ['whenRRTouch', 'hat.rrTouch', 'when [ROOT] RR touch sensor is touched'], ['whenRRRelease', 'hat.rrRelease', 'when [ROOT] RR touch sensor is released']];
 var fixedEventHats = function fixedEventHats() {
   return FIXED_EVENT_HAT_MESSAGES.map(function (_ref) {
     var _ref2 = _slicedToArray$1(_ref, 3),
@@ -5687,7 +6160,13 @@ var fixedEventHats = function fixedEventHats() {
       func: 'whenFixedEvent',
       blockType: BlockType.HAT,
       text: _translate(id, defaultText),
-      isEdgeActivated: false
+      isEdgeActivated: false,
+      arguments: {
+        ROOT: {
+          type: ArgumentType.STRING,
+          menu: 'rootMenu'
+        }
+      }
     };
   });
 };
@@ -5719,20 +6198,28 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     // editable while preserving the visual picker in enhanced editors.
     this.supportsRootMotionPicker = Boolean(runtime && runtime[ROOT_MOTION_PICKER_CAPABILITY]);
     if (runtime.formatMessage) formatMessage = runtime.formatMessage;
-    this.protocol = new RootProtocol();
-    this.pendingCommands = new Map();
-    this.transport = new RootTransport(runtime, EXTENSION_ID, function (packet) {
-      return _this._receive(packet);
-    }, function () {
-      return _this._cancelPendingCommands(new Error('Root connection was reset'));
+    this.rootManager = new RootManager(runtime, EXTENSION_ID, {
+      onData: function onData(session, packet) {
+        return _this._receive(packet, session);
+      },
+      onReset: function onReset(session) {
+        return _this._cancelPendingCommands(new Error('Root connection was reset'), session);
+      }
     });
+    this._hatDispatchSessionId = null;
     // Preserve the established extension behaviour for existing projects.
     // New projects can opt into Auto (simulator while disconnected) or
     // Simulator fixed explicitly; this default will be reconsidered only
     // after the simulator has completed classroom validation.
     this.controlMode = CONTROL_MODE_PHYSICAL;
+    // The multi-Root connection layer deliberately shares one virtual
+    // Root. Simulating several independent robots in a single classroom
+    // canvas made the drawing and collision model ambiguous, whereas a
+    // selected, clearly-labelled Root remains a dependable rehearsal for
+    // its physical counterpart.
+    this.simulatedSessionId = this.rootManager.activeSessionId;
     this.simulator = new RootSimulator(function (event) {
-      return _this._receiveSimulatorEvent(event);
+      return _this._receiveSimulatorEvent(event, _this.simulatedSessionId);
     }, {
       isActive: function isActive() {
         return _this._isSimulatorActive();
@@ -5750,23 +6237,96 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         if (typeof _this.runtime.stopAll === 'function') _this.runtime.stopAll();
       }
     });
-    this.last = {};
-    this.lastDetailedEvent = '';
-    this.currentEvent = null;
-    this.bumperState = 0;
-    this.touchState = 0;
-    // Root rt0/rt1 navigation is implemented in the client, as in the
-    // official Python SDK. Heading uses the conventional xy plane: 90° is
-    // forward (+y), and a positive Root rotation turns clockwise.
-    this.navigationPosition = {
-      x: 0,
-      y: 0,
-      heading: 90
-    };
+    this._setSimulatedSession(this._activeSession());
     this._playNoteForPicker = this._playNoteForPicker.bind(this);
     if (typeof this.runtime.on === 'function') this.runtime.on('PLAY_NOTE', this._playNoteForPicker);
   }
   return _createClass$1(IrobotRootBlocks, [{
+    key: "_activeSession",
+    value: function _activeSession() {
+      var util = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var sessionId = util && util.thread && util.thread.irobotRootSessionId !== undefined ? util.thread.irobotRootSessionId : this._hatDispatchSessionId;
+      return this.rootManager.getSession(sessionId) || this.rootManager.getActiveSession();
+    }
+  }, {
+    key: "_setThreadSession",
+    value: function _setThreadSession(util, session) {
+      if (util && util.thread) util.thread.irobotRootSessionId = session.id;
+      return session;
+    }
+  }, {
+    key: "_matchesThreadSession",
+    value: function _matchesThreadSession(args, util) {
+      var requested = args && args.ROOT;
+      if (requested === undefined || requested === null || requested === '') return true;
+      var sessionId = util && util.thread && util.thread.irobotRootEventSessionId !== undefined ? util.thread.irobotRootEventSessionId : this._hatDispatchSessionId;
+      if (sessionId === undefined || sessionId === null) return true;
+      return Number(requested) === Number(sessionId);
+    }
+  }, {
+    key: "protocol",
+    get: function get() {
+      return this._activeSession().protocol;
+    }
+  }, {
+    key: "pendingCommands",
+    get: function get() {
+      return this._activeSession().pendingCommands;
+    }
+  }, {
+    key: "transport",
+    get: function get() {
+      return this._activeSession().transport;
+    }
+  }, {
+    key: "last",
+    get: function get() {
+      return this._activeSession().last;
+    },
+    set: function set(value) {
+      this._activeSession().last = value;
+    }
+  }, {
+    key: "lastDetailedEvent",
+    get: function get() {
+      return this._activeSession().lastDetailedEvent;
+    },
+    set: function set(value) {
+      this._activeSession().lastDetailedEvent = value;
+    }
+  }, {
+    key: "currentEvent",
+    get: function get() {
+      return this._activeSession().currentEvent;
+    },
+    set: function set(value) {
+      this._activeSession().currentEvent = value;
+    }
+  }, {
+    key: "bumperState",
+    get: function get() {
+      return this._activeSession().bumperState;
+    },
+    set: function set(value) {
+      this._activeSession().bumperState = value;
+    }
+  }, {
+    key: "touchState",
+    get: function get() {
+      return this._activeSession().touchState;
+    },
+    set: function set(value) {
+      this._activeSession().touchState = value;
+    }
+  }, {
+    key: "navigationPosition",
+    get: function get() {
+      return this._activeSession().navigationPosition;
+    },
+    set: function set(value) {
+      this._activeSession().navigationPosition = value;
+    }
+  }, {
     key: "getInfo",
     value: function getInfo() {
       var _this2 = this;
@@ -5785,9 +6345,31 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           blockType: BlockType.COMMAND,
           text: _translate('block.connect', 'connect to Root')
         }, {
+          opcode: 'addRoot',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.addRoot', 'connect another Root')
+        }, {
           opcode: 'disconnect',
           blockType: BlockType.COMMAND,
           text: _translate('block.disconnect', 'disconnect Root')
+        }, {
+          opcode: 'resetRootConnections',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.resetRootConnections', 'disconnect all Roots and reset connections')
+        }, {
+          opcode: 'selectRoot',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.selectRoot', 'use [ROOT]'),
+          arguments: {
+            ROOT: {
+              type: ArgumentType.STRING,
+              menu: 'rootMenu'
+            }
+          }
+        }, {
+          opcode: 'activeRoot',
+          blockType: BlockType.REPORTER,
+          text: _translate('block.activeRoot', 'selected Root')
         }, {
           opcode: 'isConnected',
           blockType: BlockType.BOOLEAN,
@@ -6027,9 +6609,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenEvent',
           blockType: BlockType.HAT,
-          text: _translate('block.whenEvent', 'when [EVENT] changes'),
+          text: _translate('block.whenEvent', 'when [ROOT] [EVENT] changes'),
           isEdgeActivated: false,
           arguments: {
+            ROOT: {
+              type: ArgumentType.STRING,
+              menu: 'rootMenu'
+            },
             EVENT: {
               type: ArgumentType.STRING,
               menu: 'eventMenu'
@@ -6038,9 +6624,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenBumper',
           blockType: BlockType.HAT,
-          text: _translate('block.whenBumper', 'when [BUMPER] bumper is [ACTION]'),
+          text: _translate('block.whenBumper', 'when [ROOT] [BUMPER] bumper is [ACTION]'),
           isEdgeActivated: false,
           arguments: {
+            ROOT: {
+              type: ArgumentType.STRING,
+              menu: 'rootMenu'
+            },
             BUMPER: {
               type: ArgumentType.STRING,
               menu: 'bumperMenu'
@@ -6053,9 +6643,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         }, {
           opcode: 'whenTouchSensor',
           blockType: BlockType.HAT,
-          text: _translate('block.whenTouchSensor', 'when [SENSOR] touch sensor is [ACTION]'),
+          text: _translate('block.whenTouchSensor', 'when [ROOT] [SENSOR] touch sensor is [ACTION]'),
           isEdgeActivated: false,
           arguments: {
+            ROOT: {
+              type: ArgumentType.STRING,
+              menu: 'rootMenu'
+            },
             SENSOR: {
               type: ArgumentType.STRING,
               menu: 'touchSensorMenu'
@@ -6244,6 +6838,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
               text: _translate('menu.controlMode.physical', 'physical Root'),
               value: CONTROL_MODE_PHYSICAL
             }]
+          },
+          rootMenu: {
+            acceptReporters: true,
+            items: 'getRootMenu'
           }
         }
       };
@@ -6251,47 +6849,83 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "connect",
     value: function connect() {
-      this.navigationPosition = {
-        x: 0,
-        y: 0,
-        heading: 90
-      };
       if (this.controlMode === CONTROL_MODE_SIMULATOR) {
         this.simulator.open();
         return;
       }
-      this.transport.scan();
+      this.rootManager.scan();
+    }
+  }, {
+    key: "addRoot",
+    value: function addRoot() {
+      if (this.controlMode === CONTROL_MODE_SIMULATOR) {
+        this.simulator.open();
+        return this._activeSession().displayName;
+      }
+      // Web Bluetooth opens its device picker from scan(). Scratch Link and
+      // Scrub use Xcratch's connection modal, whose scanning step calls the
+      // same manager after the dialog has become visible.
+      if (supportsWebBluetooth() || !openRootConnectionDialog()) this.rootManager.scan();
     }
   }, {
     key: "disconnect",
-    value: function disconnect() {
-      this.transport.disconnect();
+    value: function disconnect(args, util) {
+      this.rootManager.disconnect(this._activeSession(util).id);
+    }
+  }, {
+    key: "resetRootConnections",
+    value: function resetRootConnections() {
+      this.rootManager.resetConnections();
+      this._setSimulatedSession(this._activeSession());
+      this.simulator.reset();
+    }
+  }, {
+    key: "selectRoot",
+    value: function selectRoot(args, util) {
+      var session = this._setThreadSession(util, this.rootManager.setActiveSession(args.ROOT));
+      if (this._isSimulatorActive(util, session)) this._setSimulatedSession(session);
+    }
+  }, {
+    key: "activeRoot",
+    value: function activeRoot(args, util) {
+      return this._activeSession(util).displayName;
+    }
+  }, {
+    key: "getRootMenu",
+    value: function getRootMenu() {
+      return this.rootManager.getMenu();
     }
   }, {
     key: "isConnected",
-    value: function isConnected() {
-      return this.transport.isConnected();
+    value: function isConnected(args, util) {
+      return this.rootManager.isConnected(this._activeSession(util).id);
     }
   }, {
     key: "transportMode",
-    value: function transportMode() {
-      return this.transport.mode;
+    value: function transportMode(args, util) {
+      return this.rootManager.transportMode(this._activeSession(util).id);
     }
   }, {
     key: "lastConnectionError",
-    value: function lastConnectionError() {
-      return this.transport.lastError;
+    value: function lastConnectionError(args, util) {
+      return this.rootManager.lastConnectionError(this._activeSession(util).id);
     }
   }, {
     key: "setControlMode",
-    value: function setControlMode(args) {
+    value: function setControlMode(args, util) {
       var requested = String(args.MODE || CONTROL_MODE_AUTO);
       var mode = [CONTROL_MODE_AUTO, CONTROL_MODE_SIMULATOR, CONTROL_MODE_PHYSICAL].includes(requested) ? requested : CONTROL_MODE_AUTO;
-      var wasPhysical = !this._isSimulatorActive();
+      var wasSimulatorActive = this._isSimulatorActive();
       this.controlMode = mode;
-      if (this._isSimulatorActive()) {
-        if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
-        this._cancelPendingCommands(new Error('Root control target changed to simulator'));
+      var session = this._activeSession(util);
+      var isSimulatorActive = this._isSimulatorActive();
+      if (isSimulatorActive) this._setSimulatedSession(session);
+      // A green-flag program can contain several mode blocks. Reset only on
+      // entering simulator mode, so a later selector block does not wipe
+      // the selected Root's in-progress rehearsal.
+      if (isSimulatorActive && !wasSimulatorActive) {
+        if (this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
+        this._cancelPendingCommands(new Error('Root control target changed to simulator'), session);
         this.simulator.reset();
         this.simulator.open();
       }
@@ -6299,8 +6933,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     }
   }, {
     key: "controlTarget",
-    value: function controlTarget() {
-      return this._isSimulatorActive() ? 'Simulator' : 'Physical Root';
+    value: function controlTarget(args, util) {
+      return this._isSimulatorActive(util) ? 'Simulator' : 'Physical Root';
     }
   }, {
     key: "openSimulator",
@@ -6316,66 +6950,89 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_isSimulatorActive",
     value: function _isSimulatorActive() {
-      return this.controlMode === CONTROL_MODE_SIMULATOR || this.controlMode === CONTROL_MODE_AUTO && !this.transport.isConnected();
+      var util = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession(util);
+      return this.controlMode === CONTROL_MODE_SIMULATOR || this.controlMode === CONTROL_MODE_AUTO && !session.isConnected();
+    }
+  }, {
+    key: "_setSimulatedSession",
+    value: function _setSimulatedSession(session) {
+      var target = session || this._activeSession();
+      this.simulatedSessionId = target.id;
+      this.simulator.setRootLabel(target.displayName);
+    }
+  }, {
+    key: "_isSimulatedSession",
+    value: function _isSimulatedSession(session) {
+      return Number(session.id) === Number(this.simulatedSessionId);
     }
   }, {
     key: "motors",
-    value: function motors(args) {
-      this.navigationPosition = null;
-      if (this._isSimulatorActive()) return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
-      return this._send(this.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)));
+    value: function motors(args, util) {
+      var session = this._activeSession(util);
+      session.navigationPosition = null;
+      if (this._isSimulatorActive(util, session)) {
+        if (!this._isSimulatedSession(session)) return;
+        return this.simulator.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT));
+      }
+      return this._send(session.protocol.motors(Cast.toNumber(args.LEFT), Cast.toNumber(args.RIGHT)), session);
     }
   }, {
     key: "drive",
-    value: function drive(args) {
+    value: function drive(args, util) {
       var distance = Cast.toNumber(args.MM);
-      this.navigationPosition = null;
-      if (this._isSimulatorActive()) return this.simulator.move(distance);
-      return this._sendAndWait(this.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
+      var session = this._activeSession(util);
+      session.navigationPosition = null;
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.move(distance) : undefined;
+      return this._sendAndWait(session.protocol.driveDistance(distance), linearMotionWatchdogMs(distance), session);
     }
   }, {
     key: "turn",
-    value: function turn(args) {
+    value: function turn(args, util) {
       var degrees = Cast.toNumber(args.DEGREES);
-      if (this._isSimulatorActive()) return this.simulator.turn(degrees);
-      return this._sendAndWait(this.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees));
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.turn(degrees) : undefined;
+      return this._sendAndWait(session.protocol.rotate(degrees * 10), turnMotionWatchdogMs(degrees), session);
     }
   }, {
     key: "arc",
-    value: function arc(args) {
+    value: function arc(args, util) {
       var degrees = Cast.toNumber(args.DEGREES);
       var radius = Cast.toNumber(args.RADIUS);
-      this.navigationPosition = null;
-      if (this._isSimulatorActive()) return this.simulator.arc(radius, degrees);
-      return this._sendAndWait(this.protocol.driveArc(degrees * 10, radius), arcMotionWatchdogMs(degrees, radius));
+      var session = this._activeSession(util);
+      session.navigationPosition = null;
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.arc(radius, degrees) : undefined;
+      return this._sendAndWait(session.protocol.driveArc(degrees * 10, radius), arcMotionWatchdogMs(degrees, radius), session);
     }
   }, {
     key: "resetNavigation",
-    value: function resetNavigation() {
+    value: function resetNavigation(args, util) {
       // The official SDK keeps Root rt0/rt1 pose on the client. Native
       // Reset Position / Navigate to Position packets are not accepted by
       // every Root firmware even though they exist in the shared protocol.
-      this.navigationPosition = {
+      var session = this._activeSession(util);
+      session.navigationPosition = {
         x: 0,
         y: 0,
         heading: 90
       };
-      if (this._isSimulatorActive()) this.simulator.resetNavigation();
+      if (this._isSimulatorActive(util, session) && this._isSimulatedSession(session)) this.simulator.resetNavigation();
     }
   }, {
     key: "navigateTo",
-    value: function navigateTo(args) {
+    value: function navigateTo(args, util) {
       var _this3 = this;
       var target = {
         x: Math.round(Cast.toNumber(args.X) * 10),
         y: Math.round(Cast.toNumber(args.Y) * 10)
       };
-      var origin = this.navigationPosition || {
+      var session = this._activeSession(util);
+      var origin = session.navigationPosition || {
         x: 0,
         y: 0,
         heading: 90
       };
-      if (this._isSimulatorActive()) return this.simulator.navigateTo(target.x, target.y);
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.navigateTo(target.x, target.y) : undefined;
       var deltaX = target.x - origin.x;
       var deltaY = target.y - origin.y;
       var distance = Math.round(Math.hypot(deltaX, deltaY));
@@ -6385,7 +7042,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // xy headings increase counter-clockwise.
       var turn = normalizeTurn(origin.heading - targetHeading);
       var needsRotation = Math.abs(turn) >= 0.05;
-      var rotation = needsRotation ? this._sendAndWait(this.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn)) : Promise.resolve();
+      var rotation = needsRotation ? this._sendAndWait(session.protocol.rotate(Math.round(turn * 10)), turnMotionWatchdogMs(turn), session) : Promise.resolve();
       // A completed finite movement is followed by a zero-speed motor packet
       // to suppress residual closed-loop corrections. Scratch Link/Scrub does
       // not provide a dependable write-completion promise, so sending the next
@@ -6398,96 +7055,107 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         });
       }) : rotation;
       return settledRotation.then(function () {
-        return _this3._sendAndWait(_this3.protocol.driveDistance(distance), linearMotionWatchdogMs(distance));
+        return _this3._sendAndWait(session.protocol.driveDistance(distance), linearMotionWatchdogMs(distance), session);
       }).then(function () {
-        _this3.navigationPosition = {
+        session.navigationPosition = {
           x: target.x,
           y: target.y,
           heading: targetHeading
         };
       }).catch(function (error) {
-        _this3.navigationPosition = null;
+        session.navigationPosition = null;
         throw error;
       });
     }
   }, {
     key: "stop",
-    value: function stop() {
-      if (this._isSimulatorActive()) return this.simulator.stop();
-      return this._send(this.protocol.packet(0, 3));
+    value: function stop(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.stop() : undefined;
+      return this._send(session.protocol.packet(0, 3), session);
     }
   }, {
     key: "marker",
-    value: function marker(args) {
-      if (this._isSimulatorActive()) return this.simulator.setMarker(args.POSITION);
-      return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]));
+    value: function marker(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.setMarker(args.POSITION) : undefined;
+      return this._send(session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]), session);
     }
   }, {
     key: "ledColor",
-    value: function ledColor(args) {
+    value: function ledColor(args, util) {
       var _Cast$toRgbColorList = Cast.toRgbColorList(args.COLOR),
         _Cast$toRgbColorList2 = _slicedToArray$1(_Cast$toRgbColorList, 3),
         red = _Cast$toRgbColorList2[0],
         green = _Cast$toRgbColorList2[1],
         blue = _Cast$toRgbColorList2[2];
-      if (this._isSimulatorActive()) return this.simulator.setLed(1, red, green, blue);
-      return this._send(this.protocol.led(1, red, green, blue));
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.setLed(1, red, green, blue) : undefined;
+      return this._send(session.protocol.led(1, red, green, blue), session);
     }
   }, {
     key: "ledAnimationColor",
-    value: function ledAnimationColor(args) {
+    value: function ledAnimationColor(args, util) {
       var _Cast$toRgbColorList3 = Cast.toRgbColorList(args.COLOR),
         _Cast$toRgbColorList4 = _slicedToArray$1(_Cast$toRgbColorList3, 3),
         red = _Cast$toRgbColorList4[0],
         green = _Cast$toRgbColorList4[1],
         blue = _Cast$toRgbColorList4[2];
-      if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue);
-      return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue));
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.setLed(Cast.toNumber(args.EFFECT), red, green, blue) : undefined;
+      return this._send(session.protocol.led(Cast.toNumber(args.EFFECT), red, green, blue), session);
     }
   }, {
     key: "led",
-    value: function led(args) {
-      if (this._isSimulatorActive()) return this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
-      return this._send(this.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
+    value: function led(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) {
+        return this._isSimulatedSession(session) ? this.simulator.setLed(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)) : undefined;
+      }
+      return this._send(session.protocol.led(1, Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)), session);
     }
   }, {
     key: "ledAnimation",
-    value: function ledAnimation(args) {
-      if (this._isSimulatorActive()) return this.simulator.setLed(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE));
-      return this._send(this.protocol.led(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)));
+    value: function ledAnimation(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) {
+        return this._isSimulatedSession(session) ? this.simulator.setLed(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)) : undefined;
+      }
+      return this._send(session.protocol.led(Cast.toNumber(args.EFFECT), Cast.toNumber(args.RED), Cast.toNumber(args.GREEN), Cast.toNumber(args.BLUE)), session);
     }
   }, {
     key: "playNote",
-    value: function playNote(args) {
+    value: function playNote(args, util) {
       var midiNote = Math.min(127, Math.max(0, Math.round(Cast.toNumber(args.NOTE))));
-      return this._playFrequency(midiNoteToFrequency(midiNote), args.MS);
+      return this._playFrequency(midiNoteToFrequency(midiNote), args.MS, util);
     }
   }, {
     key: "note",
-    value: function note(args) {
-      return this._playFrequency(Cast.toNumber(args.HZ), args.MS);
+    value: function note(args, util) {
+      return this._playFrequency(Cast.toNumber(args.HZ), args.MS, util);
     }
   }, {
     key: "_playFrequency",
-    value: function _playFrequency(frequency, milliseconds) {
+    value: function _playFrequency(frequency, milliseconds, util) {
       // Root's sound command stores the duration in an unsigned 16-bit
       // field. Wait for Root's matching Play Note Finished packet rather
       // than a browser timer, so BLE latency cannot make the next note
       // interrupt this one just before it actually finishes.
       var durationMs = Math.min(0xFFFF, Math.max(0, Math.round(Cast.toNumber(milliseconds))));
-      if (this._isSimulatorActive()) return this.simulator.playNote(frequency, durationMs);
-      var packet = this.protocol.note(frequency, durationMs);
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.playNote(frequency, durationMs) : undefined;
+      var packet = session.protocol.note(frequency, durationMs);
       if (durationMs === 0) {
-        this._send(packet);
+        this._send(packet, session);
         return Promise.resolve();
       }
-      return this._sendSoundAndWait(packet, durationMs);
+      return this._sendSoundAndWait(packet, durationMs, session);
     }
   }, {
     key: "_playNoteForPicker",
     value: function _playNoteForPicker(midiNote, category) {
       if (category !== this.getInfo().name) return;
-      if (this._isSimulatorActive()) {
+      if (this._isSimulatorActive() && this._isSimulatedSession(this._activeSession())) {
         this.simulator.playNote(midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
         return;
       }
@@ -6496,87 +7164,91 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     }
   }, {
     key: "sayPhrase",
-    value: function sayPhrase(args) {
-      if (this._isSimulatorActive()) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
-      return this._sendSoundCommandAndWait(this.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase');
+    value: function sayPhrase(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.sayPhrase(Cast.toString(args.PHRASE)) : undefined;
+      return this._sendSoundCommandAndWait(session.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase', session);
     }
   }, {
     key: "refreshSensor",
-    value: function refreshSensor(args) {
-      if (this._isSimulatorActive()) return;
+    value: function refreshSensor(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return;
       var commands = {
         battery: [14, 1],
         light: [13, 1],
         accel: [16, 1]
       };
       var command = commands[args.SENSOR];
-      return command ? this._send(this.protocol.packet(command[0], command[1])) : undefined;
+      return command ? this._send(session.protocol.packet(command[0], command[1]), session) : undefined;
     }
   }, {
     key: "sensor",
-    value: function sensor(args) {
-      if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
-      return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
+    value: function sensor(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.getSensor(args.VALUE) : 0;
+      return session.last[args.VALUE] === undefined ? 0 : session.last[args.VALUE];
     }
   }, {
     key: "whenEvent",
-    value: function whenEvent(args) {
-      return String(args.EVENT).toUpperCase() === this.currentEvent;
+    value: function whenEvent(args, util) {
+      return this._matchesThreadSession(args, util) && String(args.EVENT).toUpperCase() === this._activeSession(util).currentEvent;
     }
 
     // These hats are selected by runtime.startHats match fields before their
     // primitives run, so the primitive itself must allow the selected thread.
   }, {
     key: "whenBumper",
-    value: function whenBumper() {
-      return true;
+    value: function whenBumper(args, util) {
+      return this._matchesThreadSession(args, util);
     }
   }, {
     key: "whenTouchSensor",
-    value: function whenTouchSensor() {
-      return true;
+    value: function whenTouchSensor(args, util) {
+      return this._matchesThreadSession(args, util);
     }
   }, {
     key: "whenFixedEvent",
-    value: function whenFixedEvent() {
-      return true;
+    value: function whenFixedEvent(args, util) {
+      return this._matchesThreadSession(args, util);
     }
   }, {
     key: "raw",
-    value: function raw(args) {
-      if (this._isSimulatorActive()) {
-        this.transport.setError(new Error('Raw BLE packets are unavailable in simulator mode'));
+    value: function raw(args, util) {
+      var session = this._activeSession(util);
+      if (this._isSimulatorActive(util, session)) {
+        session.transport.setError(new Error('Raw BLE packets are unavailable in simulator mode'));
         return;
       }
-      return this._send(this.protocol.packet(Cast.toNumber(args.DEVICE), Cast.toNumber(args.COMMAND), RootProtocol.hexToBytes(args.PAYLOAD)));
+      return this._send(session.protocol.packet(Cast.toNumber(args.DEVICE), Cast.toNumber(args.COMMAND), RootProtocol.hexToBytes(args.PAYLOAD)), session);
     }
   }, {
     key: "lastPacket",
-    value: function lastPacket() {
-      return this.last.raw || '';
+    value: function lastPacket(args, util) {
+      return this._activeSession(util).last.raw || '';
     }
   }, {
     key: "detailedEvent",
-    value: function detailedEvent() {
-      return this.lastDetailedEvent;
+    value: function detailedEvent(args, util) {
+      return this._activeSession(util).lastDetailedEvent;
     }
   }, {
     key: "_send",
     value: function _send(packet) {
-      var _this4 = this;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       // Hardware writes are fire-and-forget from Scratch's point of view.
       // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
       // after CoreBluetooth accepted the bytes; returning that promise would
       // leave the command block and the rest of its stack permanently waiting.
       try {
-        var pendingWrite = this.transport.write(packet);
+        var pendingWrite = session.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this4.transport.setError(error);
+            return session.transport.setError(error);
           });
         }
       } catch (error) {
-        this.transport.setError(error);
+        session.transport.setError(error);
       }
     }
   }, {
@@ -6587,19 +7259,20 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendAndWait",
     value: function _sendAndWait(packet, motionWatchdogMs) {
-      var _this5 = this;
+      var _this4 = this;
+      var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._activeSession();
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this5.pendingCommands.get(key);
+          var pending = session.pendingCommands.get(key);
           if (!pending) return;
-          _this5._clearPendingCommand(key, pending);
+          _this4._clearPendingCommand(key, pending, session);
           var error = new Error("Root command timed out (command ".concat(packet[1], ", packet ").concat(packet[2], ")"));
-          _this5.transport.setError(error);
+          session.transport.setError(error);
           reject(error);
         }, COMMAND_FINISH_TIMEOUT_MS);
         var watchdog = setTimeout(function () {
-          var pending = _this5.pendingCommands.get(key);
+          var pending = session.pendingCommands.get(key);
           if (!pending || pending.settling) return;
           pending.settling = true;
 
@@ -6610,15 +7283,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           // interrupted movement also produces its matching Finished
           // response. Resolve after a short BLE settling interval even if
           // old firmware omits that response.
-          _this5._sendMotionStop(key);
+          _this4._sendMotionStop(key, session);
           pending.settle = setTimeout(function () {
-            if (_this5.pendingCommands.get(key) !== pending) return;
-            _this5._clearPendingCommand(key, pending);
-            _this5.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
+            if (session.pendingCommands.get(key) !== pending) return;
+            _this4._clearPendingCommand(key, pending, session);
+            session.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
             resolve();
           }, MOTION_WATCHDOG_SETTLE_MS);
         }, motionWatchdogMs);
-        _this5.pendingCommands.set(key, {
+        session.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6633,38 +7306,40 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // versions leave it pending after CoreBluetooth has accepted the bytes.
       // The Scratch block waits only for Root's own matching Finished packet.
       try {
-        var pendingWrite = this.transport.write(packet);
+        var pendingWrite = session.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this5._rejectPendingCommand(key, error);
+            return _this4._rejectPendingCommand(key, error, session);
           });
         }
       } catch (error) {
-        this._rejectPendingCommand(key, error);
+        this._rejectPendingCommand(key, error, session);
       }
       return completion;
     }
   }, {
     key: "_sendSoundAndWait",
     value: function _sendSoundAndWait(packet, durationMs) {
-      return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound');
+      var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._activeSession();
+      return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound', session);
     }
   }, {
     key: "_sendSoundCommandAndWait",
     value: function _sendSoundCommandAndWait(packet, timeoutMs, description) {
-      var _this6 = this;
+      var _this5 = this;
+      var session = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this._activeSession();
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this6.pendingCommands.get(key);
+          var pending = session.pendingCommands.get(key);
           if (!pending) return;
-          _this6._clearPendingCommand(key, pending);
-          _this6.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
+          _this5._clearPendingCommand(key, pending, session);
+          session.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
           // Do not leave a Scratch stack stuck if a single notification
           // was lost after Root had enough time to finish the sound.
           resolve();
         }, timeoutMs);
-        _this6.pendingCommands.set(key, {
+        session.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6675,75 +7350,80 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         });
       });
       try {
-        var pendingWrite = this.transport.write(packet);
+        var pendingWrite = session.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this6._rejectPendingCommand(key, error);
+            return _this5._rejectPendingCommand(key, error, session);
           });
         }
       } catch (error) {
-        this._rejectPendingCommand(key, error);
+        this._rejectPendingCommand(key, error, session);
       }
       return completion;
     }
   }, {
     key: "_resolvePendingCommand",
     value: function _resolvePendingCommand(decoded) {
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       var key = this._commandKey(decoded.device, decoded.command, decoded.packetId);
-      var pending = this.pendingCommands.get(key);
+      var pending = session.pendingCommands.get(key);
       if (!pending) return false;
       // Explicitly zero the wheel speeds even after Root reports completion.
       // This prevents a residual velocity/controller correction from leaking
       // into the following Scratch command.
-      if (pending.stopMotion && !pending.settling) this._sendMotionStop(key);
-      this._clearPendingCommand(key, pending);
+      if (pending.stopMotion && !pending.settling) this._sendMotionStop(key, session);
+      this._clearPendingCommand(key, pending, session);
       pending.resolve();
       return true;
     }
   }, {
     key: "_sendMotionStop",
     value: function _sendMotionStop(pendingKey) {
-      var _this7 = this;
+      var _this6 = this;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       try {
-        var pendingWrite = this.transport.write(this.protocol.motors(0, 0));
+        var pendingWrite = session.transport.write(session.protocol.motors(0, 0));
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this7._rejectPendingCommand(pendingKey, error);
+            return _this6._rejectPendingCommand(pendingKey, error, session);
           });
         }
       } catch (error) {
-        this._rejectPendingCommand(pendingKey, error);
+        this._rejectPendingCommand(pendingKey, error, session);
       }
     }
   }, {
     key: "_clearPendingCommand",
     value: function _clearPendingCommand(key, pending) {
+      var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._activeSession();
       clearTimeout(pending.timeout);
       if (pending.watchdog) clearTimeout(pending.watchdog);
       if (pending.settle) clearTimeout(pending.settle);
-      this.pendingCommands.delete(key);
+      session.pendingCommands.delete(key);
     }
   }, {
     key: "_rejectPendingCommand",
     value: function _rejectPendingCommand(key, error) {
-      var pending = this.pendingCommands.get(key);
+      var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._activeSession();
+      var pending = session.pendingCommands.get(key);
       if (!pending) return false;
-      this._clearPendingCommand(key, pending);
-      this.transport.setError(error);
+      this._clearPendingCommand(key, pending, session);
+      session.transport.setError(error);
       pending.reject(error);
       return true;
     }
   }, {
     key: "_cancelPendingCommands",
     value: function _cancelPendingCommands(error) {
-      var _iterator = _createForOfIteratorHelper(this.pendingCommands),
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      var _iterator = _createForOfIteratorHelper(session.pendingCommands),
         _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var _step$value = _slicedToArray$1(_step.value, 2),
             key = _step$value[0],
             pending = _step$value[1];
-          this._clearPendingCommand(key, pending);
+          this._clearPendingCommand(key, pending, session);
           pending.reject(error);
         }
       } catch (err) {
@@ -6755,108 +7435,125 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_startEventHat",
     value: function _startEventHat(opcode, property, event) {
-      this[property] = event;
+      var session = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this._activeSession();
+      var matchFields = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {};
+      if (property) session[property] = event;
+      var previousDispatchSessionId = this._hatDispatchSessionId;
+      this._hatDispatchSessionId = session.id;
       try {
-        this.runtime.startHats("".concat(EXTENSION_ID, "_").concat(opcode));
+        var hatOpcode = "".concat(EXTENSION_ID, "_").concat(opcode);
+        var threads = Object.keys(matchFields).length > 0 ? this.runtime.startHats(hatOpcode, matchFields) || [] : this.runtime.startHats(hatOpcode) || [];
+        threads.forEach(function (thread) {
+          thread.irobotRootSessionId = session.id;
+          thread.irobotRootEventSessionId = session.id;
+        });
+        return threads;
       } finally {
-        this[property] = null;
+        if (property) session[property] = null;
+        this._hatDispatchSessionId = previousDispatchSessionId;
       }
     }
   }, {
     key: "_startBumperHat",
     value: function _startBumperHat(event) {
-      this.lastDetailedEvent = event;
-      this._startFixedEventHat(event);
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      session.lastDetailedEvent = event;
+      this._startFixedEventHat(event, session);
       var _event$split = event.split('_'),
         _event$split2 = _slicedToArray$1(_event$split, 2),
         bumper = _event$split2[0],
         action = _event$split2[1];
       try {
-        this.runtime.startHats("".concat(EXTENSION_ID, "_whenBumper"), {
+        this._startEventHat('whenBumper', null, event, session, {
           BUMPER: bumper,
           ACTION: action
         });
       } catch (error) {
         // A parameterized hat saved by an older extension version can have
         // stale/missing fields. It must not prevent fixed hats or BLE I/O.
-        this.transport.setError(error);
+        session.transport.setError(error);
       }
     }
   }, {
     key: "_startTouchHat",
     value: function _startTouchHat(event) {
-      this.lastDetailedEvent = event;
-      this._startFixedEventHat(event);
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      session.lastDetailedEvent = event;
+      this._startFixedEventHat(event, session);
       var _event$split3 = event.split('_'),
         _event$split4 = _slicedToArray$1(_event$split3, 2),
         sensor = _event$split4[0],
         action = _event$split4[1];
       try {
-        this.runtime.startHats("".concat(EXTENSION_ID, "_whenTouchSensor"), {
+        this._startEventHat('whenTouchSensor', null, event, session, {
           SENSOR: sensor,
           ACTION: action
         });
       } catch (error) {
-        this.transport.setError(error);
+        session.transport.setError(error);
       }
     }
   }, {
     key: "_startFixedEventHat",
     value: function _startFixedEventHat(event) {
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       var opcode = FIXED_EVENT_OPCODES[event];
-      if (opcode) this.runtime.startHats("".concat(EXTENSION_ID, "_").concat(opcode));
+      if (opcode) this._startEventHat(opcode, null, event, session);
     }
   }, {
     key: "_receiveBumperEvent",
     value: function _receiveBumperEvent(decoded) {
-      var previous = this.bumperState;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      var previous = session.bumperState;
       var next = (decoded.leftBumper ? 0x80 : 0) | (decoded.rightBumper ? 0x40 : 0);
-      this.bumperState = next;
+      session.bumperState = next;
       if (previous === 0 && next === 0xC0) {
-        this._startBumperHat('BOTH_PUSH');
+        this._startBumperHat('BOTH_PUSH', session);
         return;
       }
       if (previous === 0xC0 && next === 0) {
-        this._startBumperHat('BOTH_RELEASE');
+        this._startBumperHat('BOTH_RELEASE', session);
         return;
       }
       if ((previous ^ next) & 0x80) {
-        this._startBumperHat(next & 0x80 ? 'LEFT_PUSH' : 'LEFT_RELEASE');
+        this._startBumperHat(next & 0x80 ? 'LEFT_PUSH' : 'LEFT_RELEASE', session);
       }
       if ((previous ^ next) & 0x40) {
-        this._startBumperHat(next & 0x40 ? 'RIGHT_PUSH' : 'RIGHT_RELEASE');
+        this._startBumperHat(next & 0x40 ? 'RIGHT_PUSH' : 'RIGHT_RELEASE', session);
       }
     }
   }, {
     key: "_receiveTouchEvent",
     value: function _receiveTouchEvent(decoded) {
-      var previous = this.touchState;
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
+      var previous = session.touchState;
       var next = decoded.touchMask;
-      this.touchState = next;
+      session.touchState = next;
       var sensors = [['FL', 0x8], ['FR', 0x4], ['RR', 0x2], ['RL', 0x1]];
       for (var _i = 0, _sensors = sensors; _i < _sensors.length; _i++) {
         var _sensors$_i = _slicedToArray$1(_sensors[_i], 2),
           sensor = _sensors$_i[0],
           mask = _sensors$_i[1];
         if ((previous ^ next) & mask) {
-          this._startTouchHat("".concat(sensor, "_").concat(next & mask ? 'TOUCH' : 'RELEASE'));
+          this._startTouchHat("".concat(sensor, "_").concat(next & mask ? 'TOUCH' : 'RELEASE'), session);
         }
       }
     }
   }, {
     key: "_receive",
     value: function _receive(packet) {
+      var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this._activeSession();
       // A connected physical Root may keep sending sensor notifications while
       // the student deliberately works in simulator-fixed mode. Never let
       // those events launch scripts for the virtual Root.
-      if (this._isSimulatorActive()) return;
-      var decoded = this.protocol.decode(packet);
+      if (this.controlMode === CONTROL_MODE_SIMULATOR || this.controlMode === CONTROL_MODE_AUTO && !session.isConnected()) return;
+      var decoded = session.protocol.decode(packet);
       if (!decoded) return;
-      this.last = Object.assign({}, this.last, decoded);
-      this._resolvePendingCommand(decoded);
+      session.last = Object.assign({}, session.last, decoded);
+      this._resolvePendingCommand(decoded, session);
       if (decoded.command !== 0) return;
-      if (decoded.device === 12) this._receiveBumperEvent(decoded);
-      if (decoded.device === 17) this._receiveTouchEvent(decoded);
+      if (decoded.device === 12) this._receiveBumperEvent(decoded, session);
+      if (decoded.device === 17) this._receiveTouchEvent(decoded, session);
       var names = {
         12: 'BUMPER',
         17: 'TOUCH',
@@ -6864,21 +7561,23 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         14: 'BATTERY'
       };
       var name = names[decoded.device];
-      if (name) this._startEventHat('whenEvent', 'currentEvent', name);
+      if (name) this._startEventHat('whenEvent', 'currentEvent', name, session);
     }
   }, {
     key: "_receiveSimulatorEvent",
     value: function _receiveSimulatorEvent(event) {
-      if (!this._isSimulatorActive() || !event) return;
+      var sessionId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.rootManager.activeSessionId;
+      var session = this.rootManager.getSession(sessionId) || this._activeSession();
+      if (!this._isSimulatorActive(null, session) || !event) return;
       if (event.type === 'bumper') {
         this._receiveBumperEvent({
           leftBumper: event.left,
           rightBumper: event.right
-        });
+        }, session);
       } else if (event.type === 'touch') {
         this._receiveTouchEvent({
           touchMask: event.mask
-        });
+        }, session);
       }
     }
   }], [{
@@ -6912,5 +7611,5 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }]);
 }();
 
-export { COMMAND_FINISH_TIMEOUT_MS, MOTION_COMMAND_GAP_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, navigationMotionWatchdogMs, turnMotionWatchdogMs };
+export { COMMAND_FINISH_TIMEOUT_MS, MOTION_COMMAND_GAP_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, navigationMotionWatchdogMs, openRootConnectionDialog, turnMotionWatchdogMs };
 //# sourceMappingURL=irobotRoot.mjs.map

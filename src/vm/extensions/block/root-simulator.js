@@ -22,6 +22,8 @@ class RootSimulator {
     constructor (onEvent, controls = {}) {
         this.onEvent = onEvent;
         this.controls = controls;
+        this.enableRootPlacement = Boolean(controls.enableRootPlacement);
+        this.placementMode = false;
         this.speedMultiplier = 1;
         // Display zoom only changes the viewport.  Root coordinates, collision
         // geometry, and motion timing remain in millimetres.
@@ -39,7 +41,11 @@ class RootSimulator {
         this._collisionPoint = null;
         this._runButton = null;
         this._stopButton = null;
+        this._placementButton = null;
         this._localizedElements = [];
+        // In the multi-Root extension build this remains one virtual robot.
+        // The label makes the physical Root selected for rehearsal explicit.
+        this.rootLabel = 'Root 1';
         this.reset();
     }
 
@@ -114,6 +120,12 @@ class RootSimulator {
         return this.viewZoom;
     }
 
+    toggleRootPlacementMode () {
+        this.placementMode = !this.placementMode;
+        this._draw();
+        return this.placementMode;
+    }
+
     runProject () {
         if (!this._canControlProject()) return false;
         this.reset();
@@ -158,6 +170,11 @@ class RootSimulator {
     }
 
     refresh () {
+        this._draw();
+    }
+
+    setRootLabel (label) {
+        this.rootLabel = String(label || 'Root 1');
         this._draw();
     }
 
@@ -446,6 +463,9 @@ class RootSimulator {
         addButton('addBlock', '+ Block', () => this.addObstacle('block'));
         addButton('delete', 'Delete', () => this.deleteSelectedObstacle());
         addButton('clearObstacles', 'Clear obstacles', () => this.clearObstacles());
+        if (this.enableRootPlacement) {
+            this._placementButton = addButton('rootPlacement', '▣ Place Roots', () => this.toggleRootPlacementMode());
+        }
         const speedLabel = document.createElement('label');
         speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
         const speedText = document.createElement('span');
@@ -677,16 +697,18 @@ class RootSimulator {
         }
         context.fillStyle = '#f2d941'; context.beginPath(); context.arc(0, -27, 6, 0, Math.PI * 2); context.fill();
         context.restore();
-        context.fillStyle = '#26353a'; context.font = '18px Arial';
-        context.fillText(`${this._t('x', 'x')}: ${this.pose.x.toFixed(1)} mm   ${this._t('y', 'y')}: ${this.pose.y.toFixed(1)} mm   ${this._t('heading', 'heading')}: ${this.pose.heading.toFixed(1)}°`, 18, 30);
+        context.fillStyle = '#26353a'; context.font = 'bold 18px Arial';
+        context.fillText(`${this._t('simulating', 'Simulating')}: ${this.rootLabel}`, 18, 30);
+        context.font = '18px Arial';
+        context.fillText(`${this._t('x', 'x')}: ${this.pose.x.toFixed(1)} mm   ${this._t('y', 'y')}: ${this.pose.y.toFixed(1)} mm   ${this._t('heading', 'heading')}: ${this.pose.heading.toFixed(1)}°`, 18, 57);
         const markerStates = [this._t('up', 'up'), this._t('down', 'down'), this._t('eraser', 'eraser')];
         const ledStates = [this._t('off', 'off'), this._t('on', 'on'), this._t('blink', 'blink'), this._t('spin', 'spin')];
-        context.fillText(`${this._t('marker', 'marker')}: ${markerStates[this.marker]}   LED: ${ledStates[this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 57);
+        context.fillText(`${this._t('marker', 'marker')}: ${markerStates[this.marker]}   LED: ${ledStates[this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 84);
         const bumper = this.last.leftBumper && this.last.rightBumper ? this._t('bothPush', 'BOTH PUSH') :
             (this.last.leftBumper ? this._t('leftPush', 'LEFT PUSH') :
                 (this.last.rightBumper ? this._t('rightPush', 'RIGHT PUSH') : this._t('none', 'none')));
-        context.fillText(`${this._t('bumper', 'bumper')}: ${bumper}   ${this._t('touchMask', 'touch mask')}: ${this.last.touchMask.toString(2).padStart(4, '0')}`, 18, 84);
-        if (this.phrase) context.fillText(`${this._t('say', 'say')}: ${this.phrase}`, 18, 111);
+        context.fillText(`${this._t('bumper', 'bumper')}: ${bumper}   ${this._t('touchMask', 'touch mask')}: ${this.last.touchMask.toString(2).padStart(4, '0')}`, 18, 111);
+        if (this.phrase) context.fillText(`${this._t('say', 'say')}: ${this.phrase}`, 18, 138);
     }
 }
 

@@ -1,5 +1,6 @@
 import ScratchLinkBLE from '../../io/ble';
 import WebBLE from '../../io/ble-web';
+import JSONRPC from '../../util/jsonrpc';
 
 const ROOT_SERVICE = '48c5d828-ac2a-442d-97a3-0c9822b04979';
 const UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
@@ -11,6 +12,11 @@ const ROOT_DISCOVERY_OPTIONS = {
 };
 const SCRUB_DISCOVERY_ACK_TIMEOUT_MS = 1000;
 const SCRUB_DISCOVERY_ACK_ATTEMPTS = 30;
+// Web Bluetooth and the Scrub bridge both expose a write promise, but some
+// Scratch Link/Scrub versions leave that promise pending after CoreBluetooth
+// accepted the packet. Keep the transport-level ordering without making the
+// Scratch command wait on that promise forever.
+const UART_WRITE_GAP_MS = 60;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value)));
 
@@ -68,16 +74,36 @@ const getScrubSocketClass = (scope = typeof self === 'undefined' ? null : self) 
     }
 };
 
-class RootScratchLinkBLE extends ScratchLinkBLE {
+/**
+ * Scrub's injected Socket supports multiple independent BLE sessions. Do not
+ * inherit the VM's default BLE export here: that CommonJS module selects its
+ * implementation when the editor bundle loads, and certain WKWebViews expose
+ * a partial navigator.bluetooth object. In that situation the default export
+ * can be WebBLE even though Scrub's Scratch Link bridge is the usable
+ * transport. This self-contained adapter always uses the injected Socket and
+ * therefore opens one native BLE session per Root.
+ */
+class RootScratchLinkBLE extends JSONRPC {
     constructor (runtime, extensionId, peripheralOptions, connectCallback, resetCallback, SocketClass) {
-        const isolatedRuntime = {
-            constructor: runtime.constructor,
-            emit: runtime.emit.bind(runtime),
-            getScratchLinkSocket: type => new SocketClass(type)
-        };
-        super(isolatedRuntime, extensionId, peripheralOptions, connectCallback, resetCallback);
+        super();
+        this._runtime = runtime;
+        this._extensionId = extensionId;
+        this._peripheralOptions = peripheralOptions;
+        this._connectCallback = connectCallback;
+        this._resetCallback = resetCallback;
+        this._availablePeripherals = {};
+        this._connected = false;
+        this._characteristicDidChangeCallback = null;
+        this._discoverTimeoutID = null;
         this._scrubDiscoveryAckTimer = null;
         this._scrubDiscoveryAttempt = 0;
+        this._socket = new SocketClass('BLE');
+        this._socket.setOnOpen(this.requestPeripheral.bind(this));
+        this._socket.setOnClose(this.handleDisconnectError.bind(this));
+        this._socket.setOnError(this._handleRequestError.bind(this));
+        this._socket.setHandleMessage(this._handleMessage.bind(this));
+        this._sendMessage = this._socket.sendMessage.bind(this._socket);
+        this._socket.open();
     }
 
     requestPeripheral () {
@@ -119,7 +145,82 @@ class RootScratchLinkBLE extends ScratchLinkBLE {
             window.clearTimeout(this._scrubDiscoveryAckTimer);
             this._scrubDiscoveryAckTimer = null;
         }
-        super.disconnect();
+        this._connected = false;
+        if (this._socket.isOpen()) this._socket.close();
+        if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+        this._runtime.emit(this._runtime.constructor.PERIPHERAL_DISCONNECTED);
+    }
+
+    isConnected () {
+        return this._connected;
+    }
+
+    connectPeripheral (id) {
+        this.sendRemoteRequest('connect', {peripheralId: id}).then(() => {
+            this._connected = true;
+            this._runtime.emit(this._runtime.constructor.PERIPHERAL_CONNECTED);
+            this._connectCallback();
+        }).catch(error => this._handleRequestError(error));
+    }
+
+    startNotifications (serviceId, characteristicId, onCharacteristicChanged = null) {
+        this._characteristicDidChangeCallback = onCharacteristicChanged;
+        return this.sendRemoteRequest('startNotifications', {serviceId, characteristicId})
+            .catch(error => this.handleDisconnectError(error));
+    }
+
+    write (serviceId, characteristicId, message, encoding = null, withResponse = null) {
+        const params = {serviceId, characteristicId, message};
+        if (encoding) params.encoding = encoding;
+        if (withResponse !== null) params.withResponse = withResponse;
+        return this.sendRemoteRequest('write', params).catch(error => {
+            this.handleDisconnectError(error);
+            throw error;
+        });
+    }
+
+    didReceiveCall (method, params) {
+        switch (method) {
+        case 'didDiscoverPeripheral':
+            this._availablePeripherals[params.peripheralId] = params;
+            this._runtime.emit(this._runtime.constructor.PERIPHERAL_LIST_UPDATE, this._availablePeripherals);
+            if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+            break;
+        case 'userDidPickPeripheral':
+            this._availablePeripherals[params.peripheralId] = params;
+            this._runtime.emit(this._runtime.constructor.USER_PICKED_PERIPHERAL, this._availablePeripherals);
+            if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+            break;
+        case 'userDidNotPickPeripheral':
+            this._runtime.emit(this._runtime.constructor.PERIPHERAL_SCAN_TIMEOUT);
+            if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+            break;
+        case 'characteristicDidChange':
+            if (this._characteristicDidChangeCallback) this._characteristicDidChangeCallback(params.message);
+            break;
+        case 'ping':
+            return 42;
+        }
+    }
+
+    handleDisconnectError () {
+        if (!this._connected) return;
+        this.disconnect();
+        if (this._resetCallback) this._resetCallback();
+        this._runtime.emit(this._runtime.constructor.PERIPHERAL_CONNECTION_LOST_ERROR, {
+            message: 'Scratch lost connection to', extensionId: this._extensionId
+        });
+    }
+
+    _handleRequestError () {
+        this._runtime.emit(this._runtime.constructor.PERIPHERAL_REQUEST_ERROR, {
+            message: 'Scratch lost connection to', extensionId: this._extensionId
+        });
+    }
+
+    _handleDiscoverTimeout () {
+        if (this._discoverTimeoutID) window.clearTimeout(this._discoverTimeoutID);
+        this._runtime.emit(this._runtime.constructor.PERIPHERAL_SCAN_TIMEOUT);
     }
 }
 
@@ -216,12 +317,14 @@ class RootProtocol {
 }
 
 class RootTransport {
-    constructor (runtime, extensionId, onData, onReset = null) {
+    constructor (runtime, extensionId, onData, onReset = null, onConnected = null) {
         this.runtime = runtime;
         this.extensionId = extensionId;
         this.onData = onData;
         this.onReset = onReset;
+        this.onConnected = onConnected;
         this.ble = null;
+        this._writeTail = Promise.resolve();
         this.mode = supportsWebBluetooth() ? 'Web Bluetooth' : 'Scratch Link / Scrub';
         this.lastError = '';
         this.runtime.registerPeripheralExtension(extensionId, this);
@@ -262,15 +365,60 @@ class RootTransport {
         this.ble.startNotifications(UART_SERVICE, TX, message => {
             this.onData(base64ToBytes(message));
         });
+        if (this.onConnected) this.onConnected();
     }
 
     write (bytes) {
         if (!this.isConnected()) return Promise.reject(new Error('Rootに接続してください'));
-        return this.ble.write(UART_SERVICE, RX, bytesToBase64(bytes), 'base64', false)
-            .catch(error => {
+        const encoded = bytesToBase64(bytes);
+        let resolveWrite;
+        let rejectWrite;
+        const result = new Promise((resolve, reject) => {
+            resolveWrite = resolve;
+            rejectWrite = reject;
+        });
+
+        // Each RootTransport has its own tail, so one Root cannot reorder or
+        // suppress another Root's packets. Release the queue on either the
+        // adapter's completion or a short bounded interval. The latter is
+        // required for Scrub/Scratch Link implementations whose JSON-RPC
+        // write request may remain pending after the BLE bytes were accepted.
+        const previous = this._writeTail || Promise.resolve();
+        const queued = previous.then(() => new Promise(resolveQueue => {
+            let released = false;
+            const release = () => {
+                if (released) return;
+                released = true;
+                resolveQueue();
+            };
+            const setTimer = typeof window === 'undefined' ? setTimeout : window.setTimeout.bind(window);
+            const clearTimer = typeof window === 'undefined' ? clearTimeout : window.clearTimeout.bind(window);
+            const releaseTimer = setTimer(release, UART_WRITE_GAP_MS);
+            let pendingWrite;
+            try {
+                pendingWrite = this.ble.write(UART_SERVICE, RX, encoded, 'base64', false);
+            } catch (error) {
+                clearTimer(releaseTimer);
                 this.setError(error);
-                throw error;
+                rejectWrite(error);
+                release();
+                return;
+            }
+            Promise.resolve(pendingWrite).then(value => {
+                clearTimer(releaseTimer);
+                resolveWrite(value);
+                release();
+            }).catch(error => {
+                clearTimer(releaseTimer);
+                this.setError(error);
+                rejectWrite(error);
+                release();
             });
+        }));
+        // A failed packet must not poison the following packets in this
+        // session. The returned `result` still reports that individual error.
+        this._writeTail = queued.catch(() => undefined);
+        return result;
     }
 
     disconnect () {
@@ -297,6 +445,10 @@ class RootTransport {
             }
         });
         this.runtime.on(RuntimeClass.PERIPHERAL_SCAN_TIMEOUT, () => {
+            // Scratch VM does not include extensionId in this legacy event.
+            // Session transports must not turn another Root's scan timeout
+            // into their own connection error.
+            if (this.extensionId.includes(':session:')) return;
             this.lastError = `${this.mode}: Rootが見つかりませんでした`;
         });
         this.runtime.on(RuntimeClass.PERIPHERAL_CONNECTION_LOST_ERROR, details => {
@@ -313,6 +465,7 @@ export {
     RootProtocol,
     RootScratchLinkBLE,
     RootTransport,
+    UART_WRITE_GAP_MS,
     SCRUB_DISCOVERY_ACK_ATTEMPTS,
     SCRUB_DISCOVERY_ACK_TIMEOUT_MS,
     base64ToBytes,

@@ -23,6 +23,7 @@
   "scripts": {
     "setup-dev": "node ./scripts/setup-dev.mjs",
     "build": "rollup -c ./scripts/rollup.config.mjs",
+    "build:multi-site": "npm run build && node ./scripts/assemble-multi-site.mjs",
     "watch": "rollup -c ./scripts/rollup.config.mjs --watch",
     "test": "jest",
     "version": "node ./scripts/version-build.mjs && git add dist"
