@@ -359,7 +359,18 @@ class RootSimulatorWorld {
         this.obstacles.forEach((obstacle, index) => { const center = point(obstacle); context.fillStyle = obstacle.type === 'wall' ? '#71828a' : '#d9864d'; context.strokeStyle = index === this.host._selectedObstacle ? '#f2c94c' : '#3d4d54'; context.lineWidth = index === this.host._selectedObstacle ? 5 : 3; context.beginPath(); context.rect(center.x - obstacle.width * scale / 2, center.y - obstacle.height * scale / 2, obstacle.width * scale, obstacle.height * scale); context.fill(); context.stroke(); });
         for (const [id, robot] of this.robots) {
             context.strokeStyle = robot.marker === 2 ? '#fff' : (id === this.activeId ? '#22a6a6' : '#8a9bd0'); context.lineWidth = 4; context.lineCap = 'round';
-            for (const segment of robot.trail) { const a = point(segment); const b = point({x: segment.x2, y: segment.y2}); context.beginPath(); context.moveTo(a.x, a.y); context.lineTo(b.x, b.y); context.stroke(); }
+            for (const segment of robot.trail) {
+                // A trail segment stores its endpoints as x1/y1 and x2/y2.
+                // Passing the segment itself to point() loses the starting
+                // coordinate because point() expects x/y, which makes a
+                // continuous stroke appear as a collection of dots.
+                const a = point({x: segment.x1, y: segment.y1});
+                const b = point({x: segment.x2, y: segment.y2});
+                context.beginPath();
+                context.moveTo(a.x, a.y);
+                context.lineTo(b.x, b.y);
+                context.stroke();
+            }
             this._drawRobot(context, robot, point, scale);
             const p = point(robot.pose); context.fillStyle = id === this.activeId ? '#26353a' : '#52646c'; context.font = 'bold 16px Arial'; context.fillText(`Root ${id}`, p.x + 38, p.y - 28);
         }
