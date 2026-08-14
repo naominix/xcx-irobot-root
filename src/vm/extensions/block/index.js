@@ -26,6 +26,7 @@ const translate = (id, defaultText, description) => formatMessage({
 
 const EXTENSION_ID = 'irobotRoot';
 const COMMAND_FINISH_TIMEOUT_MS = 120000;
+const MARKER_FINISH_TIMEOUT_MS = 3000;
 const SOUND_FINISH_GRACE_MS = 1000;
 const SAY_PHRASE_TIMEOUT_MS = 30000;
 const MOTION_WATCHDOG_BASE_MS = 2000;
@@ -528,7 +529,14 @@ class IrobotRootBlocks {
     }
     marker (args) {
         if (this._isSimulatorActive()) return this.simulator.setMarker(args.POSITION);
-        return this._send(this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]));
+        // Marker movement is asynchronous. Waiting for Root's matching
+        // Finished packet prevents a following motor write from overlapping
+        // this BLE operation on platforms that reject concurrent GATT writes.
+        return this._sendFinishedCommandAndWait(
+            this.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]),
+            MARKER_FINISH_TIMEOUT_MS,
+            'marker/eraser'
+        );
     }
     ledColor (args) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
@@ -586,7 +594,7 @@ class IrobotRootBlocks {
 
     sayPhrase (args) {
         if (this._isSimulatorActive()) return this.simulator.sayPhrase(Cast.toString(args.PHRASE));
-        return this._sendSoundCommandAndWait(
+        return this._sendFinishedCommandAndWait(
             this.protocol.sayPhrase(Cast.toString(args.PHRASE)),
             SAY_PHRASE_TIMEOUT_MS,
             'phrase'
@@ -717,10 +725,10 @@ class IrobotRootBlocks {
     }
 
     _sendSoundAndWait (packet, durationMs) {
-        return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound');
+        return this._sendFinishedCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound');
     }
 
-    _sendSoundCommandAndWait (packet, timeoutMs, description) {
+    _sendFinishedCommandAndWait (packet, timeoutMs, description) {
         const key = this._commandKey(packet[0], packet[1], packet[2]);
         const completion = new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
@@ -730,8 +738,8 @@ class IrobotRootBlocks {
                 this.transport.setError(new Error(
                     `Root ${description} completion response timed out (packet ${packet[2]})`
                 ));
-                // Do not leave a Scratch stack stuck if a single notification
-                // was lost after Root had enough time to finish the sound.
+                // Do not leave a Scratch stack stuck if one notification was
+                // lost after Root had enough time to finish the operation.
                 resolve();
             }, timeoutMs);
             this.pendingCommands.set(key, {
@@ -901,6 +909,7 @@ export {
     IrobotRootBlocks as default,
     IrobotRootBlocks as blockClass,
     linearMotionWatchdogMs,
+    MARKER_FINISH_TIMEOUT_MS,
     MOTION_WATCHDOG_SETTLE_MS,
     MOTION_COMMAND_GAP_MS,
     navigationMotionWatchdogMs,

@@ -1,5 +1,6 @@
 import {
     COMMAND_FINISH_TIMEOUT_MS,
+    MARKER_FINISH_TIMEOUT_MS,
     MOTION_COMMAND_GAP_MS,
     MOTION_WATCHDOG_SETTLE_MS,
     blockClass,
@@ -481,6 +482,52 @@ describe('iRobot Root extension', () => {
         expect(block.transport.write).toHaveBeenCalledTimes(1);
         resolveWrite();
         await Promise.resolve();
+    });
+
+    test('waits for Root marker completion before allowing the next Scratch block', async () => {
+        const block = new blockClass(runtime);
+        // Scrub may never settle this write promise, so completion must be
+        // driven solely by the matching notification from Root.
+        block.transport.write = jest.fn(() => new Promise(() => {}));
+        const completion = block.marker({POSITION: '1'});
+        const packet = block.transport.write.mock.calls[0][0];
+        let completed = false;
+        completion.then(() => {
+            completed = true;
+        });
+
+        expect(Array.from(packet.slice(0, 2))).toEqual([2, 0]);
+        await Promise.resolve();
+        expect(completed).toBe(false);
+
+        const wrongId = new RootProtocol().packet(2, 0);
+        wrongId[2] = (packet[2] + 1) & 0xFF;
+        wrongId[19] = crc8(wrongId.slice(0, 19));
+        block._receive(wrongId);
+        await Promise.resolve();
+        expect(completed).toBe(false);
+
+        const finished = new RootProtocol().packet(2, 0);
+        finished[2] = packet[2];
+        finished[19] = crc8(finished.slice(0, 19));
+        block._receive(finished);
+        await expect(completion).resolves.toBeUndefined();
+        expect(completed).toBe(true);
+    });
+
+    test('releases a marker block when its completion notification is lost', async () => {
+        jest.useFakeTimers();
+        try {
+            const block = new blockClass(runtime);
+            block.transport.write = jest.fn(() => new Promise(() => {}));
+            const completion = block.marker({POSITION: '0'});
+
+            jest.advanceTimersByTime(MARKER_FINISH_TIMEOUT_MS);
+            await expect(completion).resolves.toBeUndefined();
+            expect(block.lastConnectionError()).toContain('marker/eraser completion response timed out');
+        } finally {
+            jest.useRealTimers();
+        }
     });
 
     test.each([
