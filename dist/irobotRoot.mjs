@@ -6011,6 +6011,7 @@ var _translate = function translate(id, defaultText, description) {
 };
 var EXTENSION_ID = 'irobotRoot';
 var COMMAND_FINISH_TIMEOUT_MS = 120000;
+var MARKER_FINISH_TIMEOUT_MS = 3000;
 var SOUND_FINISH_GRACE_MS = 1000;
 var SAY_PHRASE_TIMEOUT_MS = 30000;
 var MOTION_WATCHDOG_BASE_MS = 2000;
@@ -7079,7 +7080,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function marker(args, util) {
       var session = this._activeSession(util);
       if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.setMarker(args.POSITION) : undefined;
-      return this._send(session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]), session);
+      // Marker movement is asynchronous. Wait for Root's matching Finished
+      // packet before allowing the next motor write on platforms that reject
+      // concurrent GATT operations.
+      return this._sendFinishedCommandAndWait(session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]), MARKER_FINISH_TIMEOUT_MS, 'marker/eraser', session);
     }
   }, {
     key: "ledColor",
@@ -7167,7 +7171,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function sayPhrase(args, util) {
       var session = this._activeSession(util);
       if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.sayPhrase(Cast.toString(args.PHRASE)) : undefined;
-      return this._sendSoundCommandAndWait(session.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase', session);
+      return this._sendFinishedCommandAndWait(session.protocol.sayPhrase(Cast.toString(args.PHRASE)), SAY_PHRASE_TIMEOUT_MS, 'phrase', session);
     }
   }, {
     key: "refreshSensor",
@@ -7321,11 +7325,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     key: "_sendSoundAndWait",
     value: function _sendSoundAndWait(packet, durationMs) {
       var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this._activeSession();
-      return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound', session);
+      return this._sendFinishedCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound', session);
     }
   }, {
-    key: "_sendSoundCommandAndWait",
-    value: function _sendSoundCommandAndWait(packet, timeoutMs, description) {
+    key: "_sendFinishedCommandAndWait",
+    value: function _sendFinishedCommandAndWait(packet, timeoutMs, description) {
       var _this5 = this;
       var session = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this._activeSession();
       var key = this._commandKey(packet[0], packet[1], packet[2]);
@@ -7335,8 +7339,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           if (!pending) return;
           _this5._clearPendingCommand(key, pending, session);
           session.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
-          // Do not leave a Scratch stack stuck if a single notification
-          // was lost after Root had enough time to finish the sound.
+          // Do not leave a Scratch stack stuck if one notification was
+          // lost after Root had enough time to finish the operation.
           resolve();
         }, timeoutMs);
         session.pendingCommands.set(key, {
@@ -7611,5 +7615,5 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }]);
 }();
 
-export { COMMAND_FINISH_TIMEOUT_MS, MOTION_COMMAND_GAP_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, navigationMotionWatchdogMs, openRootConnectionDialog, turnMotionWatchdogMs };
+export { COMMAND_FINISH_TIMEOUT_MS, MARKER_FINISH_TIMEOUT_MS, MOTION_COMMAND_GAP_MS, MOTION_WATCHDOG_SETTLE_MS, arcMotionWatchdogMs, IrobotRootBlocks as blockClass, entry, linearMotionWatchdogMs, navigationMotionWatchdogMs, openRootConnectionDialog, turnMotionWatchdogMs };
 //# sourceMappingURL=irobotRoot.mjs.map

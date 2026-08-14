@@ -27,6 +27,7 @@ const translate = (id, defaultText, description) => formatMessage({
 
 const EXTENSION_ID = 'irobotRoot';
 const COMMAND_FINISH_TIMEOUT_MS = 120000;
+const MARKER_FINISH_TIMEOUT_MS = 3000;
 const SOUND_FINISH_GRACE_MS = 1000;
 const SAY_PHRASE_TIMEOUT_MS = 30000;
 const MOTION_WATCHDOG_BASE_MS = 2000;
@@ -630,7 +631,14 @@ class IrobotRootBlocks {
     marker (args, util) {
         const session = this._activeSession(util);
         if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.setMarker(args.POSITION) : undefined;
-        return this._send(session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]), session);
+        // Marker movement is asynchronous. Wait for Root's matching Finished
+        // packet before allowing the next motor write on platforms that reject
+        // concurrent GATT operations.
+        return this._sendFinishedCommandAndWait(
+            session.protocol.packet(2, 0, [Cast.toNumber(args.POSITION)]),
+            MARKER_FINISH_TIMEOUT_MS,
+            'marker/eraser', session
+        );
     }
     ledColor (args, util) {
         const [red, green, blue] = Cast.toRgbColorList(args.COLOR);
@@ -698,7 +706,7 @@ class IrobotRootBlocks {
     sayPhrase (args, util) {
         const session = this._activeSession(util);
         if (this._isSimulatorActive(util, session)) return this._isSimulatedSession(session) ? this.simulator.sayPhrase(Cast.toString(args.PHRASE)) : undefined;
-        return this._sendSoundCommandAndWait(
+        return this._sendFinishedCommandAndWait(
             session.protocol.sayPhrase(Cast.toString(args.PHRASE)),
             SAY_PHRASE_TIMEOUT_MS,
             'phrase', session
@@ -817,10 +825,10 @@ class IrobotRootBlocks {
     }
 
     _sendSoundAndWait (packet, durationMs, session = this._activeSession()) {
-        return this._sendSoundCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound', session);
+        return this._sendFinishedCommandAndWait(packet, durationMs + SOUND_FINISH_GRACE_MS, 'sound', session);
     }
 
-    _sendSoundCommandAndWait (packet, timeoutMs, description, session = this._activeSession()) {
+    _sendFinishedCommandAndWait (packet, timeoutMs, description, session = this._activeSession()) {
         const key = this._commandKey(packet[0], packet[1], packet[2]);
         const completion = new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
@@ -830,8 +838,8 @@ class IrobotRootBlocks {
                 session.transport.setError(new Error(
                     `Root ${description} completion response timed out (packet ${packet[2]})`
                 ));
-                // Do not leave a Scratch stack stuck if a single notification
-                // was lost after Root had enough time to finish the sound.
+                // Do not leave a Scratch stack stuck if one notification was
+                // lost after Root had enough time to finish the operation.
                 resolve();
             }, timeoutMs);
             session.pendingCommands.set(key, {
@@ -1014,6 +1022,7 @@ export {
     IrobotRootBlocks as default,
     IrobotRootBlocks as blockClass,
     linearMotionWatchdogMs,
+    MARKER_FINISH_TIMEOUT_MS,
     MOTION_WATCHDOG_SETTLE_MS,
     MOTION_COMMAND_GAP_MS,
     navigationMotionWatchdogMs,
