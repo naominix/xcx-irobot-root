@@ -315,6 +315,14 @@ class IrobotRootBlocks {
                     text: translate('block.sensor', '[VALUE] value'), arguments: {
                     VALUE: {type: ArgumentType.STRING, menu: 'valueMenu'}
                 }},
+                {opcode: 'isBumperPressed', blockType: BlockType.BOOLEAN,
+                    text: translate('block.isBumperPressed', '[BUMPER] bumper is pressed?'), arguments: {
+                    BUMPER: {type: ArgumentType.STRING, menu: 'bumperMenu'}
+                }},
+                {opcode: 'isTouchSensorTouched', blockType: BlockType.BOOLEAN,
+                    text: translate('block.isTouchSensorTouched', '[SENSOR] touch sensor is touched?'), arguments: {
+                    SENSOR: {type: ArgumentType.STRING, menu: 'touchSensorMenu'}
+                }},
                 {opcode: 'whenEvent', blockType: BlockType.HAT,
                     text: translate('block.whenEvent', 'when [EVENT] changes'), isEdgeActivated: false, arguments: {
                     EVENT: {type: ArgumentType.STRING, menu: 'eventMenu'}
@@ -595,6 +603,24 @@ class IrobotRootBlocks {
     sensor (args) {
         if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
         return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
+    }
+
+    // Unlike the event hats, these report the current state continuously.
+    // They are intentionally backed by the state updated from unsolicited
+    // sensor packets, so they are safe to use in `forever` and `if` blocks
+    // without sending a BLE query for every Scratch frame.
+    isBumperPressed (args) {
+        const bumper = String(args.BUMPER || '').toUpperCase();
+        if (bumper === 'LEFT') return Boolean(this.bumperState & 0x80);
+        if (bumper === 'RIGHT') return Boolean(this.bumperState & 0x40);
+        if (bumper === 'BOTH') return (this.bumperState & 0xC0) === 0xC0;
+        return false;
+    }
+
+    isTouchSensorTouched (args) {
+        const masks = {FL: 0x8, FR: 0x4, RL: 0x1, RR: 0x2};
+        const mask = masks[String(args.SENSOR || '').toUpperCase()];
+        return Boolean(mask && (this.touchState & mask));
     }
 
     whenEvent (args) { return String(args.EVENT).toUpperCase() === this.currentEvent; }

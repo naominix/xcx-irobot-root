@@ -71,6 +71,8 @@ describe('iRobot Root extension', () => {
         expect(block.getInfo().blocks.some(item => item.opcode === 'sayPhrase')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenBumper')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenTouchSensor')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'isBumperPressed')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'isTouchSensorTouched')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenFLTouch')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenBothBumpersRelease')).toBe(true);
         expect(block.whenBumper()).toBe(true);
@@ -255,6 +257,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(japaneseInfo, 'resetNavigation').text).toBe('ナビをリセットする');
         expect(findBlock(japaneseInfo, 'navigateTo').text).toBe('ナビで x [X] y [Y] cmへ移動する');
         expect(findBlock(japaneseInfo, 'sayPhrase').text).toBe('[PHRASE] と言う');
+        expect(findBlock(japaneseInfo, 'isBumperPressed').text).toBe('[BUMPER] バンパーが押されている');
+        expect(findBlock(japaneseInfo, 'isTouchSensorTouched').text).toBe('[SENSOR] タッチセンサーに触れている');
         expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
         expect(japaneseInfo.menus.markerMenu.items[0]).toEqual({text: '上げる', value: '0'});
         expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ もう一度実行');
@@ -269,6 +273,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(hiraganaInfo, 'resetNavigation').text).toBe('なびのいちをりせっとする');
         expect(findBlock(hiraganaInfo, 'navigateTo').text).toBe('なびで x [X] y [Y] cmへうごく');
         expect(findBlock(hiraganaInfo, 'sayPhrase').text).toBe('[PHRASE] という');
+        expect(findBlock(hiraganaInfo, 'isBumperPressed').text).toBe('[BUMPER] ばんぱーがおされている');
+        expect(findBlock(hiraganaInfo, 'isTouchSensorTouched').text).toBe('[SENSOR] たっちせんさーにふれている');
         expect(findBlock(hiraganaInfo, 'whenBumper').text).toBe('[BUMPER] ばんぱーが [ACTION] とき');
         expect(findBlock(hiraganaInfo, 'whenFLTouch').text).toBe('FLたっちせんさーにふれたとき');
         expect(hiraganaInfo.menus.markerMenu.items[0]).toEqual({text: 'あげる', value: '0'});
@@ -288,6 +294,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(englishInfo, 'resetNavigation').text).toBe('reset navigation position');
         expect(findBlock(englishInfo, 'navigateTo').text).toBe('navigate to x [X] y [Y] cm');
         expect(findBlock(englishInfo, 'sayPhrase').text).toBe('say [PHRASE]');
+        expect(findBlock(englishInfo, 'isBumperPressed').text).toBe('[BUMPER] bumper is pressed?');
+        expect(findBlock(englishInfo, 'isTouchSensorTouched').text).toBe('[SENSOR] touch sensor is touched?');
         expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
         expect(englishInfo.menus.markerMenu.items[0]).toEqual({text: 'up', value: '0'});
         expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ Run again');
@@ -863,6 +871,22 @@ describe('iRobot Root extension', () => {
         expect(block.detailedEvent()).toBe('BOTH_RELEASE');
     });
 
+    test('reports current bumper state for use in loops and conditions', () => {
+        const block = new blockClass(runtime);
+        const bumperPacket = state => block.protocol.packet(12, 0, [0, 0, 0, 0, state]);
+
+        block._receive(bumperPacket(0x80));
+        expect(block.isBumperPressed({BUMPER: 'LEFT'})).toBe(true);
+        expect(block.isBumperPressed({BUMPER: 'RIGHT'})).toBe(false);
+        expect(block.isBumperPressed({BUMPER: 'BOTH'})).toBe(false);
+
+        block._receive(bumperPacket(0xC0));
+        expect(block.isBumperPressed({BUMPER: 'BOTH'})).toBe(true);
+
+        block._receive(bumperPacket(0));
+        expect(block.isBumperPressed({BUMPER: 'LEFT'})).toBe(false);
+    });
+
     test('fires an event for every touch sensor bit that changes', () => {
         const block = new blockClass(runtime);
         const events = [];
@@ -881,6 +905,20 @@ describe('iRobot Root extension', () => {
         expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenFLTouch');
         expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenRLRelease');
         expect(block.detailedEvent()).toBe('RL_RELEASE');
+    });
+
+    test('reports current individual touch sensor state for use in loops and conditions', () => {
+        const block = new blockClass(runtime);
+        const touchPacket = mask => block.protocol.packet(17, 0, [0, 0, 0, 0, mask << 4]);
+
+        block._receive(touchPacket(0x9)); // FL and RL
+        expect(block.isTouchSensorTouched({SENSOR: 'FL'})).toBe(true);
+        expect(block.isTouchSensorTouched({SENSOR: 'FR'})).toBe(false);
+        expect(block.isTouchSensorTouched({SENSOR: 'RL'})).toBe(true);
+        expect(block.isTouchSensorTouched({SENSOR: 'RR'})).toBe(false);
+
+        block._receive(touchPacket(0));
+        expect(block.isTouchSensorTouched({SENSOR: 'FL'})).toBe(false);
     });
 
     test('still starts a fixed hat when a saved parameterized hat is malformed', () => {

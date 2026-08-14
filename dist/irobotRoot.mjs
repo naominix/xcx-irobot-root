@@ -869,6 +869,8 @@ var en = {
 	"irobotRoot.block.sayPhrase": "say [PHRASE]",
 	"irobotRoot.block.refreshSensor": "read [SENSOR]",
 	"irobotRoot.block.sensor": "[VALUE] value",
+	"irobotRoot.block.isBumperPressed": "[BUMPER] bumper is pressed?",
+	"irobotRoot.block.isTouchSensorTouched": "[SENSOR] touch sensor is touched?",
 	"irobotRoot.block.whenEvent": "when [EVENT] changes",
 	"irobotRoot.block.whenBumper": "when [BUMPER] bumper is [ACTION]",
 	"irobotRoot.block.whenTouchSensor": "when [SENSOR] touch sensor is [ACTION]",
@@ -980,6 +982,8 @@ var ja = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] と言う",
 	"irobotRoot.block.refreshSensor": "[SENSOR] を読み取る",
 	"irobotRoot.block.sensor": "[VALUE] の値",
+	"irobotRoot.block.isBumperPressed": "[BUMPER] バンパーが押されている",
+	"irobotRoot.block.isTouchSensorTouched": "[SENSOR] タッチセンサーに触れている",
 	"irobotRoot.block.whenEvent": "[EVENT] が変化したとき",
 	"irobotRoot.block.whenBumper": "[BUMPER] バンパーが [ACTION] されたとき",
 	"irobotRoot.block.whenTouchSensor": "[SENSOR] タッチセンサーが [ACTION] されたとき",
@@ -1094,6 +1098,8 @@ var translations = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] という",
 	"irobotRoot.block.refreshSensor": "[SENSOR] をよみとる",
 	"irobotRoot.block.sensor": "[VALUE] のあたい",
+	"irobotRoot.block.isBumperPressed": "[BUMPER] ばんぱーがおされている",
+	"irobotRoot.block.isTouchSensorTouched": "[SENSOR] たっちせんさーにふれている",
 	"irobotRoot.block.whenEvent": "[EVENT] がかわったとき",
 	"irobotRoot.block.whenBumper": "[BUMPER] ばんぱーが [ACTION] とき",
 	"irobotRoot.block.whenTouchSensor": "[SENSOR] たっちせんさーが [ACTION] とき",
@@ -6025,6 +6031,26 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
             }
           }
         }, {
+          opcode: 'isBumperPressed',
+          blockType: BlockType.BOOLEAN,
+          text: _translate('block.isBumperPressed', '[BUMPER] bumper is pressed?'),
+          arguments: {
+            BUMPER: {
+              type: ArgumentType.STRING,
+              menu: 'bumperMenu'
+            }
+          }
+        }, {
+          opcode: 'isTouchSensorTouched',
+          blockType: BlockType.BOOLEAN,
+          text: _translate('block.isTouchSensorTouched', '[SENSOR] touch sensor is touched?'),
+          arguments: {
+            SENSOR: {
+              type: ArgumentType.STRING,
+              menu: 'touchSensorMenu'
+            }
+          }
+        }, {
           opcode: 'whenEvent',
           blockType: BlockType.HAT,
           text: _translate('block.whenEvent', 'when [EVENT] changes'),
@@ -6517,6 +6543,32 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function sensor(args) {
       if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
       return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
+    }
+
+    // Unlike the event hats, these report the current state continuously.
+    // They are intentionally backed by the state updated from unsolicited
+    // sensor packets, so they are safe to use in `forever` and `if` blocks
+    // without sending a BLE query for every Scratch frame.
+  }, {
+    key: "isBumperPressed",
+    value: function isBumperPressed(args) {
+      var bumper = String(args.BUMPER || '').toUpperCase();
+      if (bumper === 'LEFT') return Boolean(this.bumperState & 0x80);
+      if (bumper === 'RIGHT') return Boolean(this.bumperState & 0x40);
+      if (bumper === 'BOTH') return (this.bumperState & 0xC0) === 0xC0;
+      return false;
+    }
+  }, {
+    key: "isTouchSensorTouched",
+    value: function isTouchSensorTouched(args) {
+      var masks = {
+        FL: 0x8,
+        FR: 0x4,
+        RL: 0x1,
+        RR: 0x2
+      };
+      var mask = masks[String(args.SENSOR || '').toUpperCase()];
+      return Boolean(mask && this.touchState & mask);
     }
   }, {
     key: "whenEvent",
