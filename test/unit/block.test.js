@@ -55,6 +55,8 @@ describe('iRobot Root extension', () => {
         expect(block.getInfo().blocks.find(item => item.opcode === 'arc').arguments.RADIUS.type)
             .toBe('root-arc-radius');
         expect(block.getInfo().blocks.some(item => item.opcode === 'resetNavigation')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'pitch')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'roll')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'navigateTo').arguments.X.type)
             .toBe('number');
         expect(block.getInfo().customFieldTypes['root-motor-left'].implementation).toMatchObject({
@@ -966,6 +968,25 @@ describe('iRobot Root extension', () => {
 
         block._receive(touchPacket(0));
         expect(block.isTouchSensorTouched({SENSOR: 'FL'})).toBe(false);
+    });
+
+    test('derives pitch and roll in degrees from the accelerometer response', () => {
+        const block = new blockClass(runtime);
+        const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
+
+        // x=-z is a 45° pitch; y=0 leaves the roll level.
+        block._receive(block.protocol.packet(16, 1, [
+            0, 0, 0, 0, ...signed16(-1000), ...signed16(0), ...signed16(1000)
+        ]));
+        expect(block.pitch()).toBe(45);
+        expect(block.roll()).toBe(0);
+
+        // y=z is a 45° roll; x=0 leaves the pitch level.
+        block._receive(block.protocol.packet(16, 1, [
+            0, 0, 0, 0, ...signed16(0), ...signed16(1000), ...signed16(1000)
+        ]));
+        expect(block.pitch()).toBe(0);
+        expect(block.roll()).toBe(45);
     });
 
     test('still starts a fixed hat when a saved parameterized hat is malformed', () => {

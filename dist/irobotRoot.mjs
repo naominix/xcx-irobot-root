@@ -869,6 +869,8 @@ var en = {
 	"irobotRoot.block.sayPhrase": "say [PHRASE]",
 	"irobotRoot.block.refreshSensor": "read [SENSOR]",
 	"irobotRoot.block.sensor": "[VALUE] value",
+	"irobotRoot.block.pitch": "pitch (°)",
+	"irobotRoot.block.roll": "roll (°)",
 	"irobotRoot.block.isBumperPressed": "[BUMPER] bumper is pressed?",
 	"irobotRoot.block.isTouchSensorTouched": "[SENSOR] touch sensor is touched?",
 	"irobotRoot.block.whenEvent": "when [EVENT] changes",
@@ -982,6 +984,8 @@ var ja = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] と言う",
 	"irobotRoot.block.refreshSensor": "[SENSOR] を読み取る",
 	"irobotRoot.block.sensor": "[VALUE] の値",
+	"irobotRoot.block.pitch": "ピッチ (°)",
+	"irobotRoot.block.roll": "ロール (°)",
 	"irobotRoot.block.isBumperPressed": "[BUMPER] バンパーが押されている",
 	"irobotRoot.block.isTouchSensorTouched": "[SENSOR] タッチセンサーに触れている",
 	"irobotRoot.block.whenEvent": "[EVENT] が変化したとき",
@@ -1098,6 +1102,8 @@ var translations = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] という",
 	"irobotRoot.block.refreshSensor": "[SENSOR] をよみとる",
 	"irobotRoot.block.sensor": "[VALUE] のあたい",
+	"irobotRoot.block.pitch": "ぴっち (°)",
+	"irobotRoot.block.roll": "ろーる (°)",
 	"irobotRoot.block.isBumperPressed": "[BUMPER] ばんぱーがおされている",
 	"irobotRoot.block.isTouchSensorTouched": "[SENSOR] たっちせんさーにふれている",
 	"irobotRoot.block.whenEvent": "[EVENT] がかわったとき",
@@ -6032,6 +6038,14 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
             }
           }
         }, {
+          opcode: 'pitch',
+          blockType: BlockType.REPORTER,
+          text: _translate('block.pitch', 'pitch (°)')
+        }, {
+          opcode: 'roll',
+          blockType: BlockType.REPORTER,
+          text: _translate('block.roll', 'roll (°)')
+        }, {
           opcode: 'isBumperPressed',
           blockType: BlockType.BOOLEAN,
           text: _translate('block.isBumperPressed', '[BUMPER] bumper is pressed?'),
@@ -6547,6 +6561,44 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     value: function sensor(args) {
       if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
       return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
+    }
+  }, {
+    key: "_accelerometerAngles",
+    value: function _accelerometerAngles() {
+      var source = this._isSimulatorActive() ? {
+        accelX: this.simulator.getSensor('accelX'),
+        accelY: this.simulator.getSensor('accelY'),
+        accelZ: this.simulator.getSensor('accelZ')
+      } : this.last;
+      var x = Number(source.accelX) || 0;
+      var y = Number(source.accelY) || 0;
+      var z = Number(source.accelZ) || 0;
+
+      // Pitch and roll can be derived from the gravity vector while Root is
+      // stationary. A zero vector means the accelerometer has not yet been
+      // read, so return the neutral angle instead of NaN.
+      if (x === 0 && y === 0 && z === 0) return {
+        pitch: 0,
+        roll: 0
+      };
+      var toDegrees = function toDegrees(radians) {
+        var degrees = Math.round(radians * 1800 / Math.PI) / 10;
+        return degrees === 0 ? 0 : degrees;
+      };
+      return {
+        pitch: toDegrees(Math.atan2(-x, Math.hypot(y, z))),
+        roll: toDegrees(Math.atan2(y, z))
+      };
+    }
+  }, {
+    key: "pitch",
+    value: function pitch() {
+      return this._accelerometerAngles().pitch;
+    }
+  }, {
+    key: "roll",
+    value: function roll() {
+      return this._accelerometerAngles().roll;
     }
 
     // Unlike the event hats, these report the current state continuously.

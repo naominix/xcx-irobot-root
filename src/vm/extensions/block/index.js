@@ -316,6 +316,10 @@ class IrobotRootBlocks {
                     text: translate('block.sensor', '[VALUE] value'), arguments: {
                     VALUE: {type: ArgumentType.STRING, menu: 'valueMenu'}
                 }},
+                {opcode: 'pitch', blockType: BlockType.REPORTER,
+                    text: translate('block.pitch', 'pitch (°)')},
+                {opcode: 'roll', blockType: BlockType.REPORTER,
+                    text: translate('block.roll', 'roll (°)')},
                 {opcode: 'isBumperPressed', blockType: BlockType.BOOLEAN,
                     text: translate('block.isBumperPressed', '[BUMPER] bumper is pressed?'), arguments: {
                     BUMPER: {type: ArgumentType.STRING, menu: 'bumperMenu'}
@@ -611,6 +615,38 @@ class IrobotRootBlocks {
     sensor (args) {
         if (this._isSimulatorActive()) return this.simulator.getSensor(args.VALUE);
         return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
+    }
+
+    _accelerometerAngles () {
+        const source = this._isSimulatorActive() ? {
+            accelX: this.simulator.getSensor('accelX'),
+            accelY: this.simulator.getSensor('accelY'),
+            accelZ: this.simulator.getSensor('accelZ')
+        } : this.last;
+        const x = Number(source.accelX) || 0;
+        const y = Number(source.accelY) || 0;
+        const z = Number(source.accelZ) || 0;
+
+        // Pitch and roll can be derived from the gravity vector while Root is
+        // stationary. A zero vector means the accelerometer has not yet been
+        // read, so return the neutral angle instead of NaN.
+        if (x === 0 && y === 0 && z === 0) return {pitch: 0, roll: 0};
+        const toDegrees = radians => {
+            const degrees = Math.round((radians * 1800) / Math.PI) / 10;
+            return degrees === 0 ? 0 : degrees;
+        };
+        return {
+            pitch: toDegrees(Math.atan2(-x, Math.hypot(y, z))),
+            roll: toDegrees(Math.atan2(y, z))
+        };
+    }
+
+    pitch () {
+        return this._accelerometerAngles().pitch;
+    }
+
+    roll () {
+        return this._accelerometerAngles().roll;
     }
 
     // Unlike the event hats, these report the current state continuously.
