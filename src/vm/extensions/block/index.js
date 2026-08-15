@@ -706,8 +706,11 @@ class IrobotRootBlocks {
             return degrees === 0 ? 0 : degrees;
         };
         return {
-            pitch: toDegrees(Math.atan2(-x, Math.hypot(y, z))),
-            roll: toDegrees(Math.atan2(y, z))
+            // With the Root held so the power button points forward, the
+            // accelerometer Y axis measures front/back tilt (pitch), while X
+            // measures left/right tilt (roll).
+            pitch: toDegrees(Math.atan2(-y, Math.hypot(x, z))),
+            roll: toDegrees(Math.atan2(x, z))
         };
     }
 
