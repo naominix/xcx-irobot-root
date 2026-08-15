@@ -58,6 +58,8 @@ describe('iRobot Root extension', () => {
         expect(block.getInfo().blocks.some(item => item.opcode === 'pitch')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'roll')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'setAccelerometerPolling')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'rootName')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'setRootName')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'navigateTo').arguments.X.type)
             .toBe('number');
         expect(block.getInfo().customFieldTypes['root-motor-left'].implementation).toMatchObject({
@@ -365,6 +367,25 @@ describe('iRobot Root extension', () => {
         const protocol = new RootProtocol();
         for (let id = 0; id < 256; id++) expect(protocol.packet(0, 0)[2]).toBe(id);
         expect(protocol.packet(0, 0)[2]).toBe(0);
+    });
+
+    test('encodes and decodes the Root BLE name packets', () => {
+        const protocol = new RootProtocol();
+        const setName = protocol.setName('Root-A');
+        expect(Array.from(setName.slice(0, 3))).toEqual([0, 1, 0]);
+        expect(Array.from(setName.slice(3, 10))).toEqual([82, 111, 111, 116, 45, 65, 0]);
+        expect(Array.from(protocol.getName().slice(0, 2))).toEqual([0, 2]);
+
+        const response = protocol.packet(0, 2, [82, 111, 111, 116, 45, 66, 0]);
+        expect(protocol.decode(response).name).toBe('Root-B');
+    });
+
+    test('stores a received Root name for the reporter', () => {
+        const block = new blockClass(runtime);
+        block._receive(block.protocol.packet(0, 2, [82, 111, 111, 116, 0]));
+        expect(block.rootName()).toBe('Root');
+        block.setRootName({NAME: 'Classroom Root'});
+        expect(block.rootName()).toBe('Classroom Root');
     });
 
     test('selects Web Bluetooth at runtime instead of at bundle time', () => {

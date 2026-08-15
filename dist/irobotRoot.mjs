@@ -848,6 +848,8 @@ var en = {
 	"irobotRoot.block.isConnected": "Root is connected?",
 	"irobotRoot.block.transportMode": "Root connection method",
 	"irobotRoot.block.lastConnectionError": "last connection error",
+	"irobotRoot.block.rootName": "Root name",
+	"irobotRoot.block.setRootName": "set Root name to [NAME]",
 	"irobotRoot.block.setControlMode": "set control mode to [MODE]",
 	"irobotRoot.block.controlTarget": "current control target",
 	"irobotRoot.block.openSimulator": "open Root simulator",
@@ -966,6 +968,8 @@ var ja = {
 	"irobotRoot.block.isConnected": "Rootは接続済み",
 	"irobotRoot.block.transportMode": "Rootの通信方式",
 	"irobotRoot.block.lastConnectionError": "最後の接続エラー",
+	"irobotRoot.block.rootName": "Rootの名前",
+	"irobotRoot.block.setRootName": "Rootの名前を [NAME] にする",
 	"irobotRoot.block.setControlMode": "制御モードを [MODE] にする",
 	"irobotRoot.block.controlTarget": "現在の制御先",
 	"irobotRoot.block.openSimulator": "Rootシミュレーターを開く",
@@ -1087,6 +1091,8 @@ var translations = {
 	"irobotRoot.block.isConnected": "るーとはつながっている",
 	"irobotRoot.block.transportMode": "るーとのつなぎかた",
 	"irobotRoot.block.lastConnectionError": "さいごのせつぞくのもんだい",
+	"irobotRoot.block.rootName": "るーとのなまえ",
+	"irobotRoot.block.setRootName": "るーとのなまえを [NAME] にする",
 	"irobotRoot.block.setControlMode": "せいぎょもーどを [MODE] にする",
 	"irobotRoot.block.controlTarget": "いまのせいぎょさき",
 	"irobotRoot.block.openSimulator": "るーとしみゅれーたーをひらく",
@@ -4221,6 +4227,11 @@ var bytesToHex = function bytesToHex(bytes) {
     return value.toString(16).padStart(2, '0');
   }).join(' ');
 };
+var bytesToUtf8 = function bytesToUtf8(bytes) {
+  var end = Array.from(bytes).indexOf(0);
+  var value = end < 0 ? bytes : bytes.slice(0, end);
+  return new TextDecoder().decode(value);
+};
 
 // Scratch VM's Base64Util imports the npm `btoa` package, whose browser build
 // performs an unguarded Node Buffer check. Buffer is not present in Edge, Safari, or
@@ -4444,6 +4455,37 @@ var RootProtocol = /*#__PURE__*/function () {
       return this.packet(5, 4, payload);
     }
   }, {
+    key: "setName",
+    value: function setName(name) {
+      var payload = new Uint8Array(16);
+      var encoder = new TextEncoder();
+      var offset = 0;
+      var _iterator4 = _createForOfIteratorHelper$2(String(name)),
+        _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var character = _step4.value;
+          var encoded = encoder.encode(character);
+          if (offset + encoded.length > payload.length) break;
+          payload.set(encoded, offset);
+          offset += encoded.length;
+        }
+        // The protocol requires a terminator when the name is shorter than
+        // the 16-byte payload. A full 16-byte name uses all available bytes.
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+      if (offset < payload.length) payload[offset] = 0;
+      return this.packet(0, 1, payload);
+    }
+  }, {
+    key: "getName",
+    value: function getName() {
+      return this.packet(0, 2);
+    }
+  }, {
     key: "decode",
     value: function decode(packet) {
       var bytes = Uint8Array.from(packet);
@@ -4472,6 +4514,8 @@ var RootProtocol = /*#__PURE__*/function () {
       } else if (bytes[0] === 13 && (bytes[1] === 0 || bytes[1] === 1)) {
         result.lightLeft = view.getUint16(7, false);
         result.lightRight = view.getUint16(9, false);
+      } else if (bytes[0] === 0 && bytes[1] === 2) {
+        result.name = bytesToUtf8(bytes.slice(3, 19));
       }
       return result;
     }
@@ -4490,12 +4534,15 @@ var RootProtocol = /*#__PURE__*/function () {
 var RootTransport = /*#__PURE__*/function () {
   function RootTransport(runtime, extensionId, onData) {
     var onReset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    var onReady = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
     _classCallCheck$1(this, RootTransport);
     this.runtime = runtime;
     this.extensionId = extensionId;
     this.onData = onData;
     this.onReset = onReset;
+    this.onReady = onReady;
     this.ble = null;
+    this.deviceName = '';
     this.mode = supportsWebBluetooth() ? 'Web Bluetooth' : 'Scratch Link / Scrub';
     this.lastError = '';
     this.runtime.registerPeripheralExtension(extensionId, this);
@@ -4521,14 +4568,20 @@ var RootTransport = /*#__PURE__*/function () {
   }, {
     key: "connect",
     value: function connect(peripheralId) {
+      var peripheral = this.ble && this.ble._availablePeripherals && this.ble._availablePeripherals[peripheralId];
+      var webDevice = this.ble && this.ble._device;
+      this.deviceName = peripheral && (peripheral.name || peripheral.localName) || webDevice && webDevice.name || '';
       if (this.ble) this.ble.connectPeripheral(peripheralId);
     }
   }, {
     key: "onConnect",
     value: function onConnect() {
       var _this3 = this;
-      this.ble.startNotifications(UART_SERVICE, TX, function (message) {
+      var startNotifications = this.ble.startNotifications(UART_SERVICE, TX, function (message) {
         _this3.onData(base64ToBytes(message));
+      });
+      if (this.onReady) Promise.resolve(startNotifications).then(function () {
+        return _this3.onReady();
       });
     }
   }, {
@@ -4551,6 +4604,7 @@ var RootTransport = /*#__PURE__*/function () {
     key: "reset",
     value: function reset() {
       this.lastError = '';
+      this.deviceName = '';
       if (this.onReset) this.onReset();
     }
   }, {
@@ -5751,6 +5805,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     }, function () {
       _this._stopAccelerometerPolling();
       _this._cancelPendingCommands(new Error('Root connection was reset'));
+    }, function () {
+      return _this._requestRootName();
     });
     // Preserve the established extension behaviour for existing projects.
     // New projects can opt into Auto (simulator while disconnected) or
@@ -5830,6 +5886,20 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           opcode: 'lastConnectionError',
           blockType: BlockType.REPORTER,
           text: _translate('block.lastConnectionError', 'last connection error')
+        }, {
+          opcode: 'rootName',
+          blockType: BlockType.REPORTER,
+          text: _translate('block.rootName', 'Root name')
+        }, {
+          opcode: 'setRootName',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.setRootName', 'set Root name to [NAME]'),
+          arguments: {
+            NAME: {
+              type: ArgumentType.STRING,
+              defaultValue: 'ROOT'
+            }
+          }
         }, {
           opcode: 'setControlMode',
           blockType: BlockType.COMMAND,
@@ -6611,6 +6681,23 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "rootName",
+    value: function rootName() {
+      return this.last.rootName || this.transport.deviceName || '';
+    }
+  }, {
+    key: "setRootName",
+    value: function setRootName(args) {
+      var name = String(args.NAME || '');
+      this.last.rootName = name;
+      if (!this._isSimulatorActive()) return this._send(this.protocol.setName(name));
+    }
+  }, {
+    key: "_requestRootName",
+    value: function _requestRootName() {
+      if (!this._isSimulatorActive()) this._send(this.protocol.getName());
+    }
+  }, {
     key: "_startAccelerometerPolling",
     value: function _startAccelerometerPolling() {
       var _this4 = this;
@@ -7060,6 +7147,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var decoded = this.protocol.decode(packet);
       if (!decoded) return;
       this.last = Object.assign({}, this.last, decoded);
+      if (decoded.name !== undefined) this.last.rootName = decoded.name;
       if (decoded.accelX !== undefined) this._finishAccelerometerPoll();
       this._resolvePendingCommand(decoded);
       if (decoded.command !== 0) return;

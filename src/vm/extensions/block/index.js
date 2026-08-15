@@ -185,7 +185,8 @@ class IrobotRootBlocks {
             () => {
                 this._stopAccelerometerPolling();
                 this._cancelPendingCommands(new Error('Root connection was reset'));
-            }
+            },
+            () => this._requestRootName()
         );
         // Preserve the established extension behaviour for existing projects.
         // New projects can opt into Auto (simulator while disconnected) or
@@ -246,6 +247,12 @@ class IrobotRootBlocks {
                     text: translate('block.transportMode', 'Root connection method')},
                 {opcode: 'lastConnectionError', blockType: BlockType.REPORTER,
                     text: translate('block.lastConnectionError', 'last connection error')},
+                {opcode: 'rootName', blockType: BlockType.REPORTER,
+                    text: translate('block.rootName', 'Root name')},
+                {opcode: 'setRootName', blockType: BlockType.COMMAND,
+                    text: translate('block.setRootName', 'set Root name to [NAME]'), arguments: {
+                    NAME: {type: ArgumentType.STRING, defaultValue: 'ROOT'}
+                }},
                 {opcode: 'setControlMode', blockType: BlockType.COMMAND,
                     text: translate('block.setControlMode', 'set control mode to [MODE]'), arguments: {
                     MODE: {type: ArgumentType.STRING, menu: 'controlModeMenu'}
@@ -647,6 +654,20 @@ class IrobotRootBlocks {
         }
     }
 
+    rootName () {
+        return this.last.rootName || this.transport.deviceName || '';
+    }
+
+    setRootName (args) {
+        const name = String(args.NAME || '');
+        this.last.rootName = name;
+        if (!this._isSimulatorActive()) return this._send(this.protocol.setName(name));
+    }
+
+    _requestRootName () {
+        if (!this._isSimulatorActive()) this._send(this.protocol.getName());
+    }
+
     _startAccelerometerPolling () {
         if (this._isSimulatorActive()) return;
         this._stopAccelerometerPolling();
@@ -1001,6 +1022,7 @@ class IrobotRootBlocks {
         const decoded = this.protocol.decode(packet);
         if (!decoded) return;
         this.last = Object.assign({}, this.last, decoded);
+        if (decoded.name !== undefined) this.last.rootName = decoded.name;
         if (decoded.accelX !== undefined) this._finishAccelerometerPoll();
         this._resolvePendingCommand(decoded);
         if (decoded.command !== 0) return;

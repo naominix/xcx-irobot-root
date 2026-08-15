@@ -25,6 +25,12 @@ const crc8 = bytes => {
 
 const bytesToHex = bytes => Array.from(bytes, value => value.toString(16).padStart(2, '0')).join(' ');
 
+const bytesToUtf8 = bytes => {
+    const end = Array.from(bytes).indexOf(0);
+    const value = end < 0 ? bytes : bytes.slice(0, end);
+    return new TextDecoder().decode(value);
+};
+
 // Scratch VM's Base64Util imports the npm `btoa` package, whose browser build
 // performs an unguarded Node Buffer check. Buffer is not present in Edge, Safari, or
 // WKWebView. Use the browser-native functions directly so command writes work
@@ -193,6 +199,26 @@ class RootProtocol {
         return this.packet(5, 4, payload);
     }
 
+    setName (name) {
+        const payload = new Uint8Array(16);
+        const encoder = new TextEncoder();
+        let offset = 0;
+        for (const character of String(name)) {
+            const encoded = encoder.encode(character);
+            if (offset + encoded.length > payload.length) break;
+            payload.set(encoded, offset);
+            offset += encoded.length;
+        }
+        // The protocol requires a terminator when the name is shorter than
+        // the 16-byte payload. A full 16-byte name uses all available bytes.
+        if (offset < payload.length) payload[offset] = 0;
+        return this.packet(0, 1, payload);
+    }
+
+    getName () {
+        return this.packet(0, 2);
+    }
+
     decode (packet) {
         const bytes = Uint8Array.from(packet);
         if (bytes.length !== 20 || crc8(bytes.slice(0, 19)) !== bytes[19]) return null;
@@ -210,18 +236,22 @@ class RootProtocol {
             result.accelX = view.getInt16(7, false); result.accelY = view.getInt16(9, false); result.accelZ = view.getInt16(11, false);
         } else if (bytes[0] === 13 && (bytes[1] === 0 || bytes[1] === 1)) {
             result.lightLeft = view.getUint16(7, false); result.lightRight = view.getUint16(9, false);
+        } else if (bytes[0] === 0 && bytes[1] === 2) {
+            result.name = bytesToUtf8(bytes.slice(3, 19));
         }
         return result;
     }
 }
 
 class RootTransport {
-    constructor (runtime, extensionId, onData, onReset = null) {
+    constructor (runtime, extensionId, onData, onReset = null, onReady = null) {
         this.runtime = runtime;
         this.extensionId = extensionId;
         this.onData = onData;
         this.onReset = onReset;
+        this.onReady = onReady;
         this.ble = null;
+        this.deviceName = '';
         this.mode = supportsWebBluetooth() ? 'Web Bluetooth' : 'Scratch Link / Scrub';
         this.lastError = '';
         this.runtime.registerPeripheralExtension(extensionId, this);
@@ -255,13 +285,18 @@ class RootTransport {
     }
 
     connect (peripheralId) {
+        const peripheral = this.ble && this.ble._availablePeripherals && this.ble._availablePeripherals[peripheralId];
+        const webDevice = this.ble && this.ble._device;
+        this.deviceName = (peripheral && (peripheral.name || peripheral.localName)) ||
+            (webDevice && webDevice.name) || '';
         if (this.ble) this.ble.connectPeripheral(peripheralId);
     }
 
     onConnect () {
-        this.ble.startNotifications(UART_SERVICE, TX, message => {
+        const startNotifications = this.ble.startNotifications(UART_SERVICE, TX, message => {
             this.onData(base64ToBytes(message));
         });
+        if (this.onReady) Promise.resolve(startNotifications).then(() => this.onReady());
     }
 
     write (bytes) {
@@ -280,6 +315,7 @@ class RootTransport {
 
     reset () {
         this.lastError = '';
+        this.deviceName = '';
         if (this.onReset) this.onReset();
     }
     setError (error) {
