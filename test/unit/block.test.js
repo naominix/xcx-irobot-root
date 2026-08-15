@@ -381,11 +381,18 @@ describe('iRobot Root extension', () => {
     });
 
     test('stores a received Root name for the reporter', () => {
+        jest.useFakeTimers();
         const block = new blockClass(runtime);
         block._receive(block.protocol.packet(0, 2, [82, 111, 111, 116, 0]));
         expect(block.rootName()).toBe('Root');
         block.setRootName({NAME: 'Classroom Root'});
-        expect(block.rootName()).toBe('Classroom Root');
+        // The requested value is not displayed until Root confirms it with
+        // the Get Name response.
+        expect(block.rootName()).toBe('Root');
+        jest.advanceTimersByTime(200);
+        block._receive(block.protocol.packet(0, 2, [67, 108, 97, 115, 115, 114, 111, 111, 109, 0]));
+        expect(block.rootName()).toBe('Classroom');
+        jest.useRealTimers();
     });
 
     test('selects Web Bluetooth at runtime instead of at bundle time', () => {

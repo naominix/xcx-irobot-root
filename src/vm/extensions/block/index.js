@@ -36,6 +36,7 @@ const MOTION_COMMAND_GAP_MS = 300;
 const ACCELEROMETER_POLL_INTERVAL_MS = 100;
 const ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS = 250;
 const ACCELEROMETER_POLL_COMMAND_GAP_MS = 75;
+const ROOT_NAME_CONFIRM_DELAY_MS = 200;
 const ROOT_HALF_TRACK_MM = 43;
 const CONTROL_MODE_AUTO = 'auto';
 const CONTROL_MODE_SIMULATOR = 'simulator';
@@ -178,12 +179,15 @@ class IrobotRootBlocks {
         if (runtime.formatMessage) formatMessage = runtime.formatMessage;
         this.protocol = new RootProtocol();
         this.pendingCommands = new Map();
+        this.rootNameConfirmTimer = null;
         this.transport = new RootTransport(
             runtime,
             EXTENSION_ID,
             packet => this._receive(packet),
             () => {
                 this._stopAccelerometerPolling();
+                if (this.rootNameConfirmTimer) clearTimeout(this.rootNameConfirmTimer);
+                this.rootNameConfirmTimer = null;
                 this._cancelPendingCommands(new Error('Root connection was reset'));
             },
             () => this._requestRootName()
@@ -660,8 +664,13 @@ class IrobotRootBlocks {
 
     setRootName (args) {
         const name = String(args.NAME || '');
-        this.last.rootName = name;
-        if (!this._isSimulatorActive()) return this._send(this.protocol.setName(name));
+        if (this._isSimulatorActive()) return;
+        this._send(this.protocol.setName(name));
+        if (this.rootNameConfirmTimer) clearTimeout(this.rootNameConfirmTimer);
+        this.rootNameConfirmTimer = setTimeout(() => {
+            this.rootNameConfirmTimer = null;
+            this._requestRootName();
+        }, ROOT_NAME_CONFIRM_DELAY_MS);
     }
 
     _requestRootName () {

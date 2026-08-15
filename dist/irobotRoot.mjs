@@ -5637,6 +5637,7 @@ var MOTION_COMMAND_GAP_MS = 300;
 var ACCELEROMETER_POLL_INTERVAL_MS = 100;
 var ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS = 250;
 var ACCELEROMETER_POLL_COMMAND_GAP_MS = 75;
+var ROOT_NAME_CONFIRM_DELAY_MS = 200;
 var ROOT_HALF_TRACK_MM = 43;
 var CONTROL_MODE_AUTO = 'auto';
 var CONTROL_MODE_SIMULATOR = 'simulator';
@@ -5800,10 +5801,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     if (runtime.formatMessage) formatMessage = runtime.formatMessage;
     this.protocol = new RootProtocol();
     this.pendingCommands = new Map();
+    this.rootNameConfirmTimer = null;
     this.transport = new RootTransport(runtime, EXTENSION_ID, function (packet) {
       return _this._receive(packet);
     }, function () {
       _this._stopAccelerometerPolling();
+      if (_this.rootNameConfirmTimer) clearTimeout(_this.rootNameConfirmTimer);
+      _this.rootNameConfirmTimer = null;
       _this._cancelPendingCommands(new Error('Root connection was reset'));
     }, function () {
       return _this._requestRootName();
@@ -6688,9 +6692,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "setRootName",
     value: function setRootName(args) {
+      var _this4 = this;
       var name = String(args.NAME || '');
-      this.last.rootName = name;
-      if (!this._isSimulatorActive()) return this._send(this.protocol.setName(name));
+      if (this._isSimulatorActive()) return;
+      this._send(this.protocol.setName(name));
+      if (this.rootNameConfirmTimer) clearTimeout(this.rootNameConfirmTimer);
+      this.rootNameConfirmTimer = setTimeout(function () {
+        _this4.rootNameConfirmTimer = null;
+        _this4._requestRootName();
+      }, ROOT_NAME_CONFIRM_DELAY_MS);
     }
   }, {
     key: "_requestRootName",
@@ -6700,11 +6710,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_startAccelerometerPolling",
     value: function _startAccelerometerPolling() {
-      var _this4 = this;
+      var _this5 = this;
       if (this._isSimulatorActive()) return;
       this._stopAccelerometerPolling();
       this.accelerometerPollTimer = setInterval(function () {
-        return _this4._pollAccelerometer();
+        return _this5._pollAccelerometer();
       }, ACCELEROMETER_POLL_INTERVAL_MS);
       this._pollAccelerometer();
     }
@@ -6720,12 +6730,12 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_pollAccelerometer",
     value: function _pollAccelerometer() {
-      var _this5 = this;
+      var _this6 = this;
       if (!this.accelerometerPollTimer || this.accelerometerPollInFlight || !this.transport.isConnected() || this.pendingCommands.size > 0 || Date.now() - this.lastHardwareCommandAt < ACCELEROMETER_POLL_COMMAND_GAP_MS) return;
       this.accelerometerPollInFlight = true;
       this.accelerometerPollTimeout = setTimeout(function () {
-        _this5.accelerometerPollInFlight = false;
-        _this5.accelerometerPollTimeout = null;
+        _this6.accelerometerPollInFlight = false;
+        _this6.accelerometerPollTimeout = null;
       }, ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS);
       this._send(this.protocol.packet(16, 1), {
         accelerometerPoll: true
@@ -6850,7 +6860,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_send",
     value: function _send(packet) {
-      var _this6 = this;
+      var _this7 = this;
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       // Hardware writes are fire-and-forget from Scratch's point of view.
       // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
@@ -6861,8 +6871,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            if (options.accelerometerPoll) _this6._finishAccelerometerPoll();
-            _this6.transport.setError(error);
+            if (options.accelerometerPoll) _this7._finishAccelerometerPoll();
+            _this7.transport.setError(error);
           });
         }
       } catch (error) {
@@ -6878,19 +6888,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendAndWait",
     value: function _sendAndWait(packet, motionWatchdogMs) {
-      var _this7 = this;
+      var _this8 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this7.pendingCommands.get(key);
+          var pending = _this8.pendingCommands.get(key);
           if (!pending) return;
-          _this7._clearPendingCommand(key, pending);
+          _this8._clearPendingCommand(key, pending);
           var error = new Error("Root command timed out (command ".concat(packet[1], ", packet ").concat(packet[2], ")"));
-          _this7.transport.setError(error);
+          _this8.transport.setError(error);
           reject(error);
         }, COMMAND_FINISH_TIMEOUT_MS);
         var watchdog = setTimeout(function () {
-          var pending = _this7.pendingCommands.get(key);
+          var pending = _this8.pendingCommands.get(key);
           if (!pending || pending.settling) return;
           pending.settling = true;
 
@@ -6901,15 +6911,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           // interrupted movement also produces its matching Finished
           // response. Resolve after a short BLE settling interval even if
           // old firmware omits that response.
-          _this7._sendMotionStop(key);
+          _this8._sendMotionStop(key);
           pending.settle = setTimeout(function () {
-            if (_this7.pendingCommands.get(key) !== pending) return;
-            _this7._clearPendingCommand(key, pending);
-            _this7.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
+            if (_this8.pendingCommands.get(key) !== pending) return;
+            _this8._clearPendingCommand(key, pending);
+            _this8.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
             resolve();
           }, MOTION_WATCHDOG_SETTLE_MS);
         }, motionWatchdogMs);
-        _this7.pendingCommands.set(key, {
+        _this8.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6928,7 +6938,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this7._rejectPendingCommand(key, error);
+            return _this8._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -6944,19 +6954,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendFinishedCommandAndWait",
     value: function _sendFinishedCommandAndWait(packet, timeoutMs, description) {
-      var _this8 = this;
+      var _this9 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this8.pendingCommands.get(key);
+          var pending = _this9.pendingCommands.get(key);
           if (!pending) return;
-          _this8._clearPendingCommand(key, pending);
-          _this8.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
+          _this9._clearPendingCommand(key, pending);
+          _this9.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
           // Do not leave a Scratch stack stuck if one notification was
           // lost after Root had enough time to finish the operation.
           resolve();
         }, timeoutMs);
-        _this8.pendingCommands.set(key, {
+        _this9.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6971,7 +6981,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this8._rejectPendingCommand(key, error);
+            return _this9._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -6996,13 +7006,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendMotionStop",
     value: function _sendMotionStop(pendingKey) {
-      var _this9 = this;
+      var _this0 = this;
       try {
         this.lastHardwareCommandAt = Date.now();
         var pendingWrite = this.transport.write(this.protocol.motors(0, 0));
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this9._rejectPendingCommand(pendingKey, error);
+            return _this0._rejectPendingCommand(pendingKey, error);
           });
         }
       } catch (error) {
