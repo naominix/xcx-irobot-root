@@ -869,6 +869,7 @@ var en = {
 	"irobotRoot.block.sayPhrase": "say [PHRASE]",
 	"irobotRoot.block.refreshSensor": "read [SENSOR]",
 	"irobotRoot.block.sensor": "[VALUE] value",
+	"irobotRoot.block.setAccelerometerPolling": "set continuous accelerometer updates [STATE]",
 	"irobotRoot.block.pitch": "pitch (°)",
 	"irobotRoot.block.roll": "roll (°)",
 	"irobotRoot.block.isBumperPressed": "[BUMPER] bumper is pressed?",
@@ -899,6 +900,8 @@ var en = {
 	"irobotRoot.menu.sensor.battery": "battery",
 	"irobotRoot.menu.sensor.light": "light",
 	"irobotRoot.menu.sensor.accel": "accelerometer",
+	"irobotRoot.menu.polling.start": "start",
+	"irobotRoot.menu.polling.stop": "stop",
 	"irobotRoot.menu.led.off": "off",
 	"irobotRoot.menu.led.on": "on",
 	"irobotRoot.menu.led.blink": "blink",
@@ -984,6 +987,7 @@ var ja = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] と言う",
 	"irobotRoot.block.refreshSensor": "[SENSOR] を読み取る",
 	"irobotRoot.block.sensor": "[VALUE] の値",
+	"irobotRoot.block.setAccelerometerPolling": "加速度を連続して [STATE]",
 	"irobotRoot.block.pitch": "ピッチ (°)",
 	"irobotRoot.block.roll": "ロール (°)",
 	"irobotRoot.block.isBumperPressed": "[BUMPER] バンパーが押されている",
@@ -1014,6 +1018,8 @@ var ja = {
 	"irobotRoot.menu.sensor.battery": "バッテリー",
 	"irobotRoot.menu.sensor.light": "明るさ",
 	"irobotRoot.menu.sensor.accel": "加速度",
+	"irobotRoot.menu.polling.start": "読み取る",
+	"irobotRoot.menu.polling.stop": "止める",
 	"irobotRoot.menu.led.off": "消す",
 	"irobotRoot.menu.led.on": "点灯",
 	"irobotRoot.menu.led.blink": "点滅",
@@ -1102,6 +1108,7 @@ var translations = {
 	"irobotRoot.block.sayPhrase": "[PHRASE] という",
 	"irobotRoot.block.refreshSensor": "[SENSOR] をよみとる",
 	"irobotRoot.block.sensor": "[VALUE] のあたい",
+	"irobotRoot.block.setAccelerometerPolling": "かそくどをれんぞくして [STATE]",
 	"irobotRoot.block.pitch": "ぴっち (°)",
 	"irobotRoot.block.roll": "ろーる (°)",
 	"irobotRoot.block.isBumperPressed": "[BUMPER] ばんぱーがおされている",
@@ -1132,6 +1139,8 @@ var translations = {
 	"irobotRoot.menu.sensor.battery": "ばってりー",
 	"irobotRoot.menu.sensor.light": "あかるさ",
 	"irobotRoot.menu.sensor.accel": "かそくど",
+	"irobotRoot.menu.polling.start": "よみとる",
+	"irobotRoot.menu.polling.stop": "とめる",
 	"irobotRoot.menu.led.off": "けす",
 	"irobotRoot.menu.led.on": "つける",
 	"irobotRoot.menu.led.blink": "てんめつ",
@@ -5571,6 +5580,9 @@ var MOTION_WATCHDOG_BASE_MS = 2000;
 var MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 var MOTION_WATCHDOG_SETTLE_MS = 300;
 var MOTION_COMMAND_GAP_MS = 300;
+var ACCELEROMETER_POLL_INTERVAL_MS = 100;
+var ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS = 250;
+var ACCELEROMETER_POLL_COMMAND_GAP_MS = 75;
 var ROOT_HALF_TRACK_MM = 43;
 var CONTROL_MODE_AUTO = 'auto';
 var CONTROL_MODE_SIMULATOR = 'simulator';
@@ -5737,7 +5749,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
     this.transport = new RootTransport(runtime, EXTENSION_ID, function (packet) {
       return _this._receive(packet);
     }, function () {
-      return _this._cancelPendingCommands(new Error('Root connection was reset'));
+      _this._stopAccelerometerPolling();
+      _this._cancelPendingCommands(new Error('Root connection was reset'));
     });
     // Preserve the established extension behaviour for existing projects.
     // New projects can opt into Auto (simulator while disconnected) or
@@ -5764,6 +5777,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       }
     });
     this.last = {};
+    this.accelerometerPollTimer = null;
+    this.accelerometerPollTimeout = null;
+    this.accelerometerPollInFlight = false;
+    this.lastHardwareCommandAt = 0;
     this.lastDetailedEvent = '';
     this.currentEvent = null;
     this.bumperState = 0;
@@ -6038,6 +6055,16 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
             }
           }
         }, {
+          opcode: 'setAccelerometerPolling',
+          blockType: BlockType.COMMAND,
+          text: _translate('block.setAccelerometerPolling', 'set continuous accelerometer updates [STATE]'),
+          arguments: {
+            STATE: {
+              type: ArgumentType.STRING,
+              menu: 'pollingStateMenu'
+            }
+          }
+        }, {
           opcode: 'pitch',
           blockType: BlockType.REPORTER,
           text: _translate('block.pitch', 'pitch (°)')
@@ -6285,6 +6312,16 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
               text: _translate('menu.controlMode.physical', 'physical Root'),
               value: CONTROL_MODE_PHYSICAL
             }]
+          },
+          pollingStateMenu: {
+            acceptReporters: true,
+            items: [{
+              text: _translate('menu.polling.start', 'start'),
+              value: 'start'
+            }, {
+              text: _translate('menu.polling.stop', 'stop'),
+              value: 'stop'
+            }]
           }
         }
       };
@@ -6306,6 +6343,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "disconnect",
     value: function disconnect() {
+      this._stopAccelerometerPolling();
       this.transport.disconnect();
     }
   }, {
@@ -6331,6 +6369,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var wasPhysical = !this._isSimulatorActive();
       this.controlMode = mode;
       if (this._isSimulatorActive()) {
+        this._stopAccelerometerPolling();
         if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
         this._cancelPendingCommands(new Error('Root control target changed to simulator'));
         this.simulator.reset();
@@ -6563,6 +6602,56 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
     }
   }, {
+    key: "setAccelerometerPolling",
+    value: function setAccelerometerPolling(args) {
+      if (String(args.STATE) === 'start') {
+        this._startAccelerometerPolling();
+      } else {
+        this._stopAccelerometerPolling();
+      }
+    }
+  }, {
+    key: "_startAccelerometerPolling",
+    value: function _startAccelerometerPolling() {
+      var _this4 = this;
+      if (this._isSimulatorActive()) return;
+      this._stopAccelerometerPolling();
+      this.accelerometerPollTimer = setInterval(function () {
+        return _this4._pollAccelerometer();
+      }, ACCELEROMETER_POLL_INTERVAL_MS);
+      this._pollAccelerometer();
+    }
+  }, {
+    key: "_stopAccelerometerPolling",
+    value: function _stopAccelerometerPolling() {
+      if (this.accelerometerPollTimer) clearInterval(this.accelerometerPollTimer);
+      if (this.accelerometerPollTimeout) clearTimeout(this.accelerometerPollTimeout);
+      this.accelerometerPollTimer = null;
+      this.accelerometerPollTimeout = null;
+      this.accelerometerPollInFlight = false;
+    }
+  }, {
+    key: "_pollAccelerometer",
+    value: function _pollAccelerometer() {
+      var _this5 = this;
+      if (!this.accelerometerPollTimer || this.accelerometerPollInFlight || !this.transport.isConnected() || this.pendingCommands.size > 0 || Date.now() - this.lastHardwareCommandAt < ACCELEROMETER_POLL_COMMAND_GAP_MS) return;
+      this.accelerometerPollInFlight = true;
+      this.accelerometerPollTimeout = setTimeout(function () {
+        _this5.accelerometerPollInFlight = false;
+        _this5.accelerometerPollTimeout = null;
+      }, ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS);
+      this._send(this.protocol.packet(16, 1), {
+        accelerometerPoll: true
+      });
+    }
+  }, {
+    key: "_finishAccelerometerPoll",
+    value: function _finishAccelerometerPoll() {
+      if (this.accelerometerPollTimeout) clearTimeout(this.accelerometerPollTimeout);
+      this.accelerometerPollTimeout = null;
+      this.accelerometerPollInFlight = false;
+    }
+  }, {
     key: "_accelerometerAngles",
     value: function _accelerometerAngles() {
       var source = this._isSimulatorActive() ? {
@@ -6671,19 +6760,23 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_send",
     value: function _send(packet) {
-      var _this4 = this;
+      var _this6 = this;
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       // Hardware writes are fire-and-forget from Scratch's point of view.
       // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
       // after CoreBluetooth accepted the bytes; returning that promise would
       // leave the command block and the rest of its stack permanently waiting.
       try {
+        if (!options.accelerometerPoll) this.lastHardwareCommandAt = Date.now();
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this4.transport.setError(error);
+            if (options.accelerometerPoll) _this6._finishAccelerometerPoll();
+            _this6.transport.setError(error);
           });
         }
       } catch (error) {
+        if (options.accelerometerPoll) this._finishAccelerometerPoll();
         this.transport.setError(error);
       }
     }
@@ -6695,19 +6788,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendAndWait",
     value: function _sendAndWait(packet, motionWatchdogMs) {
-      var _this5 = this;
+      var _this7 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this5.pendingCommands.get(key);
+          var pending = _this7.pendingCommands.get(key);
           if (!pending) return;
-          _this5._clearPendingCommand(key, pending);
+          _this7._clearPendingCommand(key, pending);
           var error = new Error("Root command timed out (command ".concat(packet[1], ", packet ").concat(packet[2], ")"));
-          _this5.transport.setError(error);
+          _this7.transport.setError(error);
           reject(error);
         }, COMMAND_FINISH_TIMEOUT_MS);
         var watchdog = setTimeout(function () {
-          var pending = _this5.pendingCommands.get(key);
+          var pending = _this7.pendingCommands.get(key);
           if (!pending || pending.settling) return;
           pending.settling = true;
 
@@ -6718,15 +6811,15 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
           // interrupted movement also produces its matching Finished
           // response. Resolve after a short BLE settling interval even if
           // old firmware omits that response.
-          _this5._sendMotionStop(key);
+          _this7._sendMotionStop(key);
           pending.settle = setTimeout(function () {
-            if (_this5.pendingCommands.get(key) !== pending) return;
-            _this5._clearPendingCommand(key, pending);
-            _this5.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
+            if (_this7.pendingCommands.get(key) !== pending) return;
+            _this7._clearPendingCommand(key, pending);
+            _this7.transport.setError(new Error("Root motion completion watchdog stopped residual movement (command ".concat(packet[1], ")")));
             resolve();
           }, MOTION_WATCHDOG_SETTLE_MS);
         }, motionWatchdogMs);
-        _this5.pendingCommands.set(key, {
+        _this7.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6741,10 +6834,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       // versions leave it pending after CoreBluetooth has accepted the bytes.
       // The Scratch block waits only for Root's own matching Finished packet.
       try {
+        this.lastHardwareCommandAt = Date.now();
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this5._rejectPendingCommand(key, error);
+            return _this7._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -6760,19 +6854,19 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendFinishedCommandAndWait",
     value: function _sendFinishedCommandAndWait(packet, timeoutMs, description) {
-      var _this6 = this;
+      var _this8 = this;
       var key = this._commandKey(packet[0], packet[1], packet[2]);
       var completion = new Promise(function (resolve, reject) {
         var timeout = setTimeout(function () {
-          var pending = _this6.pendingCommands.get(key);
+          var pending = _this8.pendingCommands.get(key);
           if (!pending) return;
-          _this6._clearPendingCommand(key, pending);
-          _this6.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
+          _this8._clearPendingCommand(key, pending);
+          _this8.transport.setError(new Error("Root ".concat(description, " completion response timed out (packet ").concat(packet[2], ")")));
           // Do not leave a Scratch stack stuck if one notification was
           // lost after Root had enough time to finish the operation.
           resolve();
         }, timeoutMs);
-        _this6.pendingCommands.set(key, {
+        _this8.pendingCommands.set(key, {
           resolve: resolve,
           reject: reject,
           timeout: timeout,
@@ -6783,10 +6877,11 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         });
       });
       try {
+        this.lastHardwareCommandAt = Date.now();
         var pendingWrite = this.transport.write(packet);
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this6._rejectPendingCommand(key, error);
+            return _this8._rejectPendingCommand(key, error);
           });
         }
       } catch (error) {
@@ -6811,12 +6906,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
   }, {
     key: "_sendMotionStop",
     value: function _sendMotionStop(pendingKey) {
-      var _this7 = this;
+      var _this9 = this;
       try {
+        this.lastHardwareCommandAt = Date.now();
         var pendingWrite = this.transport.write(this.protocol.motors(0, 0));
         if (pendingWrite && typeof pendingWrite.catch === 'function') {
           pendingWrite.catch(function (error) {
-            return _this7._rejectPendingCommand(pendingKey, error);
+            return _this9._rejectPendingCommand(pendingKey, error);
           });
         }
       } catch (error) {
@@ -6961,6 +7057,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var decoded = this.protocol.decode(packet);
       if (!decoded) return;
       this.last = Object.assign({}, this.last, decoded);
+      if (decoded.accelX !== undefined) this._finishAccelerometerPoll();
       this._resolvePendingCommand(decoded);
       if (decoded.command !== 0) return;
       if (decoded.device === 12) this._receiveBumperEvent(decoded);

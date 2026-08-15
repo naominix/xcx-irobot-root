@@ -57,6 +57,7 @@ describe('iRobot Root extension', () => {
         expect(block.getInfo().blocks.some(item => item.opcode === 'resetNavigation')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'pitch')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'roll')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'setAccelerometerPolling')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'navigateTo').arguments.X.type)
             .toBe('number');
         expect(block.getInfo().customFieldTypes['root-motor-left'].implementation).toMatchObject({
@@ -987,6 +988,28 @@ describe('iRobot Root extension', () => {
         ]));
         expect(block.pitch()).toBe(0);
         expect(block.roll()).toBe(45);
+    });
+
+    test('polls the accelerometer until continuous updates are stopped', () => {
+        jest.useFakeTimers();
+        const block = new blockClass(runtime);
+        block.transport.isConnected = jest.fn(() => true);
+        block.transport.write = jest.fn(() => Promise.resolve());
+
+        block.setAccelerometerPolling({STATE: 'start'});
+        expect(block.transport.write).toHaveBeenCalledTimes(1);
+        expect(Array.from(block.transport.write.mock.calls[0][0].slice(0, 2))).toEqual([16, 1]);
+
+        // A response permits the next periodic query; no overlapping requests
+        // are made while an earlier accelerometer request is in flight.
+        block._receive(block.protocol.packet(16, 1, [0, 0, 0, 0, 0, 0, 0, 0, 3, 232]));
+        jest.advanceTimersByTime(100);
+        expect(block.transport.write).toHaveBeenCalledTimes(2);
+
+        block.setAccelerometerPolling({STATE: 'stop'});
+        jest.advanceTimersByTime(300);
+        expect(block.transport.write).toHaveBeenCalledTimes(2);
+        jest.useRealTimers();
     });
 
     test('still starts a fixed hat when a saved parameterized hat is malformed', () => {

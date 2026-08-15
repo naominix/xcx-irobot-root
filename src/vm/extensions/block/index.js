@@ -33,6 +33,9 @@ const MOTION_WATCHDOG_BASE_MS = 2000;
 const MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 const MOTION_WATCHDOG_SETTLE_MS = 300;
 const MOTION_COMMAND_GAP_MS = 300;
+const ACCELEROMETER_POLL_INTERVAL_MS = 100;
+const ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS = 250;
+const ACCELEROMETER_POLL_COMMAND_GAP_MS = 75;
 const ROOT_HALF_TRACK_MM = 43;
 const CONTROL_MODE_AUTO = 'auto';
 const CONTROL_MODE_SIMULATOR = 'simulator';
@@ -179,7 +182,10 @@ class IrobotRootBlocks {
             runtime,
             EXTENSION_ID,
             packet => this._receive(packet),
-            () => this._cancelPendingCommands(new Error('Root connection was reset'))
+            () => {
+                this._stopAccelerometerPolling();
+                this._cancelPendingCommands(new Error('Root connection was reset'));
+            }
         );
         // Preserve the established extension behaviour for existing projects.
         // New projects can opt into Auto (simulator while disconnected) or
@@ -202,6 +208,10 @@ class IrobotRootBlocks {
             }
         });
         this.last = {};
+        this.accelerometerPollTimer = null;
+        this.accelerometerPollTimeout = null;
+        this.accelerometerPollInFlight = false;
+        this.lastHardwareCommandAt = 0;
         this.lastDetailedEvent = '';
         this.currentEvent = null;
         this.bumperState = 0;
@@ -316,6 +326,10 @@ class IrobotRootBlocks {
                     text: translate('block.sensor', '[VALUE] value'), arguments: {
                     VALUE: {type: ArgumentType.STRING, menu: 'valueMenu'}
                 }},
+                {opcode: 'setAccelerometerPolling', blockType: BlockType.COMMAND,
+                    text: translate('block.setAccelerometerPolling', 'set continuous accelerometer updates [STATE]'), arguments: {
+                    STATE: {type: ArgumentType.STRING, menu: 'pollingStateMenu'}
+                }},
                 {opcode: 'pitch', blockType: BlockType.REPORTER,
                     text: translate('block.pitch', 'pitch (°)')},
                 {opcode: 'roll', blockType: BlockType.REPORTER,
@@ -415,6 +429,10 @@ class IrobotRootBlocks {
                     {text: translate('menu.controlMode.auto', 'automatic'), value: CONTROL_MODE_AUTO},
                     {text: translate('menu.controlMode.simulator', 'simulator'), value: CONTROL_MODE_SIMULATOR},
                     {text: translate('menu.controlMode.physical', 'physical Root'), value: CONTROL_MODE_PHYSICAL}
+                ]},
+                pollingStateMenu: {acceptReporters: true, items: [
+                    {text: translate('menu.polling.start', 'start'), value: 'start'},
+                    {text: translate('menu.polling.stop', 'stop'), value: 'stop'}
                 ]}
             }
         };
@@ -429,7 +447,10 @@ class IrobotRootBlocks {
         this.transport.scan();
     }
 
-    disconnect () { this.transport.disconnect(); }
+    disconnect () {
+        this._stopAccelerometerPolling();
+        this.transport.disconnect();
+    }
     isConnected () { return this.transport.isConnected(); }
     transportMode () { return this.transport.mode; }
     lastConnectionError () { return this.transport.lastError; }
@@ -440,6 +461,7 @@ class IrobotRootBlocks {
         const wasPhysical = !this._isSimulatorActive();
         this.controlMode = mode;
         if (this._isSimulatorActive()) {
+            this._stopAccelerometerPolling();
             if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
             this._cancelPendingCommands(new Error('Root control target changed to simulator'));
             this.simulator.reset();
@@ -617,6 +639,54 @@ class IrobotRootBlocks {
         return this.last[args.VALUE] === undefined ? 0 : this.last[args.VALUE];
     }
 
+    setAccelerometerPolling (args) {
+        if (String(args.STATE) === 'start') {
+            this._startAccelerometerPolling();
+        } else {
+            this._stopAccelerometerPolling();
+        }
+    }
+
+    _startAccelerometerPolling () {
+        if (this._isSimulatorActive()) return;
+        this._stopAccelerometerPolling();
+        this.accelerometerPollTimer = setInterval(
+            () => this._pollAccelerometer(),
+            ACCELEROMETER_POLL_INTERVAL_MS
+        );
+        this._pollAccelerometer();
+    }
+
+    _stopAccelerometerPolling () {
+        if (this.accelerometerPollTimer) clearInterval(this.accelerometerPollTimer);
+        if (this.accelerometerPollTimeout) clearTimeout(this.accelerometerPollTimeout);
+        this.accelerometerPollTimer = null;
+        this.accelerometerPollTimeout = null;
+        this.accelerometerPollInFlight = false;
+    }
+
+    _pollAccelerometer () {
+        if (
+            !this.accelerometerPollTimer ||
+            this.accelerometerPollInFlight ||
+            !this.transport.isConnected() ||
+            this.pendingCommands.size > 0 ||
+            Date.now() - this.lastHardwareCommandAt < ACCELEROMETER_POLL_COMMAND_GAP_MS
+        ) return;
+        this.accelerometerPollInFlight = true;
+        this.accelerometerPollTimeout = setTimeout(() => {
+            this.accelerometerPollInFlight = false;
+            this.accelerometerPollTimeout = null;
+        }, ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS);
+        this._send(this.protocol.packet(16, 1), {accelerometerPoll: true});
+    }
+
+    _finishAccelerometerPoll () {
+        if (this.accelerometerPollTimeout) clearTimeout(this.accelerometerPollTimeout);
+        this.accelerometerPollTimeout = null;
+        this.accelerometerPollInFlight = false;
+    }
+
     _accelerometerAngles () {
         const source = this._isSimulatorActive() ? {
             accelX: this.simulator.getSensor('accelX'),
@@ -687,17 +757,22 @@ class IrobotRootBlocks {
 
     lastPacket () { return this.last.raw || ''; }
     detailedEvent () { return this.lastDetailedEvent; }
-    _send (packet) {
+    _send (packet, options = {}) {
         // Hardware writes are fire-and-forget from Scratch's point of view.
         // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
         // after CoreBluetooth accepted the bytes; returning that promise would
         // leave the command block and the rest of its stack permanently waiting.
         try {
+            if (!options.accelerometerPoll) this.lastHardwareCommandAt = Date.now();
             const pendingWrite = this.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
-                pendingWrite.catch(error => this.transport.setError(error));
+                pendingWrite.catch(error => {
+                    if (options.accelerometerPoll) this._finishAccelerometerPoll();
+                    this.transport.setError(error);
+                });
             }
         } catch (error) {
+            if (options.accelerometerPoll) this._finishAccelerometerPoll();
             this.transport.setError(error);
         }
     }
@@ -750,6 +825,7 @@ class IrobotRootBlocks {
         // versions leave it pending after CoreBluetooth has accepted the bytes.
         // The Scratch block waits only for Root's own matching Finished packet.
         try {
+            this.lastHardwareCommandAt = Date.now();
             const pendingWrite = this.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
                 pendingWrite.catch(error => this._rejectPendingCommand(key, error));
@@ -784,6 +860,7 @@ class IrobotRootBlocks {
         });
 
         try {
+            this.lastHardwareCommandAt = Date.now();
             const pendingWrite = this.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
                 pendingWrite.catch(error => this._rejectPendingCommand(key, error));
@@ -809,6 +886,7 @@ class IrobotRootBlocks {
 
     _sendMotionStop (pendingKey) {
         try {
+            this.lastHardwareCommandAt = Date.now();
             const pendingWrite = this.transport.write(this.protocol.motors(0, 0));
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
                 pendingWrite.catch(error => this._rejectPendingCommand(pendingKey, error));
@@ -920,6 +998,7 @@ class IrobotRootBlocks {
         const decoded = this.protocol.decode(packet);
         if (!decoded) return;
         this.last = Object.assign({}, this.last, decoded);
+        if (decoded.accelX !== undefined) this._finishAccelerometerPoll();
         this._resolvePendingCommand(decoded);
         if (decoded.command !== 0) return;
         if (decoded.device === 12) this._receiveBumperEvent(decoded);
