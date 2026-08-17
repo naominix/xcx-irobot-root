@@ -6800,14 +6800,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         return degrees === 0 ? 0 : degrees;
       };
       return {
-        // With the Root held so the power button points forward, the
-        // accelerometer Y axis measures front/back tilt (pitch), while X
-        // measures left/right tilt (roll).
-        pitch: toDegrees(Math.atan2(-y, Math.hypot(x, z))),
-        // Use the magnitude of the two non-roll axes. This keeps a flat
+        // With the Root held so the power button points forward, Root's
+        // block convention maps the X axis to pitch and Y axis to roll.
+        // Use the magnitude of the two non-pitch axes. This keeps a flat
         // Root at 0° whether its accelerometer reports gravity as +Z or
         // -Z, instead of displaying an equivalent ±180° angle.
-        roll: toDegrees(Math.atan2(x, Math.hypot(y, z)))
+        pitch: toDegrees(Math.atan2(x, Math.hypot(y, z))),
+        roll: toDegrees(Math.atan2(-y, Math.hypot(x, z)))
       };
     }
   }, {
