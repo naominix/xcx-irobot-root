@@ -5637,6 +5637,7 @@ var MOTION_COMMAND_GAP_MS = 300;
 var ACCELEROMETER_POLL_INTERVAL_MS = 100;
 var ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS = 250;
 var ACCELEROMETER_POLL_COMMAND_GAP_MS = 75;
+var ACCELEROMETER_FILTER_ALPHA = 0.2;
 var ROOT_NAME_CONFIRM_DELAY_MS = 200;
 var ROOT_HALF_TRACK_MM = 43;
 var CONTROL_MODE_AUTO = 'auto';
@@ -5806,6 +5807,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       return _this._receive(packet);
     }, function () {
       _this._stopAccelerometerPolling();
+      _this._resetAccelerometerFilter();
       if (_this.rootNameConfirmTimer) clearTimeout(_this.rootNameConfirmTimer);
       _this.rootNameConfirmTimer = null;
       _this._cancelPendingCommands(new Error('Root connection was reset'));
@@ -5837,6 +5839,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       }
     });
     this.last = {};
+    this.filteredAcceleration = null;
     this.accelerometerPollTimer = null;
     this.accelerometerPollTimeout = null;
     this.accelerometerPollInFlight = false;
@@ -6408,6 +6411,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         y: 0,
         heading: 90
       };
+      this._resetAccelerometerFilter();
       if (this.controlMode === CONTROL_MODE_SIMULATOR) {
         this.simulator.open();
         return;
@@ -6444,6 +6448,7 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       this.controlMode = mode;
       if (this._isSimulatorActive()) {
         this._stopAccelerometerPolling();
+        this._resetAccelerometerFilter();
         if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
         this._cancelPendingCommands(new Error('Root control target changed to simulator'));
         this.simulator.reset();
@@ -6749,13 +6754,36 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       this.accelerometerPollInFlight = false;
     }
   }, {
+    key: "_resetAccelerometerFilter",
+    value: function _resetAccelerometerFilter() {
+      this.filteredAcceleration = null;
+    }
+  }, {
+    key: "_updateFilteredAcceleration",
+    value: function _updateFilteredAcceleration(decoded) {
+      if (decoded.accelX === undefined) return;
+      var sample = {
+        accelX: Number(decoded.accelX) || 0,
+        accelY: Number(decoded.accelY) || 0,
+        accelZ: Number(decoded.accelZ) || 0
+      };
+      if (!this.filteredAcceleration) {
+        this.filteredAcceleration = sample;
+        return;
+      }
+      for (var _i = 0, _Object$keys = Object.keys(sample); _i < _Object$keys.length; _i++) {
+        var axis = _Object$keys[_i];
+        this.filteredAcceleration[axis] += ACCELEROMETER_FILTER_ALPHA * (sample[axis] - this.filteredAcceleration[axis]);
+      }
+    }
+  }, {
     key: "_accelerometerAngles",
     value: function _accelerometerAngles() {
       var source = this._isSimulatorActive() ? {
         accelX: this.simulator.getSensor('accelX'),
         accelY: this.simulator.getSensor('accelY'),
         accelZ: this.simulator.getSensor('accelZ')
-      } : this.last;
+      } : this.filteredAcceleration || this.last;
       var x = Number(source.accelX) || 0;
       var y = Number(source.accelY) || 0;
       var z = Number(source.accelZ) || 0;
@@ -6776,7 +6804,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         // accelerometer Y axis measures front/back tilt (pitch), while X
         // measures left/right tilt (roll).
         pitch: toDegrees(Math.atan2(-y, Math.hypot(x, z))),
-        roll: toDegrees(Math.atan2(x, z))
+        // Use the magnitude of the two non-roll axes. This keeps a flat
+        // Root at 0° whether its accelerometer reports gravity as +Z or
+        // -Z, instead of displaying an equivalent ±180° angle.
+        roll: toDegrees(Math.atan2(x, Math.hypot(y, z)))
       };
     }
   }, {
@@ -7138,8 +7169,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       var next = decoded.touchMask;
       this.touchState = next;
       var sensors = [['FL', 0x8], ['FR', 0x4], ['RR', 0x2], ['RL', 0x1]];
-      for (var _i = 0, _sensors = sensors; _i < _sensors.length; _i++) {
-        var _sensors$_i = _slicedToArray$1(_sensors[_i], 2),
+      for (var _i2 = 0, _sensors = sensors; _i2 < _sensors.length; _i2++) {
+        var _sensors$_i = _slicedToArray$1(_sensors[_i2], 2),
           sensor = _sensors$_i[0],
           mask = _sensors$_i[1];
         if ((previous ^ next) & mask) {
@@ -7158,7 +7189,10 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       if (!decoded) return;
       this.last = Object.assign({}, this.last, decoded);
       if (decoded.name !== undefined) this.last.rootName = decoded.name;
-      if (decoded.accelX !== undefined) this._finishAccelerometerPoll();
+      if (decoded.accelX !== undefined) {
+        this._updateFilteredAcceleration(decoded);
+        this._finishAccelerometerPoll();
+      }
       this._resolvePendingCommand(decoded);
       if (decoded.command !== 0) return;
       if (decoded.device === 12) this._receiveBumperEvent(decoded);

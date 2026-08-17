@@ -36,6 +36,7 @@ const MOTION_COMMAND_GAP_MS = 300;
 const ACCELEROMETER_POLL_INTERVAL_MS = 100;
 const ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS = 250;
 const ACCELEROMETER_POLL_COMMAND_GAP_MS = 75;
+const ACCELEROMETER_FILTER_ALPHA = 0.2;
 const ROOT_NAME_CONFIRM_DELAY_MS = 200;
 const ROOT_HALF_TRACK_MM = 43;
 const CONTROL_MODE_AUTO = 'auto';
@@ -186,6 +187,7 @@ class IrobotRootBlocks {
             packet => this._receive(packet),
             () => {
                 this._stopAccelerometerPolling();
+                this._resetAccelerometerFilter();
                 if (this.rootNameConfirmTimer) clearTimeout(this.rootNameConfirmTimer);
                 this.rootNameConfirmTimer = null;
                 this._cancelPendingCommands(new Error('Root connection was reset'));
@@ -213,6 +215,7 @@ class IrobotRootBlocks {
             }
         });
         this.last = {};
+        this.filteredAcceleration = null;
         this.accelerometerPollTimer = null;
         this.accelerometerPollTimeout = null;
         this.accelerometerPollInFlight = false;
@@ -451,6 +454,7 @@ class IrobotRootBlocks {
 
     connect () {
         this.navigationPosition = {x: 0, y: 0, heading: 90};
+        this._resetAccelerometerFilter();
         if (this.controlMode === CONTROL_MODE_SIMULATOR) {
             this.simulator.open();
             return;
@@ -473,6 +477,7 @@ class IrobotRootBlocks {
         this.controlMode = mode;
         if (this._isSimulatorActive()) {
             this._stopAccelerometerPolling();
+            this._resetAccelerometerFilter();
             if (wasPhysical && this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
             this._cancelPendingCommands(new Error('Root control target changed to simulator'));
             this.simulator.reset();
@@ -717,12 +722,33 @@ class IrobotRootBlocks {
         this.accelerometerPollInFlight = false;
     }
 
+    _resetAccelerometerFilter () {
+        this.filteredAcceleration = null;
+    }
+
+    _updateFilteredAcceleration (decoded) {
+        if (decoded.accelX === undefined) return;
+        const sample = {
+            accelX: Number(decoded.accelX) || 0,
+            accelY: Number(decoded.accelY) || 0,
+            accelZ: Number(decoded.accelZ) || 0
+        };
+        if (!this.filteredAcceleration) {
+            this.filteredAcceleration = sample;
+            return;
+        }
+        for (const axis of Object.keys(sample)) {
+            this.filteredAcceleration[axis] +=
+                ACCELEROMETER_FILTER_ALPHA * (sample[axis] - this.filteredAcceleration[axis]);
+        }
+    }
+
     _accelerometerAngles () {
         const source = this._isSimulatorActive() ? {
             accelX: this.simulator.getSensor('accelX'),
             accelY: this.simulator.getSensor('accelY'),
             accelZ: this.simulator.getSensor('accelZ')
-        } : this.last;
+        } : (this.filteredAcceleration || this.last);
         const x = Number(source.accelX) || 0;
         const y = Number(source.accelY) || 0;
         const z = Number(source.accelZ) || 0;
@@ -740,7 +766,10 @@ class IrobotRootBlocks {
             // accelerometer Y axis measures front/back tilt (pitch), while X
             // measures left/right tilt (roll).
             pitch: toDegrees(Math.atan2(-y, Math.hypot(x, z))),
-            roll: toDegrees(Math.atan2(x, z))
+            // Use the magnitude of the two non-roll axes. This keeps a flat
+            // Root at 0° whether its accelerometer reports gravity as +Z or
+            // -Z, instead of displaying an equivalent ±180° angle.
+            roll: toDegrees(Math.atan2(x, Math.hypot(y, z)))
         };
     }
 
@@ -1032,7 +1061,10 @@ class IrobotRootBlocks {
         if (!decoded) return;
         this.last = Object.assign({}, this.last, decoded);
         if (decoded.name !== undefined) this.last.rootName = decoded.name;
-        if (decoded.accelX !== undefined) this._finishAccelerometerPoll();
+        if (decoded.accelX !== undefined) {
+            this._updateFilteredAcceleration(decoded);
+            this._finishAccelerometerPoll();
+        }
         this._resolvePendingCommand(decoded);
         if (decoded.command !== 0) return;
         if (decoded.device === 12) this._receiveBumperEvent(decoded);

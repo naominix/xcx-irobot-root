@@ -1000,22 +1000,39 @@ describe('iRobot Root extension', () => {
     });
 
     test('derives pitch and roll in degrees from the accelerometer response', () => {
-        const block = new blockClass(runtime);
         const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
 
         // y=-z is a 45° pitch; x=0 leaves the roll level.
-        block._receive(block.protocol.packet(16, 1, [
+        const pitchBlock = new blockClass(runtime);
+        pitchBlock._receive(pitchBlock.protocol.packet(16, 1, [
             0, 0, 0, 0, ...signed16(0), ...signed16(-1000), ...signed16(1000)
         ]));
-        expect(block.pitch()).toBe(45);
-        expect(block.roll()).toBe(0);
+        expect(pitchBlock.pitch()).toBe(45);
+        expect(pitchBlock.roll()).toBe(0);
 
         // x=z is a 45° roll; y=0 leaves the pitch level.
-        block._receive(block.protocol.packet(16, 1, [
+        const rollBlock = new blockClass(runtime);
+        rollBlock._receive(rollBlock.protocol.packet(16, 1, [
             0, 0, 0, 0, ...signed16(1000), ...signed16(0), ...signed16(1000)
         ]));
-        expect(block.pitch()).toBe(0);
-        expect(block.roll()).toBe(45);
+        expect(rollBlock.pitch()).toBe(0);
+        expect(rollBlock.roll()).toBe(45);
+    });
+
+    test('filters accelerometer samples and reports zero roll while horizontal', () => {
+        const block = new blockClass(runtime);
+        const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
+        const accelPacket = (x, y, z) => block.protocol.packet(16, 1, [
+            0, 0, 0, 0, ...signed16(x), ...signed16(y), ...signed16(z)
+        ]);
+
+        // Root units may report gravity as -Z while lying flat.
+        block._receive(accelPacket(0, 0, -1000));
+        expect(block.roll()).toBe(0);
+
+        // The 0.2 low-pass filter turns an abrupt 45° sample into 11.3°.
+        block._receive(accelPacket(1000, 0, -1000));
+        expect(block.roll()).toBe(11.3);
     });
 
     test('polls the accelerometer until continuous updates are stopped', () => {
