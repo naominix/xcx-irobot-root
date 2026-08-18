@@ -204,7 +204,7 @@ describe('iRobot Root extension', () => {
     test('simulator view zoom changes display scale without changing Root coordinates', () => {
         const block = new blockClass(runtime);
         block.simulator.pose = {x: 120, y: -45, heading: 30};
-        expect(block.simulator.viewZoom).toBe(1);
+        expect(block.simulator.viewZoom).toBe(0.25);
         expect(block.simulator.setViewZoom(0.5)).toBe(0.5);
         expect(block.simulator.pose).toEqual({x: 120, y: -45, heading: 30});
         expect(block.simulator.setViewZoom(3)).toBe(2.5);

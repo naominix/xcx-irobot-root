@@ -28,8 +28,10 @@ class RootSimulator {
         this.speedMultiplier = 1;
         // Display zoom only changes the viewport.  Root coordinates, collision
         // geometry, and motion timing remain in millimetres.
-        this.viewZoom = 1;
+        // Start zoomed out so a physical 16 cm grid can be viewed as a board.
+        this.viewZoom = 0.25;
         this.viewOffset = {x: 0, y: 0};
+        this.homePose = {x: 0, y: 0, heading: DEFAULT_HEADING};
         this._animation = null;
         this._continuousMotion = null;
         this._ledAnimationTimer = null;
@@ -46,6 +48,9 @@ class RootSimulator {
         this._collisionPoint = null;
         this._runButton = null;
         this._stopButton = null;
+        this._placeRootButton = null;
+        this._snapRootButton = null;
+        this._rootPlacementMode = null;
         this._localizedElements = [];
         this.reset();
     }
@@ -57,7 +62,8 @@ class RootSimulator {
         this._panCandidatePointers.clear();
         this._panPointerIds.clear();
         this._panLastPoint = null;
-        this.pose = {x: 0, y: 0, heading: DEFAULT_HEADING};
+        this._rootPlacementMode = null;
+        this.pose = {...this.homePose};
         this.marker = 0;
         this.led = {effect: 0, red: 0, green: 0, blue: 0};
         this.note = null;
@@ -85,7 +91,7 @@ class RootSimulator {
     resetNavigation () {
         this.stop();
         this._setBumpers(false, false);
-        this.pose = {x: 0, y: 0, heading: DEFAULT_HEADING};
+        this.pose = {...this.homePose};
         this._draw();
     }
 
@@ -123,6 +129,25 @@ class RootSimulator {
         if (this._zoomValue) this._zoomValue.textContent = `${Math.round(this.viewZoom * 100)}%`;
         this._draw();
         return this.viewZoom;
+    }
+
+    _setRootPlacementMode (mode) {
+        this._rootPlacementMode = this._rootPlacementMode === mode ? null : mode;
+        this._selectedObstacle = -1;
+        this._dragOffset = null;
+        this._updateRootPlacementButtons();
+        this._draw();
+    }
+
+    _updateRootPlacementButtons () {
+        const update = (button, active) => {
+            if (!button) return;
+            button.setAttribute('aria-pressed', String(active));
+            button.style.background = active ? '#f2d941' : 'white';
+            button.style.color = active ? '#26353a' : '#264c40';
+        };
+        update(this._placeRootButton, this._rootPlacementMode === 'free');
+        update(this._snapRootButton, this._rootPlacementMode === 'grid');
     }
 
     runProject () {
@@ -457,6 +482,12 @@ class RootSimulator {
         addButton('addBlock', '+ Block', () => this.addObstacle('block'));
         addButton('delete', 'Delete', () => this.deleteSelectedObstacle());
         addButton('clearObstacles', 'Clear obstacles', () => this.clearObstacles());
+        this._placeRootButton = addButton('placeRoot', '▣ Place Root', () => {
+            this._setRootPlacementMode('free');
+        });
+        this._snapRootButton = addButton('snapRoot', '▦ Snap Root to Cell', () => {
+            this._setRootPlacementMode('grid');
+        });
         const speedLabel = document.createElement('label');
         speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
         const speedText = document.createElement('span');
@@ -575,6 +606,20 @@ class RootSimulator {
     _pointerDown (event) {
         const point = this._eventWorld(event);
         const canvasPoint = this._eventCanvasPoint(event);
+        if (this._rootPlacementMode) {
+            // Grid lines are ±80 mm from each cell centre. Grid placement uses
+            // an integer 160 mm coordinate; free placement keeps the click's
+            // exact physical position for arbitrary experiment layouts.
+            this.homePose = {
+                x: this._rootPlacementMode === 'grid' ? Math.round(point.x / GRID_CELL_MM) * GRID_CELL_MM : point.x,
+                y: this._rootPlacementMode === 'grid' ? Math.round(point.y / GRID_CELL_MM) * GRID_CELL_MM : point.y,
+                heading: this.pose.heading
+            };
+            this.pose = {...this.homePose};
+            this.trail = [];
+            this._setRootPlacementMode(this._rootPlacementMode);
+            return;
+        }
         const scale = SIMULATOR_SCALE * this.viewZoom;
         const rootCanvasX = this._canvas.width / 2 + (this.viewOffset.x + this.pose.x) * scale;
         const rootCanvasY = this._canvas.height / 2 - (this.viewOffset.y + this.pose.y) * scale;
@@ -677,6 +722,7 @@ class RootSimulator {
             this._stopButton.disabled = !controlsEnabled;
             this._stopButton.style.opacity = controlsEnabled ? '1' : '0.45';
         }
+        this._updateRootPlacementButtons();
         const context = this._context;
         const {width, height} = this._canvas;
         const scale = SIMULATOR_SCALE * this.viewZoom;
@@ -689,8 +735,10 @@ class RootSimulator {
         context.strokeStyle = '#e0ebe7'; context.lineWidth = 1;
         const gridCellPx = GRID_CELL_MM * scale;
         const gridOffset = coordinate => ((coordinate % gridCellPx) + gridCellPx) % gridCellPx;
-        const gridOriginX = width / 2 + this.viewOffset.x * scale;
-        const gridOriginY = height / 2 - this.viewOffset.y * scale;
+        // The coordinate origin is the centre of a 16 cm cell, not a grid
+        // intersection. A Root at (0, 0) therefore fits in its starting cell.
+        const gridOriginX = width / 2 + (this.viewOffset.x + GRID_CELL_MM / 2) * scale;
+        const gridOriginY = height / 2 - (this.viewOffset.y - GRID_CELL_MM / 2) * scale;
         for (let x = gridOffset(gridOriginX); x < width; x += gridCellPx) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke(); }
         for (let y = gridOffset(gridOriginY); y < height; y += gridCellPx) { context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke(); }
         this.obstacles.forEach((obstacle, index) => {

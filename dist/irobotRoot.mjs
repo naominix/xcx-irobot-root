@@ -940,6 +940,8 @@ var en = {
 	"irobotRoot.simulator.addBlock": "+ Block",
 	"irobotRoot.simulator.delete": "Delete",
 	"irobotRoot.simulator.clearObstacles": "Clear obstacles",
+	"irobotRoot.simulator.placeRoot": "▣ Place Root",
+	"irobotRoot.simulator.snapRoot": "▦ Snap Root to Cell",
 	"irobotRoot.simulator.speed": "Speed ",
 	"irobotRoot.simulator.help": "Drag obstacles · Drag empty space to pan · Tap Root sensors",
 	"irobotRoot.simulator.x": "x",
@@ -1060,6 +1062,8 @@ var ja = {
 	"irobotRoot.simulator.addBlock": "+ 障害物",
 	"irobotRoot.simulator.delete": "削除",
 	"irobotRoot.simulator.clearObstacles": "障害物を全消去",
+	"irobotRoot.simulator.placeRoot": "▣ Rootを配置",
+	"irobotRoot.simulator.snapRoot": "▦ Rootをマス中央に配置",
 	"irobotRoot.simulator.speed": "速度 ",
 	"irobotRoot.simulator.help": "障害物をドラッグ・空白をドラッグして移動・Rootのセンサーをタップ",
 	"irobotRoot.simulator.x": "x",
@@ -1183,6 +1187,8 @@ var translations = {
 	"irobotRoot.simulator.addBlock": "+ しょうがいぶつ",
 	"irobotRoot.simulator.delete": "けす",
 	"irobotRoot.simulator.clearObstacles": "しょうがいぶつをぜんぶけす",
+	"irobotRoot.simulator.placeRoot": "▣ るーとをはいち",
+	"irobotRoot.simulator.snapRoot": "▦ るーとをますのまんなかにはいち",
 	"irobotRoot.simulator.speed": "はやさ ",
 	"irobotRoot.simulator.help": "しょうがいぶつをうごかす・くうはくをうごかしていどう・るーとのせんさーをおす",
 	"irobotRoot.simulator.x": "x",
@@ -1984,8 +1990,8 @@ function requireJsonStringifyRecursive() {
   return jsonStringifyRecursive;
 }
 
-function ownKeys$3(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$3(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$3(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$3(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function ownKeys$4(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$4(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$4(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$4(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var hasRequiredUtil_inspect_polyfill;
 function requireUtil_inspect_polyfill() {
   if (hasRequiredUtil_inspect_polyfill) return util_inspect_polyfill;
@@ -2263,9 +2269,9 @@ function requireUtil_inspect_polyfill() {
     return braces[0] + (base === "" ? "" : base + "\n") + "  " + output.join(",\n  ") + " " + braces[1];
   }
   function _extend(origin, add) {
-    var typedOrigin = _objectSpread$3({}, origin);
+    var typedOrigin = _objectSpread$4({}, origin);
     if (!add || !isObject(add)) return origin;
-    var clonedAdd = _objectSpread$3({}, add);
+    var clonedAdd = _objectSpread$4({}, add);
     var keys = Object.keys(add);
     var i = keys.length;
     while (i--) {
@@ -2309,7 +2315,7 @@ function requireUtil_inspect_polyfill() {
                   } else if (_typeof(tempArg) !== "object" || tempArg === null) {
                     tempStr = String(tempArg);
                   } else {
-                    tempStr = inspect(tempArg, _objectSpread$3(_objectSpread$3({}, inspectOptions), {}, {
+                    tempStr = inspect(tempArg, _objectSpread$4(_objectSpread$4({}, inspectOptions), {}, {
                       compact: 3,
                       colors: false,
                       depth: 0
@@ -2336,7 +2342,7 @@ function requireUtil_inspect_polyfill() {
                 tempStr = inspect(args[++a], inspectOptions);
                 break;
               case 111:
-                tempStr = inspect(args[++a], _objectSpread$3(_objectSpread$3({}, inspectOptions), {}, {
+                tempStr = inspect(args[++a], _objectSpread$4(_objectSpread$4({}, inspectOptions), {}, {
                   showHidden: true,
                   showProxy: true,
                   depth: 4
@@ -2470,8 +2476,8 @@ function requireInterfaces() {
 function _createForOfIteratorHelper$3(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$3(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray$3(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$3(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$3(r, a) : void 0; } }
 function _arrayLikeToArray$3(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function ownKeys$2(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$2(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$2(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function ownKeys$3(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$3(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$3(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$3(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 var hasRequiredBaseLogger;
 function requireBaseLogger() {
   if (hasRequiredBaseLogger) return BaseLogger;
@@ -2710,7 +2716,7 @@ function requireBaseLogger() {
       }
       function formatStackFrames(frames, settings) {
         return frames.map(function (stackFrame) {
-          return (0, formatTemplate_js_1.formatTemplate)(settings, settings.prettyErrorStackTemplate, _objectSpread$2({}, stackFrame), true);
+          return (0, formatTemplate_js_1.formatTemplate)(settings, settings.prettyErrorStackTemplate, _objectSpread$3({}, stackFrame), true);
         });
       }
       function formatErrorMessage(error) {
@@ -3238,7 +3244,7 @@ function requireBaseLogger() {
         key: "getSubLogger",
         value: function getSubLogger(settings, logObj) {
           var _this$settings, _this$settings2, _this$settings3, _settings$prefix2;
-          var subLoggerSettings = _objectSpread$2(_objectSpread$2(_objectSpread$2({}, this.settings), settings), {}, {
+          var subLoggerSettings = _objectSpread$3(_objectSpread$3(_objectSpread$3({}, this.settings), settings), {}, {
             parentNames: ((_this$settings = this.settings) === null || _this$settings === void 0 ? void 0 : _this$settings.parentNames) != null && ((_this$settings2 = this.settings) === null || _this$settings2 === void 0 ? void 0 : _this$settings2.name) != null ? [].concat(_toConsumableArray(this.settings.parentNames), [this.settings.name]) : ((_this$settings3 = this.settings) === null || _this$settings3 === void 0 ? void 0 : _this$settings3.name) != null ? [this.settings.name] : undefined,
             prefix: [].concat(_toConsumableArray(this.settings.prefix), _toConsumableArray((_settings$prefix2 = settings === null || settings === void 0 ? void 0 : settings.prefix) !== null && _settings$prefix2 !== void 0 ? _settings$prefix2 : []))
           });
@@ -3302,7 +3308,7 @@ function requireBaseLogger() {
           var _this2 = this;
           var seen = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
           if (seen.includes(source)) {
-            return _objectSpread$2({}, source);
+            return _objectSpread$3({}, source);
           }
           if (_typeof(source) === "object" && source !== null) {
             seen.push(source);
@@ -3404,7 +3410,7 @@ function requireBaseLogger() {
           if (Array.isArray(source)) {
             return _toConsumableArray(source);
           } else {
-            return _objectSpread$2({}, source);
+            return _objectSpread$3({}, source);
           }
         }
       }, {
@@ -3418,14 +3424,14 @@ function requireBaseLogger() {
           });
           if (this.settings.argumentsArrayName == null) {
             if (args.length === 1 && !Array.isArray(args[0]) && runtime.isBuffer(args[0]) !== true && !(args[0] instanceof Date)) {
-              clonedLogObj = _typeof(args[0]) === "object" && args[0] != null ? _objectSpread$2(_objectSpread$2({}, args[0]), clonedLogObj) : _objectSpread$2({
+              clonedLogObj = _typeof(args[0]) === "object" && args[0] != null ? _objectSpread$3(_objectSpread$3({}, args[0]), clonedLogObj) : _objectSpread$3({
                 0: args[0]
               }, clonedLogObj);
             } else {
-              clonedLogObj = _objectSpread$2(_objectSpread$2({}, clonedLogObj), args);
+              clonedLogObj = _objectSpread$3(_objectSpread$3({}, clonedLogObj), args);
             }
           } else {
-            clonedLogObj = _objectSpread$2(_objectSpread$2({}, clonedLogObj), {}, _defineProperty({}, this.settings.argumentsArrayName, args));
+            clonedLogObj = _objectSpread$3(_objectSpread$3({}, clonedLogObj), {}, _defineProperty({}, this.settings.argumentsArrayName, args));
           }
           return clonedLogObj;
         }
@@ -3468,7 +3474,7 @@ function requireBaseLogger() {
       }, {
         key: "_addMetaToLogObj",
         value: function _addMetaToLogObj(logObj, logLevelId, logLevelName) {
-          return _objectSpread$2(_objectSpread$2({}, logObj), {}, _defineProperty({}, this.settings.metaProperty, runtime.getMeta(logLevelId, logLevelName, this.stackDepthLevel, !this.captureStackForMeta, this.settings.name, this.settings.parentNames)));
+          return _objectSpread$3(_objectSpread$3({}, logObj), {}, _defineProperty({}, this.settings.metaProperty, runtime.getMeta(logLevelId, logLevelName, this.stackDepthLevel, !this.captureStackForMeta, this.settings.name, this.settings.parentNames)));
         }
       }, {
         key: "_shouldCaptureStack",
@@ -3499,8 +3505,8 @@ function requireBaseLogger() {
   return BaseLogger;
 }
 
-function ownKeys$1(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread$1(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$1(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$1(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function ownKeys$2(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$2(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$2(Object(t), true).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$2(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _callSuper$2(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct$2() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct$2() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct$2 = function _isNativeReflectConstruct() { return !!t; })(); }
 function _superPropGet$1(t, o, e, r) { var p = _get(_getPrototypeOf(t.prototype ), o, e); return 2 & r && "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
@@ -3540,7 +3546,7 @@ function requireCjs() {
       function Logger(settings, logObj) {
         _classCallCheck(this, Logger);
         var isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
-        var normalizedSettings = _objectSpread$1({}, settings !== null && settings !== void 0 ? settings : {});
+        var normalizedSettings = _objectSpread$2({}, settings !== null && settings !== void 0 ? settings : {});
         if (isBrowser) {
           var _settings$stylePretty;
           normalizedSettings.stylePrettyLogs = (_settings$stylePretty = settings === null || settings === void 0 ? void 0 : settings.stylePrettyLogs) !== null && _settings$stylePretty !== void 0 ? _settings$stylePretty : true;
@@ -4182,8 +4188,8 @@ var ScratchLinkBLE = /*@__PURE__*/getDefaultExportFromCjs(bleExports);
 var bleWebExports = requireBleWeb();
 var WebBLE = /*@__PURE__*/getDefaultExportFromCjs(bleWebExports);
 
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), true).forEach(function (r) { _defineProperty$1(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function ownKeys$1(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread$1(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys$1(Object(t), true).forEach(function (r) { _defineProperty$1(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$1(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _callSuper(t, o, e) { return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e)); }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
 function _superPropGet(t, o, e, r) { var p = _get$1(_getPrototypeOf$1(t.prototype ), o, e); return "function" == typeof p ? function (t) { return p.apply(e, t); } : p; }
@@ -4557,7 +4563,7 @@ var RootTransport = /*#__PURE__*/function () {
       this.lastError = '';
       var BLEAdapter = selectBLEAdapter();
       try {
-        var options = _objectSpread({}, ROOT_DISCOVERY_OPTIONS);
+        var options = _objectSpread$1({}, ROOT_DISCOVERY_OPTIONS);
         var ScrubSocket = BLEAdapter === ScratchLinkBLE ? getScrubSocketClass() : null;
         this.ble = ScrubSocket ? new RootScratchLinkBLE(this.runtime, this.extensionId, options, this.onConnect, this.reset, ScrubSocket) : new BLEAdapter(this.runtime, this.extensionId, options, this.onConnect, this.reset);
       } catch (error) {
@@ -4646,6 +4652,8 @@ var RootTransport = /*#__PURE__*/function () {
 function _createForOfIteratorHelper$1(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray$1(r)) || e) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: true } : { done: false, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = true, u = false; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = true, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray$1(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray$1(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray$1(r, a) : void 0; } }
 function _arrayLikeToArray$1(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), true).forEach(function (r) { _defineProperty$1(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 /*
  * Root's simulator is deliberately independent from Scratch targets, costumes,
  * and the Pen extension.  This keeps the extension usable from the official
@@ -4682,10 +4690,16 @@ var RootSimulator = /*#__PURE__*/function () {
     this.speedMultiplier = 1;
     // Display zoom only changes the viewport.  Root coordinates, collision
     // geometry, and motion timing remain in millimetres.
-    this.viewZoom = 1;
+    // Start zoomed out so a physical 16 cm grid can be viewed as a board.
+    this.viewZoom = 0.25;
     this.viewOffset = {
       x: 0,
       y: 0
+    };
+    this.homePose = {
+      x: 0,
+      y: 0,
+      heading: DEFAULT_HEADING
     };
     this._animation = null;
     this._continuousMotion = null;
@@ -4703,6 +4717,9 @@ var RootSimulator = /*#__PURE__*/function () {
     this._collisionPoint = null;
     this._runButton = null;
     this._stopButton = null;
+    this._placeRootButton = null;
+    this._snapRootButton = null;
+    this._rootPlacementMode = null;
     this._localizedElements = [];
     this.reset();
   }
@@ -4718,11 +4735,8 @@ var RootSimulator = /*#__PURE__*/function () {
       this._panCandidatePointers.clear();
       this._panPointerIds.clear();
       this._panLastPoint = null;
-      this.pose = {
-        x: 0,
-        y: 0,
-        heading: DEFAULT_HEADING
-      };
+      this._rootPlacementMode = null;
+      this.pose = _objectSpread({}, this.homePose);
       this.marker = 0;
       this.led = {
         effect: 0,
@@ -4756,11 +4770,7 @@ var RootSimulator = /*#__PURE__*/function () {
     value: function resetNavigation() {
       this.stop();
       this._setBumpers(false, false);
-      this.pose = {
-        x: 0,
-        y: 0,
-        heading: DEFAULT_HEADING
-      };
+      this.pose = _objectSpread({}, this.homePose);
       this._draw();
     }
   }, {
@@ -4814,6 +4824,27 @@ var RootSimulator = /*#__PURE__*/function () {
       if (this._zoomValue) this._zoomValue.textContent = "".concat(Math.round(this.viewZoom * 100), "%");
       this._draw();
       return this.viewZoom;
+    }
+  }, {
+    key: "_setRootPlacementMode",
+    value: function _setRootPlacementMode(mode) {
+      this._rootPlacementMode = this._rootPlacementMode === mode ? null : mode;
+      this._selectedObstacle = -1;
+      this._dragOffset = null;
+      this._updateRootPlacementButtons();
+      this._draw();
+    }
+  }, {
+    key: "_updateRootPlacementButtons",
+    value: function _updateRootPlacementButtons() {
+      var update = function update(button, active) {
+        if (!button) return;
+        button.setAttribute('aria-pressed', String(active));
+        button.style.background = active ? '#f2d941' : 'white';
+        button.style.color = active ? '#26353a' : '#264c40';
+      };
+      update(this._placeRootButton, this._rootPlacementMode === 'free');
+      update(this._snapRootButton, this._rootPlacementMode === 'grid');
     }
   }, {
     key: "runProject",
@@ -5256,6 +5287,12 @@ var RootSimulator = /*#__PURE__*/function () {
       addButton('clearObstacles', 'Clear obstacles', function () {
         return _this9.clearObstacles();
       });
+      this._placeRootButton = addButton('placeRoot', '▣ Place Root', function () {
+        _this9._setRootPlacementMode('free');
+      });
+      this._snapRootButton = addButton('snapRoot', '▦ Snap Root to Cell', function () {
+        _this9._setRootPlacementMode('grid');
+      });
       var speedLabel = document.createElement('label');
       speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
       var speedText = document.createElement('span');
@@ -5414,6 +5451,20 @@ var RootSimulator = /*#__PURE__*/function () {
     value: function _pointerDown(event) {
       var point = this._eventWorld(event);
       var canvasPoint = this._eventCanvasPoint(event);
+      if (this._rootPlacementMode) {
+        // Grid lines are ±80 mm from each cell centre. Grid placement uses
+        // an integer 160 mm coordinate; free placement keeps the click's
+        // exact physical position for arbitrary experiment layouts.
+        this.homePose = {
+          x: this._rootPlacementMode === 'grid' ? Math.round(point.x / GRID_CELL_MM) * GRID_CELL_MM : point.x,
+          y: this._rootPlacementMode === 'grid' ? Math.round(point.y / GRID_CELL_MM) * GRID_CELL_MM : point.y,
+          heading: this.pose.heading
+        };
+        this.pose = _objectSpread({}, this.homePose);
+        this.trail = [];
+        this._setRootPlacementMode(this._rootPlacementMode);
+        return;
+      }
       var scale = SIMULATOR_SCALE * this.viewZoom;
       var rootCanvasX = this._canvas.width / 2 + (this.viewOffset.x + this.pose.x) * scale;
       var rootCanvasY = this._canvas.height / 2 - (this.viewOffset.y + this.pose.y) * scale;
@@ -5522,6 +5573,7 @@ var RootSimulator = /*#__PURE__*/function () {
         this._stopButton.disabled = !controlsEnabled;
         this._stopButton.style.opacity = controlsEnabled ? '1' : '0.45';
       }
+      this._updateRootPlacementButtons();
       var context = this._context;
       var _this$_canvas = this._canvas,
         width = _this$_canvas.width,
@@ -5544,8 +5596,10 @@ var RootSimulator = /*#__PURE__*/function () {
       var gridOffset = function gridOffset(coordinate) {
         return (coordinate % gridCellPx + gridCellPx) % gridCellPx;
       };
-      var gridOriginX = width / 2 + this.viewOffset.x * scale;
-      var gridOriginY = height / 2 - this.viewOffset.y * scale;
+      // The coordinate origin is the centre of a 16 cm cell, not a grid
+      // intersection. A Root at (0, 0) therefore fits in its starting cell.
+      var gridOriginX = width / 2 + (this.viewOffset.x + GRID_CELL_MM / 2) * scale;
+      var gridOriginY = height / 2 - (this.viewOffset.y - GRID_CELL_MM / 2) * scale;
       for (var x = gridOffset(gridOriginX); x < width; x += gridCellPx) {
         context.beginPath();
         context.moveTo(x, 0);
