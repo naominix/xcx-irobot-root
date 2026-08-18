@@ -63,7 +63,7 @@ class RootSimulator {
         this._panPointerIds.clear();
         this._panLastPoint = null;
         this._rootPlacementMode = null;
-        this.pose = {...this.homePose};
+        this.pose = {...this.homePose, heading: DEFAULT_HEADING};
         this.marker = 0;
         this.led = {effect: 0, red: 0, green: 0, blue: 0};
         this.note = null;
@@ -91,7 +91,7 @@ class RootSimulator {
     resetNavigation () {
         this.stop();
         this._setBumpers(false, false);
-        this.pose = {...this.homePose};
+        this.pose = {...this.homePose, heading: DEFAULT_HEADING};
         this._draw();
     }
 
@@ -613,7 +613,7 @@ class RootSimulator {
             this.homePose = {
                 x: this._rootPlacementMode === 'grid' ? Math.round(point.x / GRID_CELL_MM) * GRID_CELL_MM : point.x,
                 y: this._rootPlacementMode === 'grid' ? Math.round(point.y / GRID_CELL_MM) * GRID_CELL_MM : point.y,
-                heading: this.pose.heading
+                heading: DEFAULT_HEADING
             };
             this.pose = {...this.homePose};
             this.trail = [];

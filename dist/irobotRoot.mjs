@@ -4736,7 +4736,9 @@ var RootSimulator = /*#__PURE__*/function () {
       this._panPointerIds.clear();
       this._panLastPoint = null;
       this._rootPlacementMode = null;
-      this.pose = _objectSpread({}, this.homePose);
+      this.pose = _objectSpread(_objectSpread({}, this.homePose), {}, {
+        heading: DEFAULT_HEADING
+      });
       this.marker = 0;
       this.led = {
         effect: 0,
@@ -4770,7 +4772,9 @@ var RootSimulator = /*#__PURE__*/function () {
     value: function resetNavigation() {
       this.stop();
       this._setBumpers(false, false);
-      this.pose = _objectSpread({}, this.homePose);
+      this.pose = _objectSpread(_objectSpread({}, this.homePose), {}, {
+        heading: DEFAULT_HEADING
+      });
       this._draw();
     }
   }, {
@@ -5458,7 +5462,7 @@ var RootSimulator = /*#__PURE__*/function () {
         this.homePose = {
           x: this._rootPlacementMode === 'grid' ? Math.round(point.x / GRID_CELL_MM) * GRID_CELL_MM : point.x,
           y: this._rootPlacementMode === 'grid' ? Math.round(point.y / GRID_CELL_MM) * GRID_CELL_MM : point.y,
-          heading: this.pose.heading
+          heading: DEFAULT_HEADING
         };
         this.pose = _objectSpread({}, this.homePose);
         this.trail = [];

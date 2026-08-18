@@ -154,6 +154,18 @@ describe('iRobot Root extension', () => {
         block.simulator.reset();
     });
 
+    test('simulator reset keeps the selected starting cell and points Root upward', () => {
+        const block = new blockClass(runtime);
+        block.simulator.homePose = {x: 160, y: -160, heading: 15};
+        block.simulator.pose = {x: 90, y: 50, heading: 210};
+        block.simulator.resetNavigation();
+        expect(block.simulator.pose).toEqual({x: 160, y: -160, heading: 90});
+
+        block.simulator.pose.heading = 270;
+        block.simulator.reset();
+        expect(block.simulator.pose).toEqual({x: 160, y: -160, heading: 90});
+    });
+
     test('simulator obstacles stop Root and fire bumper push and release hats', async () => {
         jest.useFakeTimers();
         try {
