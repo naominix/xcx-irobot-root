@@ -29,6 +29,7 @@ class RootSimulator {
         // Display zoom only changes the viewport.  Root coordinates, collision
         // geometry, and motion timing remain in millimetres.
         this.viewZoom = 1;
+        this.viewOffset = {x: 0, y: 0};
         this._animation = null;
         this._continuousMotion = null;
         this._ledAnimationTimer = null;
@@ -38,6 +39,9 @@ class RootSimulator {
         this._context = null;
         this._selectedObstacle = -1;
         this._dragOffset = null;
+        this._panCandidatePointers = new Map();
+        this._panPointerIds = new Set();
+        this._panLastPoint = null;
         this._activeTouchPointer = null;
         this._collisionPoint = null;
         this._runButton = null;
@@ -49,6 +53,10 @@ class RootSimulator {
     reset () {
         this.stop();
         this._stopLedAnimation();
+        this.viewOffset = {x: 0, y: 0};
+        this._panCandidatePointers.clear();
+        this._panPointerIds.clear();
+        this._panLastPoint = null;
         this.pose = {x: 0, y: 0, heading: DEFAULT_HEADING};
         this.marker = 0;
         this.led = {effect: 0, red: 0, green: 0, blue: 0};
@@ -498,12 +506,12 @@ class RootSimulator {
         this._localizedElements.push({
             element: help,
             id: 'help',
-            defaultText: 'Drag obstacles · Tap Root sensors'
+            defaultText: 'Drag obstacles · Drag empty space to pan · Tap Root sensors'
         });
         const canvas = document.createElement('canvas');
         canvas.width = 1000;
         canvas.height = 680;
-        canvas.style.cssText = 'width:100%;height:calc(100% - 108px);touch-action:none;background:#fff;';
+        canvas.style.cssText = 'width:100%;height:calc(100% - 108px);touch-action:none;background:#fff;cursor:grab;';
         canvas.addEventListener('pointerdown', event => this._pointerDown(event));
         canvas.addEventListener('pointermove', event => this._pointerMove(event));
         canvas.addEventListener('pointerup', event => this._pointerUp(event));
@@ -524,25 +532,54 @@ class RootSimulator {
     }
 
     _eventWorld (event) {
-        const bounds = this._canvas.getBoundingClientRect();
-        const canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
-        const canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+        const canvasPoint = this._eventCanvasPoint(event);
+        const scale = SIMULATOR_SCALE * this.viewZoom;
         return {
-            x: (canvasX - this._canvas.width / 2) / (SIMULATOR_SCALE * this.viewZoom),
-            y: (this._canvas.height / 2 - canvasY) / (SIMULATOR_SCALE * this.viewZoom)
+            x: (canvasPoint.x - this._canvas.width / 2) / scale - this.viewOffset.x,
+            y: (this._canvas.height / 2 - canvasPoint.y) / scale - this.viewOffset.y
         };
+    }
+
+    _eventCanvasPoint (event) {
+        const bounds = this._canvas.getBoundingClientRect();
+        return {
+            x: (event.clientX - bounds.left) * this._canvas.width / bounds.width,
+            y: (event.clientY - bounds.top) * this._canvas.height / bounds.height
+        };
+    }
+
+    _panCentroid () {
+        const points = [...this._panPointerIds]
+            .map(pointerId => this._panCandidatePointers.get(pointerId))
+            .filter(Boolean);
+        if (!points.length) return null;
+        return points.reduce((sum, point) => ({x: sum.x + point.x, y: sum.y + point.y}), {x: 0, y: 0});
+    }
+
+    _startPan (pointerIds) {
+        this._panPointerIds = new Set(pointerIds);
+        const centroid = this._panCentroid();
+        this._panLastPoint = centroid ? {
+            x: centroid.x / this._panPointerIds.size,
+            y: centroid.y / this._panPointerIds.size
+        } : null;
+        this._canvas.style.cursor = 'grabbing';
+    }
+
+    _stopPan () {
+        this._panPointerIds.clear();
+        this._panLastPoint = null;
+        if (this._canvas) this._canvas.style.cursor = 'grab';
     }
 
     _pointerDown (event) {
         const point = this._eventWorld(event);
-        const bounds = this._canvas.getBoundingClientRect();
-        const canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
-        const canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+        const canvasPoint = this._eventCanvasPoint(event);
         const scale = SIMULATOR_SCALE * this.viewZoom;
-        const rootCanvasX = this._canvas.width / 2 + this.pose.x * scale;
-        const rootCanvasY = this._canvas.height / 2 - this.pose.y * scale;
-        const rootDxPx = canvasX - rootCanvasX;
-        const rootDyPx = canvasY - rootCanvasY;
+        const rootCanvasX = this._canvas.width / 2 + (this.viewOffset.x + this.pose.x) * scale;
+        const rootCanvasY = this._canvas.height / 2 - (this.viewOffset.y + this.pose.y) * scale;
+        const rootDxPx = canvasPoint.x - rootCanvasX;
+        const rootDyPx = canvasPoint.y - rootCanvasY;
         const dx = point.x - this.pose.x;
         const dy = point.y - this.pose.y;
         const rootTouchHitRadius = Math.max(ROOT_TOUCH_HIT_MIN_RADIUS_PX, ROOT_DRAW_RADIUS_MM * scale);
@@ -568,10 +605,39 @@ class RootSimulator {
                 break;
             }
         }
+        if (this._selectedObstacle < 0) {
+            this._panCandidatePointers.set(event.pointerId, canvasPoint);
+            this._canvas.setPointerCapture(event.pointerId);
+            if (event.pointerType === 'touch') {
+                if (this._panCandidatePointers.size >= 2) {
+                    this._startPan([...this._panCandidatePointers.keys()].slice(-2));
+                }
+            } else {
+                this._startPan([event.pointerId]);
+            }
+        }
         this._draw();
     }
 
     _pointerMove (event) {
+        if (this._panCandidatePointers.has(event.pointerId)) {
+            this._panCandidatePointers.set(event.pointerId, this._eventCanvasPoint(event));
+        }
+        if (this._panPointerIds.has(event.pointerId)) {
+            const centroid = this._panCentroid();
+            if (centroid && this._panLastPoint) {
+                const scale = SIMULATOR_SCALE * this.viewZoom;
+                const current = {
+                    x: centroid.x / this._panPointerIds.size,
+                    y: centroid.y / this._panPointerIds.size
+                };
+                this.viewOffset.x += (current.x - this._panLastPoint.x) / scale;
+                this.viewOffset.y -= (current.y - this._panLastPoint.y) / scale;
+                this._panLastPoint = current;
+                this._draw();
+            }
+            return;
+        }
         if (!this._dragOffset || this._selectedObstacle < 0) return;
         const point = this._eventWorld(event);
         const obstacle = this.obstacles[this._selectedObstacle];
@@ -584,6 +650,13 @@ class RootSimulator {
         if (this._activeTouchPointer === event.pointerId) {
             this._activeTouchPointer = null;
             this._setTouchMask(0);
+        }
+        this._panCandidatePointers.delete(event.pointerId);
+        if (this._panPointerIds.has(event.pointerId)) {
+            this._panPointerIds.delete(event.pointerId);
+            // Touch panning deliberately requires two fingers so a one-finger
+            // gesture remains available for Root and obstacle interactions.
+            if (this._panPointerIds.size < (event.pointerType === 'touch' ? 2 : 1)) this._stopPan();
         }
         this._dragOffset = null;
         if (this._canvas.hasPointerCapture && this._canvas.hasPointerCapture(event.pointerId)) {
@@ -607,13 +680,19 @@ class RootSimulator {
         const context = this._context;
         const {width, height} = this._canvas;
         const scale = SIMULATOR_SCALE * this.viewZoom;
-        const point = ({x, y}) => ({x: width / 2 + x * scale, y: height / 2 - y * scale});
+        const point = ({x, y}) => ({
+            x: width / 2 + (this.viewOffset.x + x) * scale,
+            y: height / 2 - (this.viewOffset.y + y) * scale
+        });
         context.clearRect(0, 0, width, height);
         context.fillStyle = '#fcfdfd'; context.fillRect(0, 0, width, height);
         context.strokeStyle = '#e0ebe7'; context.lineWidth = 1;
         const gridCellPx = GRID_CELL_MM * scale;
-        for (let x = width / 2 % gridCellPx; x < width; x += gridCellPx) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke(); }
-        for (let y = height / 2 % gridCellPx; y < height; y += gridCellPx) { context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke(); }
+        const gridOffset = coordinate => ((coordinate % gridCellPx) + gridCellPx) % gridCellPx;
+        const gridOriginX = width / 2 + this.viewOffset.x * scale;
+        const gridOriginY = height / 2 - this.viewOffset.y * scale;
+        for (let x = gridOffset(gridOriginX); x < width; x += gridCellPx) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke(); }
+        for (let y = gridOffset(gridOriginY); y < height; y += gridCellPx) { context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke(); }
         this.obstacles.forEach((obstacle, index) => {
             const center = point(obstacle);
             const obstacleWidth = obstacle.width * scale;

@@ -941,7 +941,7 @@ var en = {
 	"irobotRoot.simulator.delete": "Delete",
 	"irobotRoot.simulator.clearObstacles": "Clear obstacles",
 	"irobotRoot.simulator.speed": "Speed ",
-	"irobotRoot.simulator.help": "Drag obstacles · Tap Root sensors",
+	"irobotRoot.simulator.help": "Drag obstacles · Drag empty space to pan · Tap Root sensors",
 	"irobotRoot.simulator.x": "x",
 	"irobotRoot.simulator.y": "y",
 	"irobotRoot.simulator.heading": "heading",
@@ -1061,7 +1061,7 @@ var ja = {
 	"irobotRoot.simulator.delete": "削除",
 	"irobotRoot.simulator.clearObstacles": "障害物を全消去",
 	"irobotRoot.simulator.speed": "速度 ",
-	"irobotRoot.simulator.help": "障害物をドラッグ・Rootのセンサーをタップ",
+	"irobotRoot.simulator.help": "障害物をドラッグ・空白をドラッグして移動・Rootのセンサーをタップ",
 	"irobotRoot.simulator.x": "x",
 	"irobotRoot.simulator.y": "y",
 	"irobotRoot.simulator.heading": "向き",
@@ -1184,7 +1184,7 @@ var translations = {
 	"irobotRoot.simulator.delete": "けす",
 	"irobotRoot.simulator.clearObstacles": "しょうがいぶつをぜんぶけす",
 	"irobotRoot.simulator.speed": "はやさ ",
-	"irobotRoot.simulator.help": "しょうがいぶつをうごかす・るーとのせんさーをおす",
+	"irobotRoot.simulator.help": "しょうがいぶつをうごかす・くうはくをうごかしていどう・るーとのせんさーをおす",
 	"irobotRoot.simulator.x": "x",
 	"irobotRoot.simulator.y": "y",
 	"irobotRoot.simulator.heading": "むき",
@@ -4683,6 +4683,10 @@ var RootSimulator = /*#__PURE__*/function () {
     // Display zoom only changes the viewport.  Root coordinates, collision
     // geometry, and motion timing remain in millimetres.
     this.viewZoom = 1;
+    this.viewOffset = {
+      x: 0,
+      y: 0
+    };
     this._animation = null;
     this._continuousMotion = null;
     this._ledAnimationTimer = null;
@@ -4692,6 +4696,9 @@ var RootSimulator = /*#__PURE__*/function () {
     this._context = null;
     this._selectedObstacle = -1;
     this._dragOffset = null;
+    this._panCandidatePointers = new Map();
+    this._panPointerIds = new Set();
+    this._panLastPoint = null;
     this._activeTouchPointer = null;
     this._collisionPoint = null;
     this._runButton = null;
@@ -4704,6 +4711,13 @@ var RootSimulator = /*#__PURE__*/function () {
     value: function reset() {
       this.stop();
       this._stopLedAnimation();
+      this.viewOffset = {
+        x: 0,
+        y: 0
+      };
+      this._panCandidatePointers.clear();
+      this._panPointerIds.clear();
+      this._panLastPoint = null;
       this.pose = {
         x: 0,
         y: 0,
@@ -5308,12 +5322,12 @@ var RootSimulator = /*#__PURE__*/function () {
       this._localizedElements.push({
         element: help,
         id: 'help',
-        defaultText: 'Drag obstacles · Tap Root sensors'
+        defaultText: 'Drag obstacles · Drag empty space to pan · Tap Root sensors'
       });
       var canvas = document.createElement('canvas');
       canvas.width = 1000;
       canvas.height = 680;
-      canvas.style.cssText = 'width:100%;height:calc(100% - 108px);touch-action:none;background:#fff;';
+      canvas.style.cssText = 'width:100%;height:calc(100% - 108px);touch-action:none;background:#fff;cursor:grab;';
       canvas.addEventListener('pointerdown', function (event) {
         return _this9._pointerDown(event);
       });
@@ -5343,26 +5357,68 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "_eventWorld",
     value: function _eventWorld(event) {
-      var bounds = this._canvas.getBoundingClientRect();
-      var canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
-      var canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+      var canvasPoint = this._eventCanvasPoint(event);
+      var scale = SIMULATOR_SCALE * this.viewZoom;
       return {
-        x: (canvasX - this._canvas.width / 2) / (SIMULATOR_SCALE * this.viewZoom),
-        y: (this._canvas.height / 2 - canvasY) / (SIMULATOR_SCALE * this.viewZoom)
+        x: (canvasPoint.x - this._canvas.width / 2) / scale - this.viewOffset.x,
+        y: (this._canvas.height / 2 - canvasPoint.y) / scale - this.viewOffset.y
       };
+    }
+  }, {
+    key: "_eventCanvasPoint",
+    value: function _eventCanvasPoint(event) {
+      var bounds = this._canvas.getBoundingClientRect();
+      return {
+        x: (event.clientX - bounds.left) * this._canvas.width / bounds.width,
+        y: (event.clientY - bounds.top) * this._canvas.height / bounds.height
+      };
+    }
+  }, {
+    key: "_panCentroid",
+    value: function _panCentroid() {
+      var _this0 = this;
+      var points = _toConsumableArray$1(this._panPointerIds).map(function (pointerId) {
+        return _this0._panCandidatePointers.get(pointerId);
+      }).filter(Boolean);
+      if (!points.length) return null;
+      return points.reduce(function (sum, point) {
+        return {
+          x: sum.x + point.x,
+          y: sum.y + point.y
+        };
+      }, {
+        x: 0,
+        y: 0
+      });
+    }
+  }, {
+    key: "_startPan",
+    value: function _startPan(pointerIds) {
+      this._panPointerIds = new Set(pointerIds);
+      var centroid = this._panCentroid();
+      this._panLastPoint = centroid ? {
+        x: centroid.x / this._panPointerIds.size,
+        y: centroid.y / this._panPointerIds.size
+      } : null;
+      this._canvas.style.cursor = 'grabbing';
+    }
+  }, {
+    key: "_stopPan",
+    value: function _stopPan() {
+      this._panPointerIds.clear();
+      this._panLastPoint = null;
+      if (this._canvas) this._canvas.style.cursor = 'grab';
     }
   }, {
     key: "_pointerDown",
     value: function _pointerDown(event) {
       var point = this._eventWorld(event);
-      var bounds = this._canvas.getBoundingClientRect();
-      var canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
-      var canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+      var canvasPoint = this._eventCanvasPoint(event);
       var scale = SIMULATOR_SCALE * this.viewZoom;
-      var rootCanvasX = this._canvas.width / 2 + this.pose.x * scale;
-      var rootCanvasY = this._canvas.height / 2 - this.pose.y * scale;
-      var rootDxPx = canvasX - rootCanvasX;
-      var rootDyPx = canvasY - rootCanvasY;
+      var rootCanvasX = this._canvas.width / 2 + (this.viewOffset.x + this.pose.x) * scale;
+      var rootCanvasY = this._canvas.height / 2 - (this.viewOffset.y + this.pose.y) * scale;
+      var rootDxPx = canvasPoint.x - rootCanvasX;
+      var rootDyPx = canvasPoint.y - rootCanvasY;
       var dx = point.x - this.pose.x;
       var dy = point.y - this.pose.y;
       var rootTouchHitRadius = Math.max(ROOT_TOUCH_HIT_MIN_RADIUS_PX, ROOT_DRAW_RADIUS_MM * scale);
@@ -5390,11 +5446,40 @@ var RootSimulator = /*#__PURE__*/function () {
           break;
         }
       }
+      if (this._selectedObstacle < 0) {
+        this._panCandidatePointers.set(event.pointerId, canvasPoint);
+        this._canvas.setPointerCapture(event.pointerId);
+        if (event.pointerType === 'touch') {
+          if (this._panCandidatePointers.size >= 2) {
+            this._startPan(_toConsumableArray$1(this._panCandidatePointers.keys()).slice(-2));
+          }
+        } else {
+          this._startPan([event.pointerId]);
+        }
+      }
       this._draw();
     }
   }, {
     key: "_pointerMove",
     value: function _pointerMove(event) {
+      if (this._panCandidatePointers.has(event.pointerId)) {
+        this._panCandidatePointers.set(event.pointerId, this._eventCanvasPoint(event));
+      }
+      if (this._panPointerIds.has(event.pointerId)) {
+        var centroid = this._panCentroid();
+        if (centroid && this._panLastPoint) {
+          var scale = SIMULATOR_SCALE * this.viewZoom;
+          var current = {
+            x: centroid.x / this._panPointerIds.size,
+            y: centroid.y / this._panPointerIds.size
+          };
+          this.viewOffset.x += (current.x - this._panLastPoint.x) / scale;
+          this.viewOffset.y -= (current.y - this._panLastPoint.y) / scale;
+          this._panLastPoint = current;
+          this._draw();
+        }
+        return;
+      }
       if (!this._dragOffset || this._selectedObstacle < 0) return;
       var point = this._eventWorld(event);
       var obstacle = this.obstacles[this._selectedObstacle];
@@ -5409,6 +5494,13 @@ var RootSimulator = /*#__PURE__*/function () {
         this._activeTouchPointer = null;
         this._setTouchMask(0);
       }
+      this._panCandidatePointers.delete(event.pointerId);
+      if (this._panPointerIds.has(event.pointerId)) {
+        this._panPointerIds.delete(event.pointerId);
+        // Touch panning deliberately requires two fingers so a one-finger
+        // gesture remains available for Root and obstacle interactions.
+        if (this._panPointerIds.size < (event.pointerType === 'touch' ? 2 : 1)) this._stopPan();
+      }
       this._dragOffset = null;
       if (this._canvas.hasPointerCapture && this._canvas.hasPointerCapture(event.pointerId)) {
         this._canvas.releasePointerCapture(event.pointerId);
@@ -5418,7 +5510,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "_draw",
     value: function _draw() {
-      var _this0 = this;
+      var _this1 = this;
       if (!this._context || !this._canvas) return;
       this._updateTranslations();
       var controlsEnabled = this._canControlProject();
@@ -5439,8 +5531,8 @@ var RootSimulator = /*#__PURE__*/function () {
         var x = _ref.x,
           y = _ref.y;
         return {
-          x: width / 2 + x * scale,
-          y: height / 2 - y * scale
+          x: width / 2 + (_this1.viewOffset.x + x) * scale,
+          y: height / 2 - (_this1.viewOffset.y + y) * scale
         };
       };
       context.clearRect(0, 0, width, height);
@@ -5449,13 +5541,18 @@ var RootSimulator = /*#__PURE__*/function () {
       context.strokeStyle = '#e0ebe7';
       context.lineWidth = 1;
       var gridCellPx = GRID_CELL_MM * scale;
-      for (var x = width / 2 % gridCellPx; x < width; x += gridCellPx) {
+      var gridOffset = function gridOffset(coordinate) {
+        return (coordinate % gridCellPx + gridCellPx) % gridCellPx;
+      };
+      var gridOriginX = width / 2 + this.viewOffset.x * scale;
+      var gridOriginY = height / 2 - this.viewOffset.y * scale;
+      for (var x = gridOffset(gridOriginX); x < width; x += gridCellPx) {
         context.beginPath();
         context.moveTo(x, 0);
         context.lineTo(x, height);
         context.stroke();
       }
-      for (var y = height / 2 % gridCellPx; y < height; y += gridCellPx) {
+      for (var y = gridOffset(gridOriginY); y < height; y += gridCellPx) {
         context.beginPath();
         context.moveTo(0, y);
         context.lineTo(width, y);
@@ -5466,8 +5563,8 @@ var RootSimulator = /*#__PURE__*/function () {
         var obstacleWidth = obstacle.width * scale;
         var obstacleHeight = obstacle.height * scale;
         context.fillStyle = obstacle.type === 'wall' ? '#71828a' : '#d9864d';
-        context.strokeStyle = index === _this0._selectedObstacle ? '#f2c94c' : '#3d4d54';
-        context.lineWidth = index === _this0._selectedObstacle ? 5 : 3;
+        context.strokeStyle = index === _this1._selectedObstacle ? '#f2c94c' : '#3d4d54';
+        context.lineWidth = index === _this1._selectedObstacle ? 5 : 3;
         context.beginPath();
         context.rect(center.x - obstacleWidth / 2, center.y - obstacleHeight / 2, obstacleWidth, obstacleHeight);
         context.fill();
