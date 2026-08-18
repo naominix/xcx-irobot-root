@@ -4657,10 +4657,13 @@ var DEFAULT_HEADING = 90;
 var DEFAULT_SPEED_MM_S = 120;
 var DEFAULT_TURN_DEG_S = 120;
 var SIMULATOR_SCALE = 1.8;
+// The simulator is a physical workspace: one background-grid cell represents
+// a 16 cm square. Root's 16 cm footprint is drawn within exactly one cell.
+var GRID_CELL_MM = 160;
+var ROOT_DRAW_RADIUS_MM = GRID_CELL_MM / 2;
 var ROOT_COLLISION_RADIUS_MM = 24;
-// Keep Root and its touch target practical on touch screens when the world is
-// zoomed out. At 100% this matches the physical 24 mm collision radius.
-var ROOT_TOUCH_HIT_RADIUS_PX = 44;
+// Preserve a usable tap target at the smallest supported viewport scale.
+var ROOT_TOUCH_HIT_MIN_RADIUS_PX = 44;
 var clamp = function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 };
@@ -5362,7 +5365,8 @@ var RootSimulator = /*#__PURE__*/function () {
       var rootDyPx = canvasY - rootCanvasY;
       var dx = point.x - this.pose.x;
       var dy = point.y - this.pose.y;
-      if (rootDxPx * rootDxPx + rootDyPx * rootDyPx <= ROOT_TOUCH_HIT_RADIUS_PX * ROOT_TOUCH_HIT_RADIUS_PX) {
+      var rootTouchHitRadius = Math.max(ROOT_TOUCH_HIT_MIN_RADIUS_PX, ROOT_DRAW_RADIUS_MM * scale);
+      if (rootDxPx * rootDxPx + rootDyPx * rootDyPx <= rootTouchHitRadius * rootTouchHitRadius) {
         var heading = headingRadians(this.pose.heading);
         var forward = dx * Math.cos(heading) + dy * Math.sin(heading);
         var right = dx * Math.sin(heading) - dy * Math.cos(heading);
@@ -5444,13 +5448,14 @@ var RootSimulator = /*#__PURE__*/function () {
       context.fillRect(0, 0, width, height);
       context.strokeStyle = '#e0ebe7';
       context.lineWidth = 1;
-      for (var x = width / 2 % (50 * scale); x < width; x += 50 * scale) {
+      var gridCellPx = GRID_CELL_MM * scale;
+      for (var x = width / 2 % gridCellPx; x < width; x += gridCellPx) {
         context.beginPath();
         context.moveTo(x, 0);
         context.lineTo(x, height);
         context.stroke();
       }
-      for (var y = height / 2 % (50 * scale); y < height; y += 50 * scale) {
+      for (var y = height / 2 % gridCellPx; y < height; y += gridCellPx) {
         context.beginPath();
         context.moveTo(0, y);
         context.lineTo(width, y);
@@ -5511,9 +5516,13 @@ var RootSimulator = /*#__PURE__*/function () {
         _iterator3.f();
       }
       var p = point(this.pose);
+      // The original illustration has an outer radius of 36 units. Scale it
+      // from millimetres so its outside diameter always equals one grid cell.
+      var rootVisualScale = ROOT_DRAW_RADIUS_MM * scale / 36;
       context.save();
       context.translate(p.x, p.y);
       context.rotate((90 - this.pose.heading) * DEG);
+      context.scale(rootVisualScale, rootVisualScale);
       context.fillStyle = '#fff';
       context.strokeStyle = '#29343a';
       context.lineWidth = 5;

@@ -9,10 +9,13 @@ const DEFAULT_HEADING = 90;
 const DEFAULT_SPEED_MM_S = 120;
 const DEFAULT_TURN_DEG_S = 120;
 const SIMULATOR_SCALE = 1.8;
+// The simulator is a physical workspace: one background-grid cell represents
+// a 16 cm square. Root's 16 cm footprint is drawn within exactly one cell.
+const GRID_CELL_MM = 160;
+const ROOT_DRAW_RADIUS_MM = GRID_CELL_MM / 2;
 const ROOT_COLLISION_RADIUS_MM = 24;
-// Keep Root and its touch target practical on touch screens when the world is
-// zoomed out. At 100% this matches the physical 24 mm collision radius.
-const ROOT_TOUCH_HIT_RADIUS_PX = 44;
+// Preserve a usable tap target at the smallest supported viewport scale.
+const ROOT_TOUCH_HIT_MIN_RADIUS_PX = 44;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const headingRadians = heading => heading * DEG;
@@ -542,7 +545,8 @@ class RootSimulator {
         const rootDyPx = canvasY - rootCanvasY;
         const dx = point.x - this.pose.x;
         const dy = point.y - this.pose.y;
-        if ((rootDxPx * rootDxPx) + (rootDyPx * rootDyPx) <= ROOT_TOUCH_HIT_RADIUS_PX * ROOT_TOUCH_HIT_RADIUS_PX) {
+        const rootTouchHitRadius = Math.max(ROOT_TOUCH_HIT_MIN_RADIUS_PX, ROOT_DRAW_RADIUS_MM * scale);
+        if ((rootDxPx * rootDxPx) + (rootDyPx * rootDyPx) <= rootTouchHitRadius * rootTouchHitRadius) {
             const heading = headingRadians(this.pose.heading);
             const forward = (dx * Math.cos(heading)) + (dy * Math.sin(heading));
             const right = (dx * Math.sin(heading)) - (dy * Math.cos(heading));
@@ -607,8 +611,9 @@ class RootSimulator {
         context.clearRect(0, 0, width, height);
         context.fillStyle = '#fcfdfd'; context.fillRect(0, 0, width, height);
         context.strokeStyle = '#e0ebe7'; context.lineWidth = 1;
-        for (let x = width / 2 % (50 * scale); x < width; x += 50 * scale) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke(); }
-        for (let y = height / 2 % (50 * scale); y < height; y += 50 * scale) { context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke(); }
+        const gridCellPx = GRID_CELL_MM * scale;
+        for (let x = width / 2 % gridCellPx; x < width; x += gridCellPx) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke(); }
+        for (let y = height / 2 % gridCellPx; y < height; y += gridCellPx) { context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke(); }
         this.obstacles.forEach((obstacle, index) => {
             const center = point(obstacle);
             const obstacleWidth = obstacle.width * scale;
@@ -643,7 +648,10 @@ class RootSimulator {
         context.strokeStyle = this.marker === 2 ? '#fff' : '#22a6a6'; context.lineWidth = 4; context.lineCap = 'round';
         for (const segment of this.trail) { const a = point({x: segment.x1, y: segment.y1}); const b = point({x: segment.x2, y: segment.y2}); context.beginPath(); context.moveTo(a.x, a.y); context.lineTo(b.x, b.y); context.stroke(); }
         const p = point(this.pose);
-        context.save(); context.translate(p.x, p.y); context.rotate((90 - this.pose.heading) * DEG);
+        // The original illustration has an outer radius of 36 units. Scale it
+        // from millimetres so its outside diameter always equals one grid cell.
+        const rootVisualScale = (ROOT_DRAW_RADIUS_MM * scale) / 36;
+        context.save(); context.translate(p.x, p.y); context.rotate((90 - this.pose.heading) * DEG); context.scale(rootVisualScale, rootVisualScale);
         context.fillStyle = '#fff'; context.strokeStyle = '#29343a'; context.lineWidth = 5;
         context.beginPath();
         for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + i * Math.PI / 3; const x = Math.cos(a) * 36; const y = Math.sin(a) * 36; i ? context.lineTo(x, y) : context.moveTo(x, y); }
