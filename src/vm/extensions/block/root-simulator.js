@@ -44,6 +44,7 @@ class RootSimulator {
         this._panCandidatePointers = new Map();
         this._panPointerIds = new Set();
         this._panLastPoint = null;
+        this._pinchLastDistance = null;
         this._activeTouchPointer = null;
         this._collisionPoint = null;
         this._runButton = null;
@@ -62,6 +63,7 @@ class RootSimulator {
         this._panCandidatePointers.clear();
         this._panPointerIds.clear();
         this._panLastPoint = null;
+        this._pinchLastDistance = null;
         this._rootPlacementMode = null;
         this.pose = {...this.homePose, heading: DEFAULT_HEADING};
         this.marker = 0;
@@ -123,9 +125,19 @@ class RootSimulator {
         this.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
     }
 
-    setViewZoom (zoom) {
+    setViewZoom (zoom, anchor = null, smooth = false) {
         const next = clamp(Number(zoom) || 1, 0.25, 2.5);
-        this.viewZoom = Math.round(next * 4) / 4;
+        const oldScale = SIMULATOR_SCALE * this.viewZoom;
+        const anchoredWorld = anchor && this._canvas ? {
+            x: (anchor.x - this._canvas.width / 2) / oldScale - this.viewOffset.x,
+            y: (this._canvas.height / 2 - anchor.y) / oldScale - this.viewOffset.y
+        } : null;
+        this.viewZoom = smooth ? Math.round(next * 100) / 100 : Math.round(next * 4) / 4;
+        if (anchoredWorld) {
+            const newScale = SIMULATOR_SCALE * this.viewZoom;
+            this.viewOffset.x = (anchor.x - this._canvas.width / 2) / newScale - anchoredWorld.x;
+            this.viewOffset.y = (this._canvas.height / 2 - anchor.y) / newScale - anchoredWorld.y;
+        }
         if (this._zoomValue) this._zoomValue.textContent = `${Math.round(this.viewZoom * 100)}%`;
         this._draw();
         return this.viewZoom;
@@ -547,6 +559,7 @@ class RootSimulator {
         canvas.addEventListener('pointermove', event => this._pointerMove(event));
         canvas.addEventListener('pointerup', event => this._pointerUp(event));
         canvas.addEventListener('pointercancel', event => this._pointerUp(event));
+        canvas.addEventListener('wheel', event => this._wheel(event), {passive: false});
         panel.tabIndex = 0;
         panel.addEventListener('keydown', event => {
             if (event.key === 'Backspace' || event.key === 'Delete') this.deleteSelectedObstacle();
@@ -587,6 +600,14 @@ class RootSimulator {
         return points.reduce((sum, point) => ({x: sum.x + point.x, y: sum.y + point.y}), {x: 0, y: 0});
     }
 
+    _panDistance () {
+        const points = [...this._panPointerIds]
+            .map(pointerId => this._panCandidatePointers.get(pointerId))
+            .filter(Boolean);
+        if (points.length !== 2) return null;
+        return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+    }
+
     _startPan (pointerIds) {
         this._panPointerIds = new Set(pointerIds);
         const centroid = this._panCentroid();
@@ -594,13 +615,21 @@ class RootSimulator {
             x: centroid.x / this._panPointerIds.size,
             y: centroid.y / this._panPointerIds.size
         } : null;
+        this._pinchLastDistance = this._panPointerIds.size === 2 ? this._panDistance() : null;
         this._canvas.style.cursor = 'grabbing';
     }
 
     _stopPan () {
         this._panPointerIds.clear();
         this._panLastPoint = null;
+        this._pinchLastDistance = null;
         if (this._canvas) this._canvas.style.cursor = 'grab';
+    }
+
+    _wheel (event) {
+        event.preventDefault();
+        const factor = Math.exp(-event.deltaY * 0.002);
+        this.setViewZoom(this.viewZoom * factor, this._eventCanvasPoint(event), true);
     }
 
     _pointerDown (event) {
@@ -679,7 +708,13 @@ class RootSimulator {
                 this.viewOffset.x += (current.x - this._panLastPoint.x) / scale;
                 this.viewOffset.y -= (current.y - this._panLastPoint.y) / scale;
                 this._panLastPoint = current;
-                this._draw();
+                const pinchDistance = this._panPointerIds.size === 2 ? this._panDistance() : null;
+                if (pinchDistance && this._pinchLastDistance) {
+                    this.setViewZoom(this.viewZoom * pinchDistance / this._pinchLastDistance, current, true);
+                } else {
+                    this._draw();
+                }
+                this._pinchLastDistance = pinchDistance;
             }
             return;
         }

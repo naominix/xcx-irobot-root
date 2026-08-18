@@ -943,7 +943,7 @@ var en = {
 	"irobotRoot.simulator.placeRoot": "▣ Place Root",
 	"irobotRoot.simulator.snapRoot": "▦ Snap Root to Cell",
 	"irobotRoot.simulator.speed": "Speed ",
-	"irobotRoot.simulator.help": "Drag obstacles · Drag empty space to pan · Tap Root sensors",
+	"irobotRoot.simulator.help": "Drag obstacles · Drag to pan · Pinch or wheel to zoom · Tap Root sensors",
 	"irobotRoot.simulator.x": "x",
 	"irobotRoot.simulator.y": "y",
 	"irobotRoot.simulator.heading": "heading",
@@ -1065,7 +1065,7 @@ var ja = {
 	"irobotRoot.simulator.placeRoot": "▣ Rootを配置",
 	"irobotRoot.simulator.snapRoot": "▦ Rootをマス中央に配置",
 	"irobotRoot.simulator.speed": "速度 ",
-	"irobotRoot.simulator.help": "障害物をドラッグ・空白をドラッグして移動・Rootのセンサーをタップ",
+	"irobotRoot.simulator.help": "障害物をドラッグ・空白をドラッグして移動・ピンチ／ホイールで拡大縮小・Rootのセンサーをタップ",
 	"irobotRoot.simulator.x": "x",
 	"irobotRoot.simulator.y": "y",
 	"irobotRoot.simulator.heading": "向き",
@@ -1190,7 +1190,7 @@ var translations = {
 	"irobotRoot.simulator.placeRoot": "▣ るーとをはいち",
 	"irobotRoot.simulator.snapRoot": "▦ るーとをますのまんなかにはいち",
 	"irobotRoot.simulator.speed": "はやさ ",
-	"irobotRoot.simulator.help": "しょうがいぶつをうごかす・くうはくをうごかしていどう・るーとのせんさーをおす",
+	"irobotRoot.simulator.help": "しょうがいぶつをうごかす・くうはくをうごかしていどう・ぴんち／ほいーるでおおきさをかえる・るーとのせんさーをおす",
 	"irobotRoot.simulator.x": "x",
 	"irobotRoot.simulator.y": "y",
 	"irobotRoot.simulator.heading": "むき",
@@ -4713,6 +4713,7 @@ var RootSimulator = /*#__PURE__*/function () {
     this._panCandidatePointers = new Map();
     this._panPointerIds = new Set();
     this._panLastPoint = null;
+    this._pinchLastDistance = null;
     this._activeTouchPointer = null;
     this._collisionPoint = null;
     this._runButton = null;
@@ -4735,6 +4736,7 @@ var RootSimulator = /*#__PURE__*/function () {
       this._panCandidatePointers.clear();
       this._panPointerIds.clear();
       this._panLastPoint = null;
+      this._pinchLastDistance = null;
       this._rootPlacementMode = null;
       this.pose = _objectSpread(_objectSpread({}, this.homePose), {}, {
         heading: DEFAULT_HEADING
@@ -4823,8 +4825,20 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "setViewZoom",
     value: function setViewZoom(zoom) {
+      var anchor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var smooth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       var next = clamp(Number(zoom) || 1, 0.25, 2.5);
-      this.viewZoom = Math.round(next * 4) / 4;
+      var oldScale = SIMULATOR_SCALE * this.viewZoom;
+      var anchoredWorld = anchor && this._canvas ? {
+        x: (anchor.x - this._canvas.width / 2) / oldScale - this.viewOffset.x,
+        y: (this._canvas.height / 2 - anchor.y) / oldScale - this.viewOffset.y
+      } : null;
+      this.viewZoom = smooth ? Math.round(next * 100) / 100 : Math.round(next * 4) / 4;
+      if (anchoredWorld) {
+        var newScale = SIMULATOR_SCALE * this.viewZoom;
+        this.viewOffset.x = (anchor.x - this._canvas.width / 2) / newScale - anchoredWorld.x;
+        this.viewOffset.y = (this._canvas.height / 2 - anchor.y) / newScale - anchoredWorld.y;
+      }
       if (this._zoomValue) this._zoomValue.textContent = "".concat(Math.round(this.viewZoom * 100), "%");
       this._draw();
       return this.viewZoom;
@@ -5381,6 +5395,11 @@ var RootSimulator = /*#__PURE__*/function () {
       canvas.addEventListener('pointercancel', function (event) {
         return _this9._pointerUp(event);
       });
+      canvas.addEventListener('wheel', function (event) {
+        return _this9._wheel(event);
+      }, {
+        passive: false
+      });
       panel.tabIndex = 0;
       panel.addEventListener('keydown', function (event) {
         if (event.key === 'Backspace' || event.key === 'Delete') _this9.deleteSelectedObstacle();
@@ -5433,6 +5452,16 @@ var RootSimulator = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "_panDistance",
+    value: function _panDistance() {
+      var _this1 = this;
+      var points = _toConsumableArray$1(this._panPointerIds).map(function (pointerId) {
+        return _this1._panCandidatePointers.get(pointerId);
+      }).filter(Boolean);
+      if (points.length !== 2) return null;
+      return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+    }
+  }, {
     key: "_startPan",
     value: function _startPan(pointerIds) {
       this._panPointerIds = new Set(pointerIds);
@@ -5441,6 +5470,7 @@ var RootSimulator = /*#__PURE__*/function () {
         x: centroid.x / this._panPointerIds.size,
         y: centroid.y / this._panPointerIds.size
       } : null;
+      this._pinchLastDistance = this._panPointerIds.size === 2 ? this._panDistance() : null;
       this._canvas.style.cursor = 'grabbing';
     }
   }, {
@@ -5448,7 +5478,15 @@ var RootSimulator = /*#__PURE__*/function () {
     value: function _stopPan() {
       this._panPointerIds.clear();
       this._panLastPoint = null;
+      this._pinchLastDistance = null;
       if (this._canvas) this._canvas.style.cursor = 'grab';
+    }
+  }, {
+    key: "_wheel",
+    value: function _wheel(event) {
+      event.preventDefault();
+      var factor = Math.exp(-event.deltaY * 0.002);
+      this.setViewZoom(this.viewZoom * factor, this._eventCanvasPoint(event), true);
     }
   }, {
     key: "_pointerDown",
@@ -5531,7 +5569,13 @@ var RootSimulator = /*#__PURE__*/function () {
           this.viewOffset.x += (current.x - this._panLastPoint.x) / scale;
           this.viewOffset.y -= (current.y - this._panLastPoint.y) / scale;
           this._panLastPoint = current;
-          this._draw();
+          var pinchDistance = this._panPointerIds.size === 2 ? this._panDistance() : null;
+          if (pinchDistance && this._pinchLastDistance) {
+            this.setViewZoom(this.viewZoom * pinchDistance / this._pinchLastDistance, current, true);
+          } else {
+            this._draw();
+          }
+          this._pinchLastDistance = pinchDistance;
         }
         return;
       }
@@ -5565,7 +5609,7 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "_draw",
     value: function _draw() {
-      var _this1 = this;
+      var _this10 = this;
       if (!this._context || !this._canvas) return;
       this._updateTranslations();
       var controlsEnabled = this._canControlProject();
@@ -5587,8 +5631,8 @@ var RootSimulator = /*#__PURE__*/function () {
         var x = _ref.x,
           y = _ref.y;
         return {
-          x: width / 2 + (_this1.viewOffset.x + x) * scale,
-          y: height / 2 - (_this1.viewOffset.y + y) * scale
+          x: width / 2 + (_this10.viewOffset.x + x) * scale,
+          y: height / 2 - (_this10.viewOffset.y + y) * scale
         };
       };
       context.clearRect(0, 0, width, height);
@@ -5621,8 +5665,8 @@ var RootSimulator = /*#__PURE__*/function () {
         var obstacleWidth = obstacle.width * scale;
         var obstacleHeight = obstacle.height * scale;
         context.fillStyle = obstacle.type === 'wall' ? '#71828a' : '#d9864d';
-        context.strokeStyle = index === _this1._selectedObstacle ? '#f2c94c' : '#3d4d54';
-        context.lineWidth = index === _this1._selectedObstacle ? 5 : 3;
+        context.strokeStyle = index === _this10._selectedObstacle ? '#f2c94c' : '#3d4d54';
+        context.lineWidth = index === _this10._selectedObstacle ? 5 : 3;
         context.beginPath();
         context.rect(center.x - obstacleWidth / 2, center.y - obstacleHeight / 2, obstacleWidth, obstacleHeight);
         context.fill();
