@@ -1014,28 +1014,28 @@ describe('iRobot Root extension', () => {
     test('derives pitch and roll in degrees from the accelerometer response', () => {
         const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
 
-        // Positive Y is front-down: pitch -45°, roll 0°.
+        // Positive X is front-down: pitch -45°, roll 0°.
         const pitchBlock = new blockClass(runtime);
         pitchBlock._receive(pitchBlock.protocol.packet(16, 1, [
-            0, 0, 0, 0, ...signed16(0), ...signed16(1000), ...signed16(1000)
+            0, 0, 0, 0, ...signed16(1000), ...signed16(0), ...signed16(1000)
         ]));
         expect(pitchBlock.pitch()).toBe(-45);
         expect(pitchBlock.roll()).toBe(0);
 
-        // Negative X is right-down: roll +45°, pitch 0°.
+        // Negative Y is right-down: roll +45°, pitch 0°.
         const rollBlock = new blockClass(runtime);
         rollBlock._receive(rollBlock.protocol.packet(16, 1, [
-            0, 0, 0, 0, ...signed16(-1000), ...signed16(0), ...signed16(1000)
+            0, 0, 0, 0, ...signed16(0), ...signed16(-1000), ...signed16(1000)
         ]));
         expect(rollBlock.pitch()).toBe(0);
         expect(rollBlock.roll()).toBe(45);
     });
 
     test.each([
-        [0, -1000, 45, 0], // Front-up.
-        [0, 1000, -45, 0], // Front-down.
-        [-1000, 0, 0, 45], // Right-down.
-        [1000, 0, 0, -45] // Left-down.
+        [-1000, 0, 45, 0], // Front-up.
+        [1000, 0, -45, 0], // Front-down.
+        [0, -1000, 0, 45], // Right-down.
+        [0, 1000, 0, -45] // Left-down.
     ])('keeps pitch and roll independent for acceleration (%s, %s)', (x, y, pitch, roll) => {
         const block = new blockClass(runtime);
         const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
@@ -1058,8 +1058,9 @@ describe('iRobot Root extension', () => {
         expect(block.pitch()).toBe(0);
 
         // The 0.2 low-pass filter turns an abrupt -45° sample into -11.3°.
-        block._receive(accelPacket(0, 1000, -1000));
+        block._receive(accelPacket(1000, 0, -1000));
         expect(block.pitch()).toBe(-11.3);
+        expect(block.roll()).toBe(0);
     });
 
     test('polls the accelerometer until continuous updates are stopped', () => {
