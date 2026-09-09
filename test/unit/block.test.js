@@ -1014,21 +1014,36 @@ describe('iRobot Root extension', () => {
     test('derives pitch and roll in degrees from the accelerometer response', () => {
         const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
 
-        // x=z is a -45° pitch (front-down); y=0 leaves the roll level.
+        // Positive Y is front-down: pitch -45°, roll 0°.
         const pitchBlock = new blockClass(runtime);
         pitchBlock._receive(pitchBlock.protocol.packet(16, 1, [
-            0, 0, 0, 0, ...signed16(1000), ...signed16(0), ...signed16(1000)
+            0, 0, 0, 0, ...signed16(0), ...signed16(1000), ...signed16(1000)
         ]));
         expect(pitchBlock.pitch()).toBe(-45);
         expect(pitchBlock.roll()).toBe(0);
 
-        // y=-z is a 45° roll; x=0 leaves the pitch level.
+        // Negative X is right-down: roll +45°, pitch 0°.
         const rollBlock = new blockClass(runtime);
         rollBlock._receive(rollBlock.protocol.packet(16, 1, [
-            0, 0, 0, 0, ...signed16(0), ...signed16(-1000), ...signed16(1000)
+            0, 0, 0, 0, ...signed16(-1000), ...signed16(0), ...signed16(1000)
         ]));
         expect(rollBlock.pitch()).toBe(0);
         expect(rollBlock.roll()).toBe(45);
+    });
+
+    test.each([
+        [0, -1000, 45, 0], // Front-up.
+        [0, 1000, -45, 0], // Front-down.
+        [-1000, 0, 0, 45], // Right-down.
+        [1000, 0, 0, -45] // Left-down.
+    ])('keeps pitch and roll independent for acceleration (%s, %s)', (x, y, pitch, roll) => {
+        const block = new blockClass(runtime);
+        const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
+        block._receive(block.protocol.packet(16, 1, [
+            0, 0, 0, 0, ...signed16(x), ...signed16(y), ...signed16(-1000)
+        ]));
+        expect(block.pitch()).toBe(pitch);
+        expect(block.roll()).toBe(roll);
     });
 
     test('filters accelerometer samples and reports zero pitch while horizontal', () => {
@@ -1043,7 +1058,7 @@ describe('iRobot Root extension', () => {
         expect(block.pitch()).toBe(0);
 
         // The 0.2 low-pass filter turns an abrupt -45° sample into -11.3°.
-        block._receive(accelPacket(1000, 0, -1000));
+        block._receive(accelPacket(0, 1000, -1000));
         expect(block.pitch()).toBe(-11.3);
     });
 

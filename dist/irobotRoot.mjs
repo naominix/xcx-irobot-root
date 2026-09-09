@@ -7009,13 +7009,13 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
       };
       return {
         // With the Root held so the power button points forward, Root's
-        // block convention maps the X axis to pitch and Y axis to roll.
+        // Y measures front/back tilt (pitch); X measures side tilt (roll).
         // Use the magnitude of the two non-pitch axes. This keeps a flat
         // Root at 0° whether its accelerometer reports gravity as +Z or
         // -Z, instead of displaying an equivalent ±180° angle.
-        // Positive pitch follows the conventional nose-up direction.
-        pitch: toDegrees(Math.atan2(-x, Math.hypot(y, z))),
-        roll: toDegrees(Math.atan2(-y, Math.hypot(x, z)))
+        // Front-up is positive pitch; right-down is positive roll.
+        pitch: toDegrees(Math.atan2(-y, Math.hypot(x, z))),
+        roll: toDegrees(Math.atan2(-x, Math.hypot(y, z)))
       };
     }
   }, {

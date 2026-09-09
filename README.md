@@ -14,6 +14,12 @@
   <a href="https://xcratch.github.io/"><img alt="Xcratch" src="https://img.shields.io/badge/Xcratch-extension-4C97FF"></a>
 </p>
 
+## ピッチ・ロールの方向
+
+電源ボタン方向をRootの前方として、ピッチは前方を上げると＋、下げると−です。
+ロールは右側を下げると＋、左側を下げると−です。水平では両方とも0°となります。
+加速度センサーのY軸からピッチ、X軸からロールを計算し、ローパスフィルターを適用しています。
+
 ## すぐに使う
 
 ChromeまたはEdgeで、次のリンクを開きます。
