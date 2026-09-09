@@ -1014,12 +1014,12 @@ describe('iRobot Root extension', () => {
     test('derives pitch and roll in degrees from the accelerometer response', () => {
         const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
 
-        // x=z is a 45° pitch; y=0 leaves the roll level.
+        // x=z is a -45° pitch (front-down); y=0 leaves the roll level.
         const pitchBlock = new blockClass(runtime);
         pitchBlock._receive(pitchBlock.protocol.packet(16, 1, [
             0, 0, 0, 0, ...signed16(1000), ...signed16(0), ...signed16(1000)
         ]));
-        expect(pitchBlock.pitch()).toBe(45);
+        expect(pitchBlock.pitch()).toBe(-45);
         expect(pitchBlock.roll()).toBe(0);
 
         // y=-z is a 45° roll; x=0 leaves the pitch level.
@@ -1042,9 +1042,9 @@ describe('iRobot Root extension', () => {
         block._receive(accelPacket(0, 0, -1000));
         expect(block.pitch()).toBe(0);
 
-        // The 0.2 low-pass filter turns an abrupt 45° sample into 11.3°.
+        // The 0.2 low-pass filter turns an abrupt -45° sample into -11.3°.
         block._receive(accelPacket(1000, 0, -1000));
-        expect(block.pitch()).toBe(11.3);
+        expect(block.pitch()).toBe(-11.3);
     });
 
     test('polls the accelerometer until continuous updates are stopped', () => {

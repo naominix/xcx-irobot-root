@@ -7013,7 +7013,8 @@ var IrobotRootBlocks = /*#__PURE__*/function () {
         // Use the magnitude of the two non-pitch axes. This keeps a flat
         // Root at 0° whether its accelerometer reports gravity as +Z or
         // -Z, instead of displaying an equivalent ±180° angle.
-        pitch: toDegrees(Math.atan2(x, Math.hypot(y, z))),
+        // Positive pitch follows the conventional nose-up direction.
+        pitch: toDegrees(Math.atan2(-x, Math.hypot(y, z))),
         roll: toDegrees(Math.atan2(-y, Math.hypot(x, z)))
       };
     }
