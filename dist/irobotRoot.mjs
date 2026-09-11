@@ -4669,7 +4669,16 @@ var SIMULATOR_SCALE = 1.8;
 // a 16 cm square. Root's 16 cm footprint is drawn within exactly one cell.
 var GRID_CELL_MM = 160;
 var ROOT_DRAW_RADIUS_MM = GRID_CELL_MM / 2;
-var ROOT_COLLISION_RADIUS_MM = 24;
+var COLLISION_STEP_MM = 1;
+var ROOT_OUTLINE = Array.from({
+  length: 6
+}, function (_, i) {
+  var angle = -Math.PI / 2 + i * Math.PI / 3;
+  return {
+    x: Math.cos(angle) * 36,
+    y: Math.sin(angle) * 36
+  };
+});
 // Preserve a usable tap target at the smallest supported viewport scale.
 var ROOT_TOUCH_HIT_MIN_RADIUS_PX = 44;
 var clamp = function clamp(value, min, max) {
@@ -5091,14 +5100,16 @@ var RootSimulator = /*#__PURE__*/function () {
       var previous = this.pose;
       var deltaX = pose.x - previous.x;
       var deltaY = pose.y - previous.y;
-      var steps = Math.max(1, Math.ceil(Math.hypot(deltaX, deltaY) / (ROOT_COLLISION_RADIUS_MM / 2)));
+      var deltaHeading = normalizeHeading$1(pose.heading - previous.heading + 180) - 180;
+      // Bound both translation and the distance swept by a rotating vertex.
+      var steps = Math.max(1, Math.ceil((Math.hypot(deltaX, deltaY) + Math.abs(deltaHeading) * DEG * ROOT_DRAW_RADIUS_MM) / COLLISION_STEP_MM));
       var accepted = previous;
       for (var step = 1; step <= steps; step++) {
         var progress = step / steps;
         var candidate = {
           x: previous.x + deltaX * progress,
           y: previous.y + deltaY * progress,
-          heading: normalizeHeading$1(previous.heading + (pose.heading - previous.heading) * progress)
+          heading: normalizeHeading$1(previous.heading + deltaHeading * progress)
         };
         var collision = this._collisionAt(candidate);
         if (collision) {
@@ -5134,27 +5145,57 @@ var RootSimulator = /*#__PURE__*/function () {
   }, {
     key: "_collisionAt",
     value: function _collisionAt(pose) {
+      var heading = headingRadians(pose.heading);
+      var rightX = Math.sin(heading);
+      var rightY = -Math.cos(heading);
+      var outline = ROOT_OUTLINE.map(function (vertex) {
+        return {
+          x: pose.x + (vertex.x * rightX - vertex.y * Math.cos(heading)) * ROOT_DRAW_RADIUS_MM / 36,
+          y: pose.y + (vertex.x * rightY - vertex.y * Math.sin(heading)) * ROOT_DRAW_RADIUS_MM / 36
+        };
+      });
       var _iterator2 = _createForOfIteratorHelper$1(this.obstacles),
         _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
           var obstacle = _step2.value;
-          var halfWidth = obstacle.width / 2;
-          var halfHeight = obstacle.height / 2;
-          var closestX = clamp(pose.x, obstacle.x - halfWidth, obstacle.x + halfWidth);
-          var closestY = clamp(pose.y, obstacle.y - halfHeight, obstacle.y + halfHeight);
+          // Clip the same hexagon used for drawing against the rectangle.
+          // Its intersection gives a contact point even for corners/thin walls.
+          var contact = outline;
+          for (var _i = 0, _arr = [['x', obstacle.x - obstacle.width / 2, 1], ['x', obstacle.x + obstacle.width / 2, -1], ['y', obstacle.y - obstacle.height / 2, 1], ['y', obstacle.y + obstacle.height / 2, -1]]; _i < _arr.length; _i++) {
+            var _arr$_i = _slicedToArray$1(_arr[_i], 3),
+              axis = _arr$_i[0],
+              boundary = _arr$_i[1],
+              sign = _arr$_i[2];
+            var clipped = [];
+            for (var i = 0; i < contact.length; i++) {
+              var a = contact[i];
+              var b = contact[(i + 1) % contact.length];
+              var insideA = (a[axis] - boundary) * sign >= -1e-9;
+              var insideB = (b[axis] - boundary) * sign >= -1e-9;
+              if (insideA) clipped.push(a);
+              if (insideA !== insideB) {
+                var t = clamp((boundary - a[axis]) / (b[axis] - a[axis]), 0, 1);
+                clipped.push({
+                  x: a.x + (b.x - a.x) * t,
+                  y: a.y + (b.y - a.y) * t
+                });
+              }
+            }
+            contact = clipped;
+            if (!contact.length) break;
+          }
+          if (!contact.length) continue;
+          var closestX = contact.reduce(function (sum, point) {
+            return sum + point.x;
+          }, 0) / contact.length;
+          var closestY = contact.reduce(function (sum, point) {
+            return sum + point.y;
+          }, 0) / contact.length;
           var dx = closestX - pose.x;
           var dy = closestY - pose.y;
-          if (dx * dx + dy * dy >= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) continue;
-          if (dx === 0 && dy === 0) {
-            dx = obstacle.x - pose.x;
-            dy = obstacle.y - pose.y;
-          }
-          var heading = headingRadians(pose.heading);
-          var rightX = Math.sin(heading);
-          var rightY = -Math.cos(heading);
           var lateral = dx * rightX + dy * rightY;
-          var centerThreshold = ROOT_COLLISION_RADIUS_MM * 0.22;
+          var centerThreshold = ROOT_DRAW_RADIUS_MM * 0.22;
           return {
             left: lateral <= centerThreshold,
             right: lateral >= -centerThreshold,
@@ -5322,8 +5363,8 @@ var RootSimulator = /*#__PURE__*/function () {
       });
       var speedSelect = document.createElement('select');
       speedSelect.style.cssText = 'border:2px solid #39846c;border-radius:8px;padding:6px;background:white;color:#264c40;font-weight:bold;';
-      for (var _i = 0, _arr = [0.25, 0.5, 1, 2, 4]; _i < _arr.length; _i++) {
-        var speed = _arr[_i];
+      for (var _i2 = 0, _arr2 = [0.25, 0.5, 1, 2, 4]; _i2 < _arr2.length; _i2++) {
+        var speed = _arr2[_i2];
         var option = document.createElement('option');
         option.value = String(speed);
         option.textContent = "".concat(speed, "\xD7");
@@ -5696,7 +5737,7 @@ var RootSimulator = /*#__PURE__*/function () {
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
           var segment = _step3.value;
-          var _a = point({
+          var a = point({
             x: segment.x1,
             y: segment.y1
           });
@@ -5705,7 +5746,7 @@ var RootSimulator = /*#__PURE__*/function () {
             y: segment.y2
           });
           context.beginPath();
-          context.moveTo(_a.x, _a.y);
+          context.moveTo(a.x, a.y);
           context.lineTo(b.x, b.y);
           context.stroke();
         }
@@ -5726,12 +5767,11 @@ var RootSimulator = /*#__PURE__*/function () {
       context.strokeStyle = '#29343a';
       context.lineWidth = 5;
       context.beginPath();
-      for (var i = 0; i < 6; i++) {
-        var a = -Math.PI / 2 + i * Math.PI / 3;
-        var _x = Math.cos(a) * 36;
-        var _y = Math.sin(a) * 36;
-        i ? context.lineTo(_x, _y) : context.moveTo(_x, _y);
-      }
+      ROOT_OUTLINE.forEach(function (_ref2, i) {
+        var x = _ref2.x,
+          y = _ref2.y;
+        if (i) context.lineTo(x, y);else context.moveTo(x, y);
+      });
       context.closePath();
       context.fill();
       context.stroke();
@@ -5764,8 +5804,8 @@ var RootSimulator = /*#__PURE__*/function () {
         y: 14,
         mask: 0x2
       }];
-      for (var _i2 = 0, _touchSensors = touchSensors; _i2 < _touchSensors.length; _i2++) {
-        var sensor = _touchSensors[_i2];
+      for (var _i3 = 0, _touchSensors = touchSensors; _i3 < _touchSensors.length; _i3++) {
+        var sensor = _touchSensors[_i3];
         context.fillStyle = this.last.touchMask & sensor.mask ? '#1976d2' : 'rgba(50,160,210,0.2)';
         context.beginPath();
         context.arc(sensor.x, sensor.y, 7, 0, Math.PI * 2);
@@ -5779,9 +5819,9 @@ var RootSimulator = /*#__PURE__*/function () {
       context.stroke();
       var ledColor = "rgb(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ")");
       if (this.led.effect === 3) {
-        for (var _i3 = 0; _i3 < 4; _i3++) {
-          var angle = (this._ledPhase + _i3 * 3) * Math.PI / 6;
-          context.fillStyle = _i3 === 0 ? ledColor : "rgba(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ",").concat(Math.max(0.15, 0.8 - _i3 * 0.18), ")");
+        for (var i = 0; i < 4; i++) {
+          var angle = (this._ledPhase + i * 3) * Math.PI / 6;
+          context.fillStyle = i === 0 ? ledColor : "rgba(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ",").concat(Math.max(0.15, 0.8 - i * 0.18), ")");
           context.beginPath();
           context.arc(Math.cos(angle) * 17, Math.sin(angle) * 17, 5, 0, Math.PI * 2);
           context.fill();

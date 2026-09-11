@@ -13,7 +13,11 @@ const SIMULATOR_SCALE = 1.8;
 // a 16 cm square. Root's 16 cm footprint is drawn within exactly one cell.
 const GRID_CELL_MM = 160;
 const ROOT_DRAW_RADIUS_MM = GRID_CELL_MM / 2;
-const ROOT_COLLISION_RADIUS_MM = 24;
+const COLLISION_STEP_MM = 1;
+const ROOT_OUTLINE = Array.from({length: 6}, (_, i) => {
+    const angle = -Math.PI / 2 + i * Math.PI / 3;
+    return {x: Math.cos(angle) * 36, y: Math.sin(angle) * 36};
+});
 // Preserve a usable tap target at the smallest supported viewport scale.
 const ROOT_TOUCH_HIT_MIN_RADIUS_PX = 44;
 
@@ -345,14 +349,17 @@ class RootSimulator {
         const previous = this.pose;
         const deltaX = pose.x - previous.x;
         const deltaY = pose.y - previous.y;
-        const steps = Math.max(1, Math.ceil(Math.hypot(deltaX, deltaY) / (ROOT_COLLISION_RADIUS_MM / 2)));
+        const deltaHeading = normalizeHeading(pose.heading - previous.heading + 180) - 180;
+        // Bound both translation and the distance swept by a rotating vertex.
+        const steps = Math.max(1, Math.ceil((Math.hypot(deltaX, deltaY) +
+            Math.abs(deltaHeading) * DEG * ROOT_DRAW_RADIUS_MM) / COLLISION_STEP_MM));
         let accepted = previous;
         for (let step = 1; step <= steps; step++) {
             const progress = step / steps;
             const candidate = {
                 x: previous.x + deltaX * progress,
                 y: previous.y + deltaY * progress,
-                heading: normalizeHeading(previous.heading + (pose.heading - previous.heading) * progress)
+                heading: normalizeHeading(previous.heading + deltaHeading * progress)
             };
             const collision = this._collisionAt(candidate);
             if (collision) {
@@ -378,23 +385,45 @@ class RootSimulator {
     }
 
     _collisionAt (pose) {
+        const heading = headingRadians(pose.heading);
+        const rightX = Math.sin(heading);
+        const rightY = -Math.cos(heading);
+        const outline = ROOT_OUTLINE.map(vertex => ({
+            x: pose.x + (vertex.x * rightX - vertex.y * Math.cos(heading)) * ROOT_DRAW_RADIUS_MM / 36,
+            y: pose.y + (vertex.x * rightY - vertex.y * Math.sin(heading)) * ROOT_DRAW_RADIUS_MM / 36
+        }));
         for (const obstacle of this.obstacles) {
-            const halfWidth = obstacle.width / 2;
-            const halfHeight = obstacle.height / 2;
-            const closestX = clamp(pose.x, obstacle.x - halfWidth, obstacle.x + halfWidth);
-            const closestY = clamp(pose.y, obstacle.y - halfHeight, obstacle.y + halfHeight);
-            let dx = closestX - pose.x;
-            let dy = closestY - pose.y;
-            if ((dx * dx) + (dy * dy) >= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) continue;
-            if (dx === 0 && dy === 0) {
-                dx = obstacle.x - pose.x;
-                dy = obstacle.y - pose.y;
+            // Clip the same hexagon used for drawing against the rectangle.
+            // Its intersection gives a contact point even for corners/thin walls.
+            let contact = outline;
+            for (const [axis, boundary, sign] of [
+                ['x', obstacle.x - obstacle.width / 2, 1],
+                ['x', obstacle.x + obstacle.width / 2, -1],
+                ['y', obstacle.y - obstacle.height / 2, 1],
+                ['y', obstacle.y + obstacle.height / 2, -1]
+            ]) {
+                const clipped = [];
+                for (let i = 0; i < contact.length; i++) {
+                    const a = contact[i];
+                    const b = contact[(i + 1) % contact.length];
+                    const insideA = (a[axis] - boundary) * sign >= -1e-9;
+                    const insideB = (b[axis] - boundary) * sign >= -1e-9;
+                    if (insideA) clipped.push(a);
+                    if (insideA !== insideB) {
+                        const t = clamp((boundary - a[axis]) / (b[axis] - a[axis]), 0, 1);
+                        clipped.push({x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t});
+                    }
+                }
+                contact = clipped;
+                if (!contact.length) break;
             }
-            const heading = headingRadians(pose.heading);
-            const rightX = Math.sin(heading);
-            const rightY = -Math.cos(heading);
+            if (!contact.length) continue;
+            const closestX = contact.reduce((sum, point) => sum + point.x, 0) / contact.length;
+            const closestY = contact.reduce((sum, point) => sum + point.y, 0) / contact.length;
+            const dx = closestX - pose.x;
+            const dy = closestY - pose.y;
             const lateral = (dx * rightX) + (dy * rightY);
-            const centerThreshold = ROOT_COLLISION_RADIUS_MM * 0.22;
+            const centerThreshold = ROOT_DRAW_RADIUS_MM * 0.22;
             return {
                 left: lateral <= centerThreshold,
                 right: lateral >= -centerThreshold,
@@ -816,7 +845,7 @@ class RootSimulator {
         context.save(); context.translate(p.x, p.y); context.rotate((90 - this.pose.heading) * DEG); context.scale(rootVisualScale, rootVisualScale);
         context.fillStyle = '#fff'; context.strokeStyle = '#29343a'; context.lineWidth = 5;
         context.beginPath();
-        for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + i * Math.PI / 3; const x = Math.cos(a) * 36; const y = Math.sin(a) * 36; i ? context.lineTo(x, y) : context.moveTo(x, y); }
+        ROOT_OUTLINE.forEach(({x, y}, i) => { if (i) context.lineTo(x, y); else context.moveTo(x, y); });
         context.closePath(); context.fill(); context.stroke();
         context.lineCap = 'round';
         context.lineWidth = 8;

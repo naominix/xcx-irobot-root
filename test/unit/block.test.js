@@ -171,11 +171,12 @@ describe('iRobot Root extension', () => {
         try {
             const block = new blockClass(runtime);
             block.setControlMode({MODE: 'simulator'});
-            block.simulator.obstacles.push({type: 'wall', x: 0, y: 70, width: 120, height: 14});
+            block.simulator.obstacles.push({type: 'wall', x: 0, y: 170, width: 120, height: 14});
             const forward = block.drive({MM: 120});
             jest.advanceTimersByTime(2000);
             await forward;
-            expect(block.simulator.pose.y).toBeLessThan(70);
+            expect(block.simulator.pose.y).toBeGreaterThanOrEqual(82);
+            expect(block.simulator.pose.y).toBeLessThan(83);
             expect(block.simulator.last.leftBumper).toBe(true);
             expect(block.simulator.last.rightBumper).toBe(true);
             expect(block.simulator._collisionPoint).toEqual(expect.objectContaining({x: expect.any(Number), y: expect.any(Number)}));
