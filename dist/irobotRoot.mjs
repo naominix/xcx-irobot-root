@@ -4949,11 +4949,16 @@ var RootSimulator = /*#__PURE__*/function () {
     value: function setLed(effect, red, green, blue) {
       var _this = this;
       this._stopLedAnimation();
+      var normalizedEffect = clamp(Math.round(Number(effect) || 0), 0, 3);
+      // Root ignores the RGB payload while the LED effect is off. Mirror the
+      // physical robot by clearing the simulated colour as well, so a colour
+      // selected by an earlier command cannot remain visible after "off".
+      var isOff = normalizedEffect === 0;
       this.led = {
-        effect: clamp(Math.round(Number(effect) || 0), 0, 3),
-        red: clamp(Math.round(Number(red) || 0), 0, 255),
-        green: clamp(Math.round(Number(green) || 0), 0, 255),
-        blue: clamp(Math.round(Number(blue) || 0), 0, 255)
+        effect: normalizedEffect,
+        red: isOff ? 0 : clamp(Math.round(Number(red) || 0), 0, 255),
+        green: isOff ? 0 : clamp(Math.round(Number(green) || 0), 0, 255),
+        blue: isOff ? 0 : clamp(Math.round(Number(blue) || 0), 0, 255)
       };
       this._ledPhase = 0;
       if (this.led.effect === 2 || this.led.effect === 3) {
@@ -5818,6 +5823,12 @@ var RootSimulator = /*#__PURE__*/function () {
       context.lineTo(0, 21);
       context.stroke();
       var ledColor = "rgb(".concat(this.led.red, ",").concat(this.led.green, ",").concat(this.led.blue, ")");
+      // Keep the unlit LED visibly black. This also provides the correct dark
+      // phase for blinking instead of exposing the white robot body beneath.
+      context.fillStyle = '#000';
+      context.beginPath();
+      context.arc(0, 0, 9, 0, Math.PI * 2);
+      context.fill();
       if (this.led.effect === 3) {
         for (var i = 0; i < 4; i++) {
           var angle = (this._ledPhase + i * 3) * Math.PI / 6;

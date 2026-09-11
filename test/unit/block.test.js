@@ -140,6 +140,17 @@ describe('iRobot Root extension', () => {
         }
     });
 
+    test('clears the simulator LED colour when the off effect is selected', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+
+        block.ledAnimation({EFFECT: '1', RED: 24, GREEN: 96, BLUE: 192});
+        expect(block.simulator.led).toEqual({effect: 1, red: 24, green: 96, blue: 192});
+
+        block.ledAnimation({EFFECT: '0', RED: 24, GREEN: 96, BLUE: 192});
+        expect(block.simulator.led).toEqual({effect: 0, red: 0, green: 0, blue: 0});
+    });
+
     test('navigation reset preserves simulator marker and LED state', () => {
         const block = new blockClass(runtime);
         block.setControlMode({MODE: 'simulator'});
