@@ -625,13 +625,51 @@ class IrobotRootBlocks {
     }
 
     _playNoteForPicker (midiNote, category) {
-        if (category !== this.getInfo().name) return;
+        // Scratch Blocks has used both the translated category name and the
+        // extension ID for custom extension fields. Accept either form so an
+        // editor update cannot silently disable piano-key previews.
+        if (category !== this.getInfo().name && category !== EXTENSION_ID) return;
+        const frequency = midiNoteToFrequency(Cast.toNumber(midiNote));
         if (this._isSimulatorActive()) {
-            this.simulator.playNote(midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
+            this.simulator.playNote(frequency, 250);
+            this._playLocalNotePreview(frequency, 250);
             return;
         }
-        if (!this.transport.isConnected()) return;
-        this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
+        if (this.transport.isConnected()) {
+            this._send(this.protocol.note(frequency, 250));
+            return;
+        }
+        // The picker is also used while composing a project before a Root is
+        // connected. In that case, use Scratch's existing Web Audio context so
+        // the selected pitch can still be checked on PCs and iPads.
+        this._playLocalNotePreview(frequency, 250);
+    }
+
+    _playLocalNotePreview (frequency, durationMs) {
+        const audioContext = this.runtime.audioEngine && this.runtime.audioEngine.audioContext;
+        if (!audioContext || typeof audioContext.createOscillator !== 'function' ||
+            typeof audioContext.createGain !== 'function') return false;
+        try {
+            if (audioContext.state === 'suspended' && typeof audioContext.resume === 'function') {
+                const resume = audioContext.resume();
+                if (resume && typeof resume.catch === 'function') resume.catch(() => {});
+            }
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const now = audioContext.currentTime;
+            const end = now + (Math.max(1, durationMs) / 1000);
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(frequency, now);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, end);
+            oscillator.connect(gain);
+            gain.connect(audioContext.destination);
+            oscillator.start(now);
+            oscillator.stop(end);
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
     sayPhrase (args) {

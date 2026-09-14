@@ -645,12 +645,54 @@ describe('iRobot Root extension', () => {
         block.transport.isConnected = jest.fn(() => true);
         block.transport.write = jest.fn();
 
-        block._playNoteForPicker(69, block.getInfo().name);
+        // Some Scratch Blocks versions provide the extension ID rather than
+        // the translated category name.
+        block._playNoteForPicker(69, 'irobotRoot');
 
         const packet = block.transport.write.mock.calls[0][0];
         const packetView = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
         expect(packetView.getUint32(3, false)).toBe(440);
         expect(packetView.getUint16(7, false)).toBe(250);
+    });
+
+    test('piano picker uses a local preview while Root is disconnected', () => {
+        const block = new blockClass(runtime);
+        block.transport.isConnected = jest.fn(() => false);
+        block._playLocalNotePreview = jest.fn(() => true);
+
+        block._playNoteForPicker(69, block.getInfo().name);
+
+        expect(block._playLocalNotePreview).toHaveBeenCalledWith(440, 250);
+    });
+
+    test('local piano preview uses Scratch audio engine', () => {
+        const oscillator = {
+            type: '',
+            frequency: {setValueAtTime: jest.fn()},
+            connect: jest.fn(),
+            start: jest.fn(),
+            stop: jest.fn()
+        };
+        const gain = {
+            gain: {setValueAtTime: jest.fn(), exponentialRampToValueAtTime: jest.fn()},
+            connect: jest.fn()
+        };
+        const audioContext = {
+            state: 'running',
+            currentTime: 2,
+            destination: {},
+            createOscillator: jest.fn(() => oscillator),
+            createGain: jest.fn(() => gain)
+        };
+        const audioRuntime = Object.assign({}, runtime, {audioEngine: {audioContext}});
+        const block = new blockClass(audioRuntime);
+
+        expect(block._playLocalNotePreview(440, 250)).toBe(true);
+        expect(oscillator.type).toBe('square');
+        expect(oscillator.frequency.setValueAtTime).toHaveBeenCalledWith(440, 2);
+        expect(oscillator.start).toHaveBeenCalledWith(2);
+        expect(oscillator.stop).toHaveBeenCalledWith(2.25);
+        expect(gain.connect).toHaveBeenCalledWith(audioContext.destination);
     });
 
     test('say phrase waits for Root Say Phrase Finished response with the matching packet ID', async () => {
