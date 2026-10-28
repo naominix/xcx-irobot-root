@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>iRobot Root for Xcratch — 複数台制御版</title>
+  <style>
+    :root { color-scheme: light; --ink:#17202a; --muted:#596775; --green:#2e936d; --paper:#f7f8f5; --blue:#24778a; }
+    * { box-sizing:border-box; } body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif; color:var(--ink); background:var(--paper); line-height:1.7; }
+    header { padding:64px 24px 52px; text-align:center; background:linear-gradient(145deg,#e7f8ef,#edf8fb 58%,#fff9d9); border-bottom:1px solid #dce5df; }
+    h1 { margin:0 0 10px; font-size:clamp(2rem,6vw,3.4rem); } header p { max-width:760px; margin:0 auto 26px; color:var(--muted); font-size:1.08rem; }
+    main { width:min(900px,calc(100% - 36px)); margin:auto; padding:46px 0 70px; } section { margin-bottom:42px; } h2 { font-size:1.6rem; }
+    .actions { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; } .button { display:inline-block; padding:11px 19px; border-radius:999px; text-decoration:none; font-weight:700; color:white; background:var(--green); } .button.secondary { color:var(--ink); background:white; border:1px solid #ccd8d0; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; } .card { background:white; padding:20px; border:1px solid #dde5df; border-radius:17px; } .card h3 { margin-top:0; }
+    .note { padding:17px 19px; border-left:5px solid var(--blue); background:#eaf9fc; border-radius:10px; } code { background:#e9efeb; border-radius:6px; padding:.15rem .4rem; overflow-wrap:anywhere; }
+    footer { text-align:center; padding:26px; color:var(--muted); border-top:1px solid #dce5df; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>iRobot Root for Xcratch<br>複数台制御版</h1>
+    <p>Root 1、Root 2、Root 3を同じScratchプロジェクトから選択し、独立して制御するための実験版Xcratchサイトです。</p>
+    <div class="actions">
+      <a class="button" href="editor/">複数台版Xcratchで開く</a>
+      <a class="button secondary" href="https://github.com/naominix/xcx-irobot-root">ソースと技術資料</a>
+      <a class="button secondary" href="irobotRoot.mjs">複数台版拡張機能</a>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2>単体制御版との使い分け</h2>
+      <p>このサイトはRootを2台以上保有しているユーザー向けです。Root 1台だけを使う場合は、安定版の <a href="https://naominix.github.io/xcx-irobot-root/">単体制御サイト</a> を利用してください。両サイトのプロジェクト形式は共通ですが、読み込む拡張機能URLは混在させないでください。</p>
+      <p class="note"><strong>実験版：</strong>複数台版は <code>multi-root</code> ブランチを基にしています。正式版への統合前の検証機能を含みます。</p>
+    </section>
+    <section>
+      <h2>複数台制御</h2>
+      <div class="grid">
+        <div class="card"><h3>Rootを個別選択</h3><p>Root 1、Root 2、Root 3をメニューから選び、選択中のRootだけを移動・回転・LED・音・マーカー制御できます。</p></div>
+        <div class="card"><h3>並列実行</h3><p>Scratchの複数スクリプトから異なるRootを同時に操作できます。RootごとにBLEセッション、packet ID、完了待ち、センサー状態を分離します。</p></div>
+        <div class="card"><h3>再接続</h3><p>個別切断後も空いたRoot番号を再利用します。接続状態が不整合になったときは、全Root接続リセットブロックを使えます。</p></div>
+      </div>
+    </section>
+    <section>
+      <h2>複数台シミュレーター</h2>
+      <p>シミュレーターモードでは、1つの共有Canvas上に複数の仮想Rootを表示します。各Rootの座標、向き、LED、マーカー、軌跡、センサー状態は独立しています。障害物とRoot同士の衝突は同じワールドで扱います。</p>
+      <div class="grid">
+        <div class="card"><h3>Rootごとに表示</h3><p>Root番号を表示し、選択中のRootを強調します。</p></div>
+        <div class="card"><h3>共有ワールド</h3><p>障害物、軌跡、衝突を同じCanvasで確認できます。</p></div>
+        <div class="card"><h3>実機接続とは独立</h3><p>シミュレーター固定時はBLE接続を維持したまま、実機へ命令を送りません。</p></div>
+      </div>
+    </section>
+    <section>
+      <h2>配布URL</h2>
+      <p>Extension Loaderには、このサイトの <code>irobotRoot.mjs</code> を指定します。単体制御版URLと取り違えないようにしてください。</p>
+      <p><code>https://naominix.github.io/xcratch-irobot-root-multi/irobotRoot.mjs</code></p>
+    </section>
+  </main>
+  <footer>MIT License · © 2026 naominix · 複数Root制御実験版</footer>
+</body>
+</html>

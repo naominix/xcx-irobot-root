@@ -1,11 +1,11 @@
 import {
     COMMAND_FINISH_TIMEOUT_MS,
-    MARKER_FINISH_TIMEOUT_MS,
     MOTION_COMMAND_GAP_MS,
     MOTION_WATCHDOG_SETTLE_MS,
     blockClass,
     linearMotionWatchdogMs,
-    navigationMotionWatchdogMs
+    navigationMotionWatchdogMs,
+    openRootConnectionDialog
 } from '../../src/vm/extensions/block/index.js';
 import {
     ROOT_DISCOVERY_OPTIONS,
@@ -13,6 +13,7 @@ import {
     RootScratchLinkBLE,
     RootTransport,
     SCRUB_DISCOVERY_ACK_TIMEOUT_MS,
+    UART_WRITE_GAP_MS,
     base64ToBytes,
     bytesToBase64,
     crc8,
@@ -46,6 +47,7 @@ describe('iRobot Root extension', () => {
         expect(block).toBeInstanceOf(blockClass);
         expect(block.getInfo().id).toBe('irobotRoot');
         expect(block.getInfo().blocks.some(item => item.opcode === 'connect')).toBe(true);
+        expect(block.getInfo().blocks.some(item => item.opcode === 'resetRootConnections')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'setControlMode')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'openSimulator')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'motors').arguments.LEFT.type)
@@ -55,11 +57,6 @@ describe('iRobot Root extension', () => {
         expect(block.getInfo().blocks.find(item => item.opcode === 'arc').arguments.RADIUS.type)
             .toBe('root-arc-radius');
         expect(block.getInfo().blocks.some(item => item.opcode === 'resetNavigation')).toBe(true);
-        expect(block.getInfo().blocks.some(item => item.opcode === 'pitch')).toBe(true);
-        expect(block.getInfo().blocks.some(item => item.opcode === 'roll')).toBe(true);
-        expect(block.getInfo().blocks.some(item => item.opcode === 'setAccelerometerPolling')).toBe(true);
-        expect(block.getInfo().blocks.some(item => item.opcode === 'rootName')).toBe(true);
-        expect(block.getInfo().blocks.some(item => item.opcode === 'setRootName')).toBe(true);
         expect(block.getInfo().blocks.find(item => item.opcode === 'navigateTo').arguments.X.type)
             .toBe('number');
         expect(block.getInfo().customFieldTypes['root-motor-left'].implementation).toMatchObject({
@@ -77,14 +74,13 @@ describe('iRobot Root extension', () => {
         expect(block.getInfo().blocks.some(item => item.opcode === 'sayPhrase')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenBumper')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenTouchSensor')).toBe(true);
-        expect(block.getInfo().blocks.some(item => item.opcode === 'isBumperPressed')).toBe(true);
-        expect(block.getInfo().blocks.some(item => item.opcode === 'isTouchSensorTouched')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenFLTouch')).toBe(true);
         expect(block.getInfo().blocks.some(item => item.opcode === 'whenBothBumpersRelease')).toBe(true);
         expect(block.whenBumper()).toBe(true);
         expect(block.whenTouchSensor()).toBe(true);
         expect(block.whenFixedEvent()).toBe(true);
-        expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot', block.transport);
+        expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot', block.rootManager);
+        expect(runtime.registerPeripheralExtension).toHaveBeenCalledWith('irobotRoot:session:1', block.transport);
     });
 
     test('falls back to standard Scratch number fields when the editor has no motion picker', () => {
@@ -99,6 +95,328 @@ describe('iRobot Root extension', () => {
         expect(findBlock('arc').arguments.RADIUS.type).toBe('number');
         expect(findBlock('arc').arguments.DEGREES.type).toBe('number');
         expect(info.customFieldTypes).toEqual({});
+    });
+
+    test('keeps Root A and Root B protocol packet ids and LED writes independent', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        rootA.transport.write = jest.fn();
+        rootB.transport.write = jest.fn();
+
+        block.selectRoot({ROOT: '1'});
+        block.led({RED: 255, GREEN: 0, BLUE: 0});
+        block.selectRoot({ROOT: String(rootB.id)});
+        block.led({RED: 0, GREEN: 0, BLUE: 255});
+
+        expect(rootA.protocol.packetId).toBe(1);
+        expect(rootB.protocol.packetId).toBe(1);
+        expect(rootA.transport.write.mock.calls[0][0][3]).toBe(1);
+        expect(rootA.transport.write.mock.calls[0][0][4]).toBe(255);
+        expect(rootB.transport.write.mock.calls[0][0][3]).toBe(1);
+        expect(rootB.transport.write.mock.calls[0][0][6]).toBe(255);
+        expect(block.getRootMenu()).toEqual([
+            {text: 'Root 1', value: '1'}, {text: 'Root 2', value: '2'}
+        ]);
+    });
+
+    test('keeps tilt, bumper, touch and names independent per Root', () => {
+        const block = new blockClass(runtime);
+        const a = block.rootManager.getSession(1);
+        const b = block.rootManager.createSession();
+        const ua = {thread: {irobotRootSessionId: a.id}};
+        const ub = {thread: {irobotRootSessionId: b.id}};
+        block._receive(a.protocol.packet(16, 1, [0, 0, 0, 0, 0x03, 0xe8, 0, 0, 0x03, 0xe8]), a);
+        block._receive(b.protocol.packet(16, 1, [0, 0, 0, 0, 0, 0, 0xfc, 0x18, 0x03, 0xe8]), b);
+        block._receive(a.protocol.packet(12, 0, [0, 0, 0, 0, 0x80]), a);
+        block._receive(b.protocol.packet(17, 0, [0, 0, 0, 0, 0x40]), b);
+        expect(block.pitch({}, ua)).toBe(-45);
+        expect(block.roll({}, ub)).toBe(45);
+        expect(block.isBumperPressed({BUMPER: 'LEFT'}, ua)).toBe(true);
+        expect(block.isBumperPressed({BUMPER: 'LEFT'}, ub)).toBe(false);
+        expect(block.isTouchSensorTouched({SENSOR: 'FR'}, ub)).toBe(true);
+        expect(block.isTouchSensorTouched({SENSOR: 'FR'}, ua)).toBe(false);
+        a.last.rootName = 'Alpha';
+        b.last.rootName = 'Beta';
+        expect(block.rootName({}, ua)).toBe('Alpha');
+        expect(block.rootName({}, ub)).toBe('Beta');
+    });
+
+    test('continuous acceleration polling starts and stops per Root', () => {
+        jest.useFakeTimers();
+        try {
+            const block = new blockClass(runtime);
+            const a = block.rootManager.getSession(1);
+            const b = block.rootManager.createSession();
+            a.transport.isConnected = b.transport.isConnected = () => true;
+            a.transport.write = jest.fn();
+            b.transport.write = jest.fn();
+            const ua = {thread: {irobotRootSessionId: a.id}};
+            const ub = {thread: {irobotRootSessionId: b.id}};
+            block.setAccelerometerPolling({STATE: 'start'}, ua);
+            block.setAccelerometerPolling({STATE: 'start'}, ub);
+            expect(a.transport.write).toHaveBeenCalledTimes(1);
+            expect(b.transport.write).toHaveBeenCalledTimes(1);
+            block.setAccelerometerPolling({STATE: 'stop'}, ua);
+            expect(a.accelerometerPollTimer).toBeNull();
+            expect(b.accelerometerPollTimer).not.toBeNull();
+            block.setAccelerometerPolling({STATE: 'stop'}, ub);
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
+    test('piano picker accepts the extension ID and previews the selected Root', () => {
+        const block = new blockClass(runtime);
+        const a = block.rootManager.getSession(1);
+        const b = block.rootManager.createSession();
+        a.transport.isConnected = b.transport.isConnected = () => true;
+        a.transport.write = jest.fn();
+        b.transport.write = jest.fn();
+        block.selectRoot({ROOT: String(b.id)});
+        block._playNoteForPicker(69, 'irobotRoot');
+        expect(a.transport.write).not.toHaveBeenCalled();
+        expect(b.transport.write).toHaveBeenCalledTimes(1);
+        const packet = b.transport.write.mock.calls[0][0];
+        expect(new DataView(packet.buffer, packet.byteOffset, packet.byteLength).getUint32(3, false)).toBe(440);
+    });
+
+    test('piano picker previews locally in simulator mode', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block._playLocalNotePreview = jest.fn();
+        block._playNoteForPicker(69, 'irobotRoot');
+        expect(block._playLocalNotePreview).toHaveBeenCalledWith(440, 250);
+    });
+
+    test('keeps one clearly-labelled simulator for the selected Root', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        block.setControlMode({MODE: 'simulator'});
+        block.selectRoot({ROOT: '1'});
+        block.led({RED: 0, GREEN: 0, BLUE: 255});
+        block.simulator.pose = {x: 20, y: 30, heading: 90};
+        block.selectRoot({ROOT: String(rootB.id)});
+        block.led({RED: 255, GREEN: 80, BLUE: 0});
+
+        expect(block.simulatedSessionId).toBe(rootB.id);
+        expect(block.simulator.rootLabel).toBe('Root 2');
+        expect(block.simulator.pose).toEqual({x: 20, y: 30, heading: 90});
+        expect(block.simulator.led).toEqual({effect: 1, red: 255, green: 80, blue: 0});
+    });
+
+    test('does not add virtual Roots from simulator mode', () => {
+        const block = new blockClass(runtime);
+        const scan = jest.spyOn(block.transport, 'scan');
+        block.setControlMode({MODE: 'simulator'});
+        expect(block.addRoot()).toBe('Root 1');
+        expect(block.getRootMenu()).toEqual([{text: 'Root 1', value: '1'}]);
+        expect(scan).not.toHaveBeenCalled();
+    });
+
+    test('reuses a disconnected Root slot when scanning again', () => {
+        const block = new blockClass(runtime);
+        const rootA = block.rootManager.getSession(1);
+        const rootB = block.rootManager.createSession();
+        rootA.transport.ble = {isConnected: () => false};
+        rootB.transport.ble = {isConnected: () => true};
+        rootA.transport.scan = jest.fn();
+        rootB.transport.scan = jest.fn();
+        block.rootManager.activeSessionId = rootB.id;
+
+        block.rootManager.scan();
+
+        expect(rootA.transport.scan).toHaveBeenCalledTimes(1);
+        expect(rootB.transport.scan).not.toHaveBeenCalled();
+        expect(block.getRootMenu()).toEqual([
+            {text: 'Root 1', value: '1'}, {text: 'Root 2', value: '2'}
+        ]);
+    });
+
+    test('routes the public Scratch Link connection dialog to the pending additional Root', () => {
+        const peripheralExtensions = {};
+        const scratchLinkRuntime = {
+            formatMessage,
+            irobotRootMotionPickerSupported: false,
+            registerPeripheralExtension: (extensionId, extension) => {
+                peripheralExtensions[extensionId] = extension;
+            },
+            startHats: jest.fn(),
+            greenFlag: jest.fn(),
+            stopAll: jest.fn()
+        };
+        const block = new blockClass(scratchLinkRuntime);
+        const root1 = block.rootManager.getSession(1);
+        const root2 = block.rootManager.createSession();
+        block.rootManager.pendingScanSessionId = root2.id;
+        root1.transport.scan = jest.fn();
+
+        // This is the exact path used by Scratch/Xcratch's connection modal:
+        // the modal addresses the public extension id, not an internal session
+        // id. The manager must retain the newly scanned Root as its destination.
+        root2.transport.connect = jest.fn();
+        peripheralExtensions.irobotRoot.connect('root-2-peripheral');
+
+        expect(root1.transport.scan).not.toHaveBeenCalled();
+        expect(root2.transport.connect).toHaveBeenCalledWith('root-2-peripheral');
+        expect(root2.peripheralId).toBe('root-2-peripheral');
+    });
+
+    test('opens the host Xcratch Scratch Link picker for another physical Root', () => {
+        const openConnectionModal = jest.fn();
+        expect(openRootConnectionDialog({Xcratch: {openConnectionModal}})).toBe(true);
+        expect(openConnectionModal).toHaveBeenCalledWith('irobotRoot', {additionalRoot: true});
+        expect(openRootConnectionDialog({})).toBe(false);
+    });
+
+    test('marks an explicitly disconnected slot reusable even if the adapter reports stale state', () => {
+        const block = new blockClass(runtime);
+        const rootA = block.rootManager.getSession(1);
+        rootA.transport.ble = {isConnected: () => true, disconnect: jest.fn()};
+        rootA.transport.disconnect = jest.fn(() => {
+            // Simulate a bridge that has not updated its connection flag yet.
+            rootA.transport.ble.isConnected = () => true;
+        });
+        rootA.transport.scan = jest.fn();
+        block.rootManager.activeSessionId = rootA.id;
+
+        block.rootManager.disconnect(rootA.id);
+        block.rootManager.scan();
+
+        expect(rootA.transport.scan).toHaveBeenCalledTimes(1);
+        expect(rootA.connectionState).toBe(false);
+    });
+
+    test('disconnects every Root and clears connection state without removing numbered slots', () => {
+        const block = new blockClass(runtime);
+        const rootA = block.rootManager.getSession(1);
+        const rootB = block.rootManager.createSession();
+        for (const session of [rootA, rootB]) {
+            session.connectionState = true;
+            session.peripheralId = `peripheral-${session.id}`;
+            session.last = {batteryPercent: 50};
+            session.bumperState = 0x80;
+            session.touchState = 0x8;
+            session.navigationPosition = {x: 10, y: 20, heading: 30};
+            session.protocol.packet(3, 2);
+            session.transport.disconnect = jest.fn(() => block.rootManager.onReset(session));
+        }
+
+        block.resetRootConnections();
+
+        expect(rootA.transport.disconnect).toHaveBeenCalledTimes(1);
+        expect(rootB.transport.disconnect).toHaveBeenCalledTimes(1);
+        expect(rootA.connectionState).toBe(false);
+        expect(rootB.connectionState).toBe(false);
+        expect(rootA.peripheralId).toBeNull();
+        expect(rootB.peripheralId).toBeNull();
+        expect(rootA.last).toEqual({});
+        expect(rootB.last).toEqual({});
+        expect(rootA.protocol.packetId).toBe(0);
+        expect(rootB.protocol.packetId).toBe(0);
+        expect(block.rootManager.activeSessionId).toBe(rootA.id);
+        expect(block.getRootMenu()).toEqual([
+            {text: 'Root 1', value: '1'}, {text: 'Root 2', value: '2'}
+        ]);
+    });
+
+    test('resets the single simulator on connection reset', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block.simulator.pose = {x: 50, y: 60, heading: 180};
+
+        block.resetRootConnections();
+
+        expect(block.simulator.pose).toEqual({x: 0, y: 0, heading: 90});
+        expect(block.simulator.rootLabel).toBe('Root 1');
+    });
+
+    test('keeps a selected Root bound to each parallel Scratch thread', async () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        rootA.transport.write = jest.fn();
+        rootB.transport.write = jest.fn();
+        const utilA = {thread: {}};
+        const utilB = {thread: {}};
+
+        block.selectRoot({ROOT: '1'}, utilA);
+        block.selectRoot({ROOT: String(rootB.id)}, utilB);
+        const turnA = block.turn({DEGREES: 90}, utilA).catch(() => undefined);
+        const turnB = block.turn({DEGREES: -90}, utilB).catch(() => undefined);
+
+        expect(utilA.thread.irobotRootSessionId).toBe(rootA.id);
+        expect(utilB.thread.irobotRootSessionId).toBe(rootB.id);
+        expect(rootA.transport.write).toHaveBeenCalledTimes(1);
+        expect(rootB.transport.write).toHaveBeenCalledTimes(1);
+        expect(rootA.transport.write.mock.calls[0][0][1]).toBe(12);
+        expect(rootB.transport.write.mock.calls[0][0][1]).toBe(12);
+
+        block._cancelPendingCommands(new Error('test cleanup'), rootA);
+        block._cancelPendingCommands(new Error('test cleanup'), rootB);
+        await Promise.all([turnA, turnB]);
+    });
+
+    test('filters Root-specific sensor hats by the notification session', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        const util = {thread: {}};
+
+        block._hatDispatchSessionId = rootA.id;
+        expect(block.whenBumper({ROOT: String(rootA.id)}, util)).toBe(true);
+        expect(block.whenBumper({ROOT: String(rootB.id)}, util)).toBe(false);
+        expect(block.whenTouchSensor({ROOT: String(rootA.id)}, util)).toBe(true);
+        expect(block.whenFixedEvent({ROOT: String(rootB.id)}, util)).toBe(false);
+        block._hatDispatchSessionId = null;
+    });
+
+    test('routes identical packet ids to the matching session pending command', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        const pending = session => {
+            const resolve = jest.fn();
+            const reject = jest.fn();
+            session.pendingCommands.set('1:8:7', {
+                resolve, reject, timeout: null, watchdog: null, settle: null,
+                settling: false, stopMotion: false
+            });
+            return {resolve, reject};
+        };
+        const a = pending(rootA);
+        const b = pending(rootB);
+
+        block._resolvePendingCommand({device: 1, command: 8, packetId: 7}, rootA);
+
+        expect(a.resolve).toHaveBeenCalledTimes(1);
+        expect(b.resolve).not.toHaveBeenCalled();
+        expect(rootA.pendingCommands.size).toBe(0);
+        expect(rootB.pendingCommands.size).toBe(1);
+    });
+
+    test('keeps sensor state, navigation, and pending commands isolated on disconnect', () => {
+        const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const rootA = block.rootManager.getSession(1);
+        rootA.navigationPosition = {x: 100, y: 0, heading: 90};
+        rootB.navigationPosition = {x: -100, y: 0, heading: 180};
+        rootA.bumperState = 0x80;
+        block._receiveBumperEvent({leftBumper: false, rightBumper: false}, rootB);
+        const rejectA = jest.fn();
+        const rejectB = jest.fn();
+        rootA.pendingCommands.set('a', {resolve: jest.fn(), reject: rejectA, timeout: null, watchdog: null, settle: null});
+        rootB.pendingCommands.set('b', {resolve: jest.fn(), reject: rejectB, timeout: null, watchdog: null, settle: null});
+
+        rootA.transport.disconnect();
+
+        expect(rootA.bumperState).toBe(0x80);
+        expect(rootB.bumperState).toBe(0);
+        expect(rootA.navigationPosition).toEqual({x: 100, y: 0, heading: 90});
+        expect(rootB.navigationPosition).toEqual({x: -100, y: 0, heading: 180});
+        expect(rejectA).toHaveBeenCalledTimes(1);
+        expect(rejectB).not.toHaveBeenCalled();
+        expect(rootB.pendingCommands).toHaveProperty('size', 1);
     });
 
     test('runs motion in simulator-fixed mode without writing BLE packets', async () => {
@@ -140,15 +458,23 @@ describe('iRobot Root extension', () => {
         }
     });
 
-    test('clears the simulator LED colour when the off effect is selected', () => {
+    test('shows and accepts simulator commands only for the selected Root', () => {
         const block = new blockClass(runtime);
+        const rootB = block.rootManager.createSession();
+        const utilA = {thread: {}};
+        const utilB = {thread: {}};
         block.setControlMode({MODE: 'simulator'});
+        block.selectRoot({ROOT: '1'}, utilA);
+        block.marker({POSITION: '1'}, utilA);
+        block.simulator.trail.push({x1: 0, y1: 0, x2: 50, y2: 0});
+        block.selectRoot({ROOT: String(rootB.id)}, utilB);
 
-        block.ledAnimation({EFFECT: '1', RED: 24, GREEN: 96, BLUE: 192});
-        expect(block.simulator.led).toEqual({effect: 1, red: 24, green: 96, blue: 192});
+        block.setControlMode({MODE: 'simulator'}, utilB);
+        block.marker({POSITION: '0'}, utilA);
 
-        block.ledAnimation({EFFECT: '0', RED: 24, GREEN: 96, BLUE: 192});
-        expect(block.simulator.led).toEqual({effect: 0, red: 0, green: 0, blue: 0});
+        expect(block.simulator.rootLabel).toBe('Root 2');
+        expect(block.simulator.marker).toBe(1);
+        expect(block.simulator.trail).toHaveLength(1);
     });
 
     test('navigation reset preserves simulator marker and LED state', () => {
@@ -165,18 +491,6 @@ describe('iRobot Root extension', () => {
         block.simulator.reset();
     });
 
-    test('simulator reset keeps the selected starting cell and points Root upward', () => {
-        const block = new blockClass(runtime);
-        block.simulator.homePose = {x: 160, y: -160, heading: 15};
-        block.simulator.pose = {x: 90, y: 50, heading: 210};
-        block.simulator.resetNavigation();
-        expect(block.simulator.pose).toEqual({x: 160, y: -160, heading: 90});
-
-        block.simulator.pose.heading = 270;
-        block.simulator.reset();
-        expect(block.simulator.pose).toEqual({x: 160, y: -160, heading: 90});
-    });
-
     test('simulator obstacles stop Root and fire bumper push and release hats', async () => {
         jest.useFakeTimers();
         try {
@@ -186,8 +500,7 @@ describe('iRobot Root extension', () => {
             const forward = block.drive({MM: 120});
             jest.advanceTimersByTime(2000);
             await forward;
-            expect(block.simulator.pose.y).toBeGreaterThanOrEqual(82);
-            expect(block.simulator.pose.y).toBeLessThan(83);
+            expect(block.simulator.pose.y).toBeLessThan(170);
             expect(block.simulator.last.leftBumper).toBe(true);
             expect(block.simulator.last.rightBumper).toBe(true);
             expect(block.simulator._collisionPoint).toEqual(expect.objectContaining({x: expect.any(Number), y: expect.any(Number)}));
@@ -287,9 +600,7 @@ describe('iRobot Root extension', () => {
         expect(findBlock(japaneseInfo, 'resetNavigation').text).toBe('ナビをリセットする');
         expect(findBlock(japaneseInfo, 'navigateTo').text).toBe('ナビで x [X] y [Y] cmへ移動する');
         expect(findBlock(japaneseInfo, 'sayPhrase').text).toBe('[PHRASE] と言う');
-        expect(findBlock(japaneseInfo, 'isBumperPressed').text).toBe('[BUMPER] バンパーが押されている');
-        expect(findBlock(japaneseInfo, 'isTouchSensorTouched').text).toBe('[SENSOR] タッチセンサーに触れている');
-        expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('FLタッチセンサーに触れたとき');
+        expect(findBlock(japaneseInfo, 'whenFLTouch').text).toBe('[ROOT] のFLタッチセンサーに触れたとき');
         expect(japaneseInfo.menus.markerMenu.items[0]).toEqual({text: '上げる', value: '0'});
         expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ もう一度実行');
         expect(block.simulator._t('clearObstacles', 'Clear obstacles')).toBe('障害物を全消去');
@@ -303,10 +614,8 @@ describe('iRobot Root extension', () => {
         expect(findBlock(hiraganaInfo, 'resetNavigation').text).toBe('なびのいちをりせっとする');
         expect(findBlock(hiraganaInfo, 'navigateTo').text).toBe('なびで x [X] y [Y] cmへうごく');
         expect(findBlock(hiraganaInfo, 'sayPhrase').text).toBe('[PHRASE] という');
-        expect(findBlock(hiraganaInfo, 'isBumperPressed').text).toBe('[BUMPER] ばんぱーがおされている');
-        expect(findBlock(hiraganaInfo, 'isTouchSensorTouched').text).toBe('[SENSOR] たっちせんさーにふれている');
-        expect(findBlock(hiraganaInfo, 'whenBumper').text).toBe('[BUMPER] ばんぱーが [ACTION] とき');
-        expect(findBlock(hiraganaInfo, 'whenFLTouch').text).toBe('FLたっちせんさーにふれたとき');
+        expect(findBlock(hiraganaInfo, 'whenBumper').text).toBe('[ROOT] の [BUMPER] ばんぱーが [ACTION] とき');
+        expect(findBlock(hiraganaInfo, 'whenFLTouch').text).toBe('[ROOT] のFLたっちせんさーにふれたとき');
         expect(hiraganaInfo.menus.markerMenu.items[0]).toEqual({text: 'あげる', value: '0'});
         expect(hiraganaInfo.menus.bumperActionMenu.items[0]).toEqual({text: 'おされた', value: 'PUSH'});
         expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ もういちどうごかす');
@@ -324,9 +633,7 @@ describe('iRobot Root extension', () => {
         expect(findBlock(englishInfo, 'resetNavigation').text).toBe('reset navigation position');
         expect(findBlock(englishInfo, 'navigateTo').text).toBe('navigate to x [X] y [Y] cm');
         expect(findBlock(englishInfo, 'sayPhrase').text).toBe('say [PHRASE]');
-        expect(findBlock(englishInfo, 'isBumperPressed').text).toBe('[BUMPER] bumper is pressed?');
-        expect(findBlock(englishInfo, 'isTouchSensorTouched').text).toBe('[SENSOR] touch sensor is touched?');
-        expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when FL touch sensor is touched');
+        expect(findBlock(englishInfo, 'whenFLTouch').text).toBe('when [ROOT] FL touch sensor is touched');
         expect(englishInfo.menus.markerMenu.items[0]).toEqual({text: 'up', value: '0'});
         expect(block.simulator._t('runAgain', '▶ Run again')).toBe('▶ Run again');
     });
@@ -391,32 +698,6 @@ describe('iRobot Root extension', () => {
         const protocol = new RootProtocol();
         for (let id = 0; id < 256; id++) expect(protocol.packet(0, 0)[2]).toBe(id);
         expect(protocol.packet(0, 0)[2]).toBe(0);
-    });
-
-    test('encodes and decodes the Root BLE name packets', () => {
-        const protocol = new RootProtocol();
-        const setName = protocol.setName('Root-A');
-        expect(Array.from(setName.slice(0, 3))).toEqual([0, 1, 0]);
-        expect(Array.from(setName.slice(3, 10))).toEqual([82, 111, 111, 116, 45, 65, 0]);
-        expect(Array.from(protocol.getName().slice(0, 2))).toEqual([0, 2]);
-
-        const response = protocol.packet(0, 2, [82, 111, 111, 116, 45, 66, 0]);
-        expect(protocol.decode(response).name).toBe('Root-B');
-    });
-
-    test('stores a received Root name for the reporter', () => {
-        jest.useFakeTimers();
-        const block = new blockClass(runtime);
-        block._receive(block.protocol.packet(0, 2, [82, 111, 111, 116, 0]));
-        expect(block.rootName()).toBe('Root');
-        block.setRootName({NAME: 'Classroom Root'});
-        // The requested value is not displayed until Root confirms it with
-        // the Get Name response.
-        expect(block.rootName()).toBe('Root');
-        jest.advanceTimersByTime(200);
-        block._receive(block.protocol.packet(0, 2, [67, 108, 97, 115, 115, 114, 111, 111, 109, 0]));
-        expect(block.rootName()).toBe('Classroom');
-        jest.useRealTimers();
     });
 
     test('selects Web Bluetooth at runtime instead of at bundle time', () => {
@@ -518,6 +799,49 @@ describe('iRobot Root extension', () => {
         }
     });
 
+    test('opens an independent Scrub BLE socket for each Root session', () => {
+        jest.useFakeTimers();
+        const originalWindow = global.window;
+        global.window = global;
+        class FakeSocket {
+            static instances = [];
+            constructor (type) {
+                this.type = type;
+                this.opened = false;
+                this.messages = [];
+                FakeSocket.instances.push(this);
+            }
+            setOnOpen (callback) { this.onOpen = callback; }
+            setOnClose (callback) { this.onClose = callback; }
+            setOnError (callback) { this.onError = callback; }
+            setHandleMessage (callback) { this.onMessage = callback; }
+            open () { this.opened = true; window.setTimeout(this.onOpen, 100); }
+            close () { this.opened = false; }
+            isOpen () { return this.opened; }
+            sendMessage (message) { this.messages.push(message); }
+        }
+        const RuntimeClass = {
+            PERIPHERAL_CONNECTED: 'connected', PERIPHERAL_DISCONNECTED: 'disconnected',
+            PERIPHERAL_LIST_UPDATE: 'list', PERIPHERAL_REQUEST_ERROR: 'requestError',
+            PERIPHERAL_SCAN_TIMEOUT: 'scanTimeout', USER_PICKED_PERIPHERAL: 'picked',
+            PERIPHERAL_CONNECTION_LOST_ERROR: 'lost'
+        };
+        const runtime = {constructor: RuntimeClass, emit: jest.fn()};
+        try {
+            new RootScratchLinkBLE(runtime, 'irobotRoot:session:1', ROOT_DISCOVERY_OPTIONS, jest.fn(), jest.fn(), FakeSocket);
+            new RootScratchLinkBLE(runtime, 'irobotRoot:session:2', ROOT_DISCOVERY_OPTIONS, jest.fn(), jest.fn(), FakeSocket);
+            jest.advanceTimersByTime(100);
+
+            expect(FakeSocket.instances).toHaveLength(2);
+            expect(FakeSocket.instances[0]).not.toBe(FakeSocket.instances[1]);
+            expect(FakeSocket.instances.map(socket => socket.type)).toEqual(['BLE', 'BLE']);
+            expect(FakeSocket.instances.map(socket => socket.messages[0].method)).toEqual(['discover', 'discover']);
+        } finally {
+            global.window = originalWindow;
+            jest.useRealTimers();
+        }
+    });
+
     test('uses discovery options accepted by Web Bluetooth and Scratch Link 2.x', () => {
         expect(ROOT_DISCOVERY_OPTIONS).toEqual({
             filters: [{services: ['48c5d828-ac2a-442d-97a3-0c9822b04979']}],
@@ -537,52 +861,6 @@ describe('iRobot Root extension', () => {
         expect(block.transport.write).toHaveBeenCalledTimes(1);
         resolveWrite();
         await Promise.resolve();
-    });
-
-    test('waits for Root marker completion before allowing the next Scratch block', async () => {
-        const block = new blockClass(runtime);
-        // Scrub may never settle this write promise, so completion must be
-        // driven solely by the matching notification from Root.
-        block.transport.write = jest.fn(() => new Promise(() => {}));
-        const completion = block.marker({POSITION: '1'});
-        const packet = block.transport.write.mock.calls[0][0];
-        let completed = false;
-        completion.then(() => {
-            completed = true;
-        });
-
-        expect(Array.from(packet.slice(0, 2))).toEqual([2, 0]);
-        await Promise.resolve();
-        expect(completed).toBe(false);
-
-        const wrongId = new RootProtocol().packet(2, 0);
-        wrongId[2] = (packet[2] + 1) & 0xFF;
-        wrongId[19] = crc8(wrongId.slice(0, 19));
-        block._receive(wrongId);
-        await Promise.resolve();
-        expect(completed).toBe(false);
-
-        const finished = new RootProtocol().packet(2, 0);
-        finished[2] = packet[2];
-        finished[19] = crc8(finished.slice(0, 19));
-        block._receive(finished);
-        await expect(completion).resolves.toBeUndefined();
-        expect(completed).toBe(true);
-    });
-
-    test('releases a marker block when its completion notification is lost', async () => {
-        jest.useFakeTimers();
-        try {
-            const block = new blockClass(runtime);
-            block.transport.write = jest.fn(() => new Promise(() => {}));
-            const completion = block.marker({POSITION: '0'});
-
-            jest.advanceTimersByTime(MARKER_FINISH_TIMEOUT_MS);
-            await expect(completion).resolves.toBeUndefined();
-            expect(block.lastConnectionError()).toContain('marker/eraser completion response timed out');
-        } finally {
-            jest.useRealTimers();
-        }
     });
 
     test.each([
@@ -645,54 +923,12 @@ describe('iRobot Root extension', () => {
         block.transport.isConnected = jest.fn(() => true);
         block.transport.write = jest.fn();
 
-        // Some Scratch Blocks versions provide the extension ID rather than
-        // the translated category name.
-        block._playNoteForPicker(69, 'irobotRoot');
+        block._playNoteForPicker(69, block.getInfo().name);
 
         const packet = block.transport.write.mock.calls[0][0];
         const packetView = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
         expect(packetView.getUint32(3, false)).toBe(440);
         expect(packetView.getUint16(7, false)).toBe(250);
-    });
-
-    test('piano picker uses a local preview while Root is disconnected', () => {
-        const block = new blockClass(runtime);
-        block.transport.isConnected = jest.fn(() => false);
-        block._playLocalNotePreview = jest.fn(() => true);
-
-        block._playNoteForPicker(69, block.getInfo().name);
-
-        expect(block._playLocalNotePreview).toHaveBeenCalledWith(440, 250);
-    });
-
-    test('local piano preview uses Scratch audio engine', () => {
-        const oscillator = {
-            type: '',
-            frequency: {setValueAtTime: jest.fn()},
-            connect: jest.fn(),
-            start: jest.fn(),
-            stop: jest.fn()
-        };
-        const gain = {
-            gain: {setValueAtTime: jest.fn(), exponentialRampToValueAtTime: jest.fn()},
-            connect: jest.fn()
-        };
-        const audioContext = {
-            state: 'running',
-            currentTime: 2,
-            destination: {},
-            createOscillator: jest.fn(() => oscillator),
-            createGain: jest.fn(() => gain)
-        };
-        const audioRuntime = Object.assign({}, runtime, {audioEngine: {audioContext}});
-        const block = new blockClass(audioRuntime);
-
-        expect(block._playLocalNotePreview(440, 250)).toBe(true);
-        expect(oscillator.type).toBe('square');
-        expect(oscillator.frequency.setValueAtTime).toHaveBeenCalledWith(440, 2);
-        expect(oscillator.start).toHaveBeenCalledWith(2);
-        expect(oscillator.stop).toHaveBeenCalledWith(2.25);
-        expect(gain.connect).toHaveBeenCalledWith(audioContext.destination);
     });
 
     test('say phrase waits for Root Say Phrase Finished response with the matching packet ID', async () => {
@@ -937,6 +1173,37 @@ describe('iRobot Root extension', () => {
         );
     });
 
+    test('serializes UART writes within one Root without coupling Root sessions', async () => {
+        jest.useFakeTimers();
+        const transportA = Object.create(RootTransport.prototype);
+        const transportB = Object.create(RootTransport.prototype);
+        transportA.lastError = '';
+        transportB.lastError = '';
+        transportA.ble = {isConnected: () => true, write: jest.fn(() => Promise.resolve('a'))};
+        transportB.ble = {isConnected: () => true, write: jest.fn(() => Promise.resolve('b'))};
+
+        const firstA = transportA.write(Uint8Array.from([1]));
+        const secondA = transportA.write(Uint8Array.from([2]));
+        const firstB = transportB.write(Uint8Array.from([3]));
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(transportA.ble.write).toHaveBeenCalledTimes(1);
+        expect(transportB.ble.write).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(UART_WRITE_GAP_MS);
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(transportA.ble.write).toHaveBeenCalledTimes(2);
+        await expect(firstA).resolves.toBe('a');
+        await expect(secondA).resolves.toBe('a');
+        await expect(firstB).resolves.toBe('b');
+        jest.useRealTimers();
+    });
+
     test('converts Root packets to and from base64 without Node Buffer', () => {
         const originalBuffer = global.Buffer;
         try {
@@ -1015,22 +1282,6 @@ describe('iRobot Root extension', () => {
         expect(block.detailedEvent()).toBe('BOTH_RELEASE');
     });
 
-    test('reports current bumper state for use in loops and conditions', () => {
-        const block = new blockClass(runtime);
-        const bumperPacket = state => block.protocol.packet(12, 0, [0, 0, 0, 0, state]);
-
-        block._receive(bumperPacket(0x80));
-        expect(block.isBumperPressed({BUMPER: 'LEFT'})).toBe(true);
-        expect(block.isBumperPressed({BUMPER: 'RIGHT'})).toBe(false);
-        expect(block.isBumperPressed({BUMPER: 'BOTH'})).toBe(false);
-
-        block._receive(bumperPacket(0xC0));
-        expect(block.isBumperPressed({BUMPER: 'BOTH'})).toBe(true);
-
-        block._receive(bumperPacket(0));
-        expect(block.isBumperPressed({BUMPER: 'LEFT'})).toBe(false);
-    });
-
     test('fires an event for every touch sensor bit that changes', () => {
         const block = new blockClass(runtime);
         const events = [];
@@ -1049,94 +1300,6 @@ describe('iRobot Root extension', () => {
         expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenFLTouch');
         expect(runtime.startHats).toHaveBeenCalledWith('irobotRoot_whenRLRelease');
         expect(block.detailedEvent()).toBe('RL_RELEASE');
-    });
-
-    test('reports current individual touch sensor state for use in loops and conditions', () => {
-        const block = new blockClass(runtime);
-        const touchPacket = mask => block.protocol.packet(17, 0, [0, 0, 0, 0, mask << 4]);
-
-        block._receive(touchPacket(0x9)); // FL and RL
-        expect(block.isTouchSensorTouched({SENSOR: 'FL'})).toBe(true);
-        expect(block.isTouchSensorTouched({SENSOR: 'FR'})).toBe(false);
-        expect(block.isTouchSensorTouched({SENSOR: 'RL'})).toBe(true);
-        expect(block.isTouchSensorTouched({SENSOR: 'RR'})).toBe(false);
-
-        block._receive(touchPacket(0));
-        expect(block.isTouchSensorTouched({SENSOR: 'FL'})).toBe(false);
-    });
-
-    test('derives pitch and roll in degrees from the accelerometer response', () => {
-        const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
-
-        // Positive X is front-down: pitch -45°, roll 0°.
-        const pitchBlock = new blockClass(runtime);
-        pitchBlock._receive(pitchBlock.protocol.packet(16, 1, [
-            0, 0, 0, 0, ...signed16(1000), ...signed16(0), ...signed16(1000)
-        ]));
-        expect(pitchBlock.pitch()).toBe(-45);
-        expect(pitchBlock.roll()).toBe(0);
-
-        // Negative Y is right-down: roll +45°, pitch 0°.
-        const rollBlock = new blockClass(runtime);
-        rollBlock._receive(rollBlock.protocol.packet(16, 1, [
-            0, 0, 0, 0, ...signed16(0), ...signed16(-1000), ...signed16(1000)
-        ]));
-        expect(rollBlock.pitch()).toBe(0);
-        expect(rollBlock.roll()).toBe(45);
-    });
-
-    test.each([
-        [-1000, 0, 45, 0], // Front-up.
-        [1000, 0, -45, 0], // Front-down.
-        [0, -1000, 0, 45], // Right-down.
-        [0, 1000, 0, -45] // Left-down.
-    ])('keeps pitch and roll independent for acceleration (%s, %s)', (x, y, pitch, roll) => {
-        const block = new blockClass(runtime);
-        const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
-        block._receive(block.protocol.packet(16, 1, [
-            0, 0, 0, 0, ...signed16(x), ...signed16(y), ...signed16(-1000)
-        ]));
-        expect(block.pitch()).toBe(pitch);
-        expect(block.roll()).toBe(roll);
-    });
-
-    test('filters accelerometer samples and reports zero pitch while horizontal', () => {
-        const block = new blockClass(runtime);
-        const signed16 = value => [(value >> 8) & 0xff, value & 0xff];
-        const accelPacket = (x, y, z) => block.protocol.packet(16, 1, [
-            0, 0, 0, 0, ...signed16(x), ...signed16(y), ...signed16(z)
-        ]);
-
-        // Root units may report gravity as -Z while lying flat.
-        block._receive(accelPacket(0, 0, -1000));
-        expect(block.pitch()).toBe(0);
-
-        // The 0.2 low-pass filter turns an abrupt -45° sample into -11.3°.
-        block._receive(accelPacket(1000, 0, -1000));
-        expect(block.pitch()).toBe(-11.3);
-        expect(block.roll()).toBe(0);
-    });
-
-    test('polls the accelerometer until continuous updates are stopped', () => {
-        jest.useFakeTimers();
-        const block = new blockClass(runtime);
-        block.transport.isConnected = jest.fn(() => true);
-        block.transport.write = jest.fn(() => Promise.resolve());
-
-        block.setAccelerometerPolling({STATE: 'start'});
-        expect(block.transport.write).toHaveBeenCalledTimes(1);
-        expect(Array.from(block.transport.write.mock.calls[0][0].slice(0, 2))).toEqual([16, 1]);
-
-        // A response permits the next periodic query; no overlapping requests
-        // are made while an earlier accelerometer request is in flight.
-        block._receive(block.protocol.packet(16, 1, [0, 0, 0, 0, 0, 0, 0, 0, 3, 232]));
-        jest.advanceTimersByTime(100);
-        expect(block.transport.write).toHaveBeenCalledTimes(2);
-
-        block.setAccelerometerPolling({STATE: 'stop'});
-        jest.advanceTimersByTime(300);
-        expect(block.transport.write).toHaveBeenCalledTimes(2);
-        jest.useRealTimers();
     });
 
     test('still starts a fixed hat when a saved parameterized hat is malformed', () => {

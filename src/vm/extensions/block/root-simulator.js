@@ -51,6 +51,7 @@ class RootSimulator {
         this._pinchLastDistance = null;
         this._activeTouchPointer = null;
         this._collisionPoint = null;
+        this.rootLabel = 'Root 1';
         this._runButton = null;
         this._stopButton = null;
         this._placeRootButton = null;
@@ -145,6 +146,11 @@ class RootSimulator {
         if (this._zoomValue) this._zoomValue.textContent = `${Math.round(this.viewZoom * 100)}%`;
         this._draw();
         return this.viewZoom;
+    }
+
+    setRootLabel (label) {
+        this.rootLabel = String(label || 'Root 1');
+        this._draw();
     }
 
     _setRootPlacementMode (mode) {
@@ -885,7 +891,7 @@ class RootSimulator {
         context.fillStyle = '#f2d941'; context.beginPath(); context.arc(0, -27, 6, 0, Math.PI * 2); context.fill();
         context.restore();
         context.fillStyle = '#26353a'; context.font = '18px Arial';
-        context.fillText(`${this._t('x', 'x')}: ${this.pose.x.toFixed(1)} mm   ${this._t('y', 'y')}: ${this.pose.y.toFixed(1)} mm   ${this._t('heading', 'heading')}: ${this.pose.heading.toFixed(1)}°`, 18, 30);
+        context.fillText(`${this.rootLabel} · ${this._t('x', 'x')}: ${this.pose.x.toFixed(1)} mm   ${this._t('y', 'y')}: ${this.pose.y.toFixed(1)} mm   ${this._t('heading', 'heading')}: ${this.pose.heading.toFixed(1)}°`, 18, 30);
         const markerStates = [this._t('up', 'up'), this._t('down', 'down'), this._t('eraser', 'eraser')];
         const ledStates = [this._t('off', 'off'), this._t('on', 'on'), this._t('blink', 'blink'), this._t('spin', 'spin')];
         context.fillText(`${this._t('marker', 'marker')}: ${markerStates[this.marker]}   LED: ${ledStates[this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 57);
