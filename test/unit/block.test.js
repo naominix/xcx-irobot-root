@@ -120,6 +120,75 @@ describe('iRobot Root extension', () => {
         ]);
     });
 
+    test('keeps tilt, bumper, touch and names independent per Root', () => {
+        const block = new blockClass(runtime);
+        const a = block.rootManager.getSession(1);
+        const b = block.rootManager.createSession();
+        const ua = {thread: {irobotRootSessionId: a.id}};
+        const ub = {thread: {irobotRootSessionId: b.id}};
+        block._receive(a.protocol.packet(16, 1, [0, 0, 0, 0, 0x03, 0xe8, 0, 0, 0x03, 0xe8]), a);
+        block._receive(b.protocol.packet(16, 1, [0, 0, 0, 0, 0, 0, 0xfc, 0x18, 0x03, 0xe8]), b);
+        block._receive(a.protocol.packet(12, 0, [0, 0, 0, 0, 0x80]), a);
+        block._receive(b.protocol.packet(17, 0, [0, 0, 0, 0, 0x40]), b);
+        expect(block.pitch({}, ua)).toBe(-45);
+        expect(block.roll({}, ub)).toBe(45);
+        expect(block.isBumperPressed({BUMPER: 'LEFT'}, ua)).toBe(true);
+        expect(block.isBumperPressed({BUMPER: 'LEFT'}, ub)).toBe(false);
+        expect(block.isTouchSensorTouched({SENSOR: 'FR'}, ub)).toBe(true);
+        expect(block.isTouchSensorTouched({SENSOR: 'FR'}, ua)).toBe(false);
+        a.last.rootName = 'Alpha';
+        b.last.rootName = 'Beta';
+        expect(block.rootName({}, ua)).toBe('Alpha');
+        expect(block.rootName({}, ub)).toBe('Beta');
+    });
+
+    test('continuous acceleration polling starts and stops per Root', () => {
+        jest.useFakeTimers();
+        try {
+            const block = new blockClass(runtime);
+            const a = block.rootManager.getSession(1);
+            const b = block.rootManager.createSession();
+            a.transport.isConnected = b.transport.isConnected = () => true;
+            a.transport.write = jest.fn();
+            b.transport.write = jest.fn();
+            const ua = {thread: {irobotRootSessionId: a.id}};
+            const ub = {thread: {irobotRootSessionId: b.id}};
+            block.setAccelerometerPolling({STATE: 'start'}, ua);
+            block.setAccelerometerPolling({STATE: 'start'}, ub);
+            expect(a.transport.write).toHaveBeenCalledTimes(1);
+            expect(b.transport.write).toHaveBeenCalledTimes(1);
+            block.setAccelerometerPolling({STATE: 'stop'}, ua);
+            expect(a.accelerometerPollTimer).toBeNull();
+            expect(b.accelerometerPollTimer).not.toBeNull();
+            block.setAccelerometerPolling({STATE: 'stop'}, ub);
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
+    test('piano picker accepts the extension ID and previews the selected Root', () => {
+        const block = new blockClass(runtime);
+        const a = block.rootManager.getSession(1);
+        const b = block.rootManager.createSession();
+        a.transport.isConnected = b.transport.isConnected = () => true;
+        a.transport.write = jest.fn();
+        b.transport.write = jest.fn();
+        block.selectRoot({ROOT: String(b.id)});
+        block._playNoteForPicker(69, 'irobotRoot');
+        expect(a.transport.write).not.toHaveBeenCalled();
+        expect(b.transport.write).toHaveBeenCalledTimes(1);
+        const packet = b.transport.write.mock.calls[0][0];
+        expect(new DataView(packet.buffer, packet.byteOffset, packet.byteLength).getUint32(3, false)).toBe(440);
+    });
+
+    test('piano picker previews locally in simulator mode', () => {
+        const block = new blockClass(runtime);
+        block.setControlMode({MODE: 'simulator'});
+        block._playLocalNotePreview = jest.fn();
+        block._playNoteForPicker(69, 'irobotRoot');
+        expect(block._playLocalNotePreview).toHaveBeenCalledWith(440, 250);
+    });
+
     test('keeps one clearly-labelled simulator for the selected Root', () => {
         const block = new blockClass(runtime);
         const rootB = block.rootManager.createSession();
@@ -427,11 +496,11 @@ describe('iRobot Root extension', () => {
         try {
             const block = new blockClass(runtime);
             block.setControlMode({MODE: 'simulator'});
-            block.simulator.obstacles.push({type: 'wall', x: 0, y: 70, width: 120, height: 14});
+            block.simulator.obstacles.push({type: 'wall', x: 0, y: 170, width: 120, height: 14});
             const forward = block.drive({MM: 120});
             jest.advanceTimersByTime(2000);
             await forward;
-            expect(block.simulator.pose.y).toBeLessThan(70);
+            expect(block.simulator.pose.y).toBeLessThan(170);
             expect(block.simulator.last.leftBumper).toBe(true);
             expect(block.simulator.last.rightBumper).toBe(true);
             expect(block.simulator._collisionPoint).toEqual(expect.objectContaining({x: expect.any(Number), y: expect.any(Number)}));
@@ -472,7 +541,7 @@ describe('iRobot Root extension', () => {
     test('simulator view zoom changes display scale without changing Root coordinates', () => {
         const block = new blockClass(runtime);
         block.simulator.pose = {x: 120, y: -45, heading: 30};
-        expect(block.simulator.viewZoom).toBe(1);
+        expect(block.simulator.viewZoom).toBe(0.25);
         expect(block.simulator.setViewZoom(0.5)).toBe(0.5);
         expect(block.simulator.pose).toEqual({x: 120, y: -45, heading: 30});
         expect(block.simulator.setViewZoom(3)).toBe(2.5);

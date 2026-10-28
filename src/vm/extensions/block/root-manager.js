@@ -17,6 +17,12 @@ class RootSession {
         this.protocol = new RootProtocol();
         this.pendingCommands = new Map();
         this.last = {};
+        this.filteredAcceleration = null;
+        this.accelerometerPollTimer = null;
+        this.accelerometerPollTimeout = null;
+        this.accelerometerPollInFlight = false;
+        this.lastHardwareCommandAt = 0;
+        this.rootNameConfirmTimer = null;
         this.lastDetailedEvent = '';
         this.currentEvent = null;
         this.bumperState = 0;
@@ -27,7 +33,8 @@ class RootSession {
             `${manager.extensionId}:session:${id}`,
             packet => manager.onData(this, packet),
             () => manager.onReset(this),
-            () => manager.onConnected(this)
+            () => manager.onConnected(this),
+            () => { if (manager.callbacks.onReady) manager.callbacks.onReady(this); }
         );
     }
 
@@ -43,6 +50,14 @@ class RootSession {
         // "use Root 2" block remain valid after the reset. Only the physical
         // connection and data tied to the former robot are discarded.
         this.peripheralId = null;
+        clearInterval(this.accelerometerPollTimer);
+        clearTimeout(this.accelerometerPollTimeout);
+        clearTimeout(this.rootNameConfirmTimer);
+        this.accelerometerPollTimer = null;
+        this.accelerometerPollTimeout = null;
+        this.accelerometerPollInFlight = false;
+        this.filteredAcceleration = null;
+        this.rootNameConfirmTimer = null;
         this.connectionState = false;
         this.protocol = new RootProtocol();
         this.last = {};

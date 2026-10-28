@@ -9,10 +9,17 @@ const DEFAULT_HEADING = 90;
 const DEFAULT_SPEED_MM_S = 120;
 const DEFAULT_TURN_DEG_S = 120;
 const SIMULATOR_SCALE = 1.8;
-const ROOT_COLLISION_RADIUS_MM = 24;
-// Keep Root and its touch target practical on touch screens when the world is
-// zoomed out. At 100% this matches the physical 24 mm collision radius.
-const ROOT_TOUCH_HIT_RADIUS_PX = 44;
+// The simulator is a physical workspace: one background-grid cell represents
+// a 16 cm square. Root's 16 cm footprint is drawn within exactly one cell.
+const GRID_CELL_MM = 160;
+const ROOT_DRAW_RADIUS_MM = GRID_CELL_MM / 2;
+const COLLISION_STEP_MM = 1;
+const ROOT_OUTLINE = Array.from({length: 6}, (_, i) => {
+    const angle = -Math.PI / 2 + i * Math.PI / 3;
+    return {x: Math.cos(angle) * 36, y: Math.sin(angle) * 36};
+});
+// Preserve a usable tap target at the smallest supported viewport scale.
+const ROOT_TOUCH_HIT_MIN_RADIUS_PX = 44;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const headingRadians = heading => heading * DEG;
@@ -22,12 +29,13 @@ class RootSimulator {
     constructor (onEvent, controls = {}) {
         this.onEvent = onEvent;
         this.controls = controls;
-        this.enableRootPlacement = Boolean(controls.enableRootPlacement);
-        this.placementMode = false;
         this.speedMultiplier = 1;
         // Display zoom only changes the viewport.  Root coordinates, collision
         // geometry, and motion timing remain in millimetres.
-        this.viewZoom = 1;
+        // Start zoomed out so a physical 16 cm grid can be viewed as a board.
+        this.viewZoom = 0.25;
+        this.viewOffset = {x: 0, y: 0};
+        this.homePose = {x: 0, y: 0, heading: DEFAULT_HEADING};
         this._animation = null;
         this._continuousMotion = null;
         this._ledAnimationTimer = null;
@@ -37,22 +45,32 @@ class RootSimulator {
         this._context = null;
         this._selectedObstacle = -1;
         this._dragOffset = null;
+        this._panCandidatePointers = new Map();
+        this._panPointerIds = new Set();
+        this._panLastPoint = null;
+        this._pinchLastDistance = null;
         this._activeTouchPointer = null;
         this._collisionPoint = null;
+        this.rootLabel = 'Root 1';
         this._runButton = null;
         this._stopButton = null;
-        this._placementButton = null;
+        this._placeRootButton = null;
+        this._snapRootButton = null;
+        this._rootPlacementMode = null;
         this._localizedElements = [];
-        // In the multi-Root extension build this remains one virtual robot.
-        // The label makes the physical Root selected for rehearsal explicit.
-        this.rootLabel = 'Root 1';
         this.reset();
     }
 
     reset () {
         this.stop();
         this._stopLedAnimation();
-        this.pose = {x: 0, y: 0, heading: DEFAULT_HEADING};
+        this.viewOffset = {x: 0, y: 0};
+        this._panCandidatePointers.clear();
+        this._panPointerIds.clear();
+        this._panLastPoint = null;
+        this._pinchLastDistance = null;
+        this._rootPlacementMode = null;
+        this.pose = {...this.homePose, heading: DEFAULT_HEADING};
         this.marker = 0;
         this.led = {effect: 0, red: 0, green: 0, blue: 0};
         this.note = null;
@@ -80,7 +98,7 @@ class RootSimulator {
     resetNavigation () {
         this.stop();
         this._setBumpers(false, false);
-        this.pose = {x: 0, y: 0, heading: DEFAULT_HEADING};
+        this.pose = {...this.homePose, heading: DEFAULT_HEADING};
         this._draw();
     }
 
@@ -112,18 +130,46 @@ class RootSimulator {
         this.speedMultiplier = [0.25, 0.5, 1, 2, 4].includes(Number(multiplier)) ? Number(multiplier) : 1;
     }
 
-    setViewZoom (zoom) {
+    setViewZoom (zoom, anchor = null, smooth = false) {
         const next = clamp(Number(zoom) || 1, 0.25, 2.5);
-        this.viewZoom = Math.round(next * 4) / 4;
+        const oldScale = SIMULATOR_SCALE * this.viewZoom;
+        const anchoredWorld = anchor && this._canvas ? {
+            x: (anchor.x - this._canvas.width / 2) / oldScale - this.viewOffset.x,
+            y: (this._canvas.height / 2 - anchor.y) / oldScale - this.viewOffset.y
+        } : null;
+        this.viewZoom = smooth ? Math.round(next * 100) / 100 : Math.round(next * 4) / 4;
+        if (anchoredWorld) {
+            const newScale = SIMULATOR_SCALE * this.viewZoom;
+            this.viewOffset.x = (anchor.x - this._canvas.width / 2) / newScale - anchoredWorld.x;
+            this.viewOffset.y = (this._canvas.height / 2 - anchor.y) / newScale - anchoredWorld.y;
+        }
         if (this._zoomValue) this._zoomValue.textContent = `${Math.round(this.viewZoom * 100)}%`;
         this._draw();
         return this.viewZoom;
     }
 
-    toggleRootPlacementMode () {
-        this.placementMode = !this.placementMode;
+    setRootLabel (label) {
+        this.rootLabel = String(label || 'Root 1');
         this._draw();
-        return this.placementMode;
+    }
+
+    _setRootPlacementMode (mode) {
+        this._rootPlacementMode = this._rootPlacementMode === mode ? null : mode;
+        this._selectedObstacle = -1;
+        this._dragOffset = null;
+        this._updateRootPlacementButtons();
+        this._draw();
+    }
+
+    _updateRootPlacementButtons () {
+        const update = (button, active) => {
+            if (!button) return;
+            button.setAttribute('aria-pressed', String(active));
+            button.style.background = active ? '#f2d941' : 'white';
+            button.style.color = active ? '#26353a' : '#264c40';
+        };
+        update(this._placeRootButton, this._rootPlacementMode === 'free');
+        update(this._snapRootButton, this._rootPlacementMode === 'grid');
     }
 
     runProject () {
@@ -173,11 +219,6 @@ class RootSimulator {
         this._draw();
     }
 
-    setRootLabel (label) {
-        this.rootLabel = String(label || 'Root 1');
-        this._draw();
-    }
-
     setMarker (position) {
         this.marker = clamp(Math.round(Number(position) || 0), 0, 2);
         this._draw();
@@ -185,11 +226,16 @@ class RootSimulator {
 
     setLed (effect, red, green, blue) {
         this._stopLedAnimation();
+        const normalizedEffect = clamp(Math.round(Number(effect) || 0), 0, 3);
+        // Root ignores the RGB payload while the LED effect is off. Mirror the
+        // physical robot by clearing the simulated colour as well, so a colour
+        // selected by an earlier command cannot remain visible after "off".
+        const isOff = normalizedEffect === 0;
         this.led = {
-            effect: clamp(Math.round(Number(effect) || 0), 0, 3),
-            red: clamp(Math.round(Number(red) || 0), 0, 255),
-            green: clamp(Math.round(Number(green) || 0), 0, 255),
-            blue: clamp(Math.round(Number(blue) || 0), 0, 255)
+            effect: normalizedEffect,
+            red: isOff ? 0 : clamp(Math.round(Number(red) || 0), 0, 255),
+            green: isOff ? 0 : clamp(Math.round(Number(green) || 0), 0, 255),
+            blue: isOff ? 0 : clamp(Math.round(Number(blue) || 0), 0, 255)
         };
         this._ledPhase = 0;
         if (this.led.effect === 2 || this.led.effect === 3) {
@@ -314,14 +360,17 @@ class RootSimulator {
         const previous = this.pose;
         const deltaX = pose.x - previous.x;
         const deltaY = pose.y - previous.y;
-        const steps = Math.max(1, Math.ceil(Math.hypot(deltaX, deltaY) / (ROOT_COLLISION_RADIUS_MM / 2)));
+        const deltaHeading = normalizeHeading(pose.heading - previous.heading + 180) - 180;
+        // Bound both translation and the distance swept by a rotating vertex.
+        const steps = Math.max(1, Math.ceil((Math.hypot(deltaX, deltaY) +
+            Math.abs(deltaHeading) * DEG * ROOT_DRAW_RADIUS_MM) / COLLISION_STEP_MM));
         let accepted = previous;
         for (let step = 1; step <= steps; step++) {
             const progress = step / steps;
             const candidate = {
                 x: previous.x + deltaX * progress,
                 y: previous.y + deltaY * progress,
-                heading: normalizeHeading(previous.heading + (pose.heading - previous.heading) * progress)
+                heading: normalizeHeading(previous.heading + deltaHeading * progress)
             };
             const collision = this._collisionAt(candidate);
             if (collision) {
@@ -347,23 +396,45 @@ class RootSimulator {
     }
 
     _collisionAt (pose) {
+        const heading = headingRadians(pose.heading);
+        const rightX = Math.sin(heading);
+        const rightY = -Math.cos(heading);
+        const outline = ROOT_OUTLINE.map(vertex => ({
+            x: pose.x + (vertex.x * rightX - vertex.y * Math.cos(heading)) * ROOT_DRAW_RADIUS_MM / 36,
+            y: pose.y + (vertex.x * rightY - vertex.y * Math.sin(heading)) * ROOT_DRAW_RADIUS_MM / 36
+        }));
         for (const obstacle of this.obstacles) {
-            const halfWidth = obstacle.width / 2;
-            const halfHeight = obstacle.height / 2;
-            const closestX = clamp(pose.x, obstacle.x - halfWidth, obstacle.x + halfWidth);
-            const closestY = clamp(pose.y, obstacle.y - halfHeight, obstacle.y + halfHeight);
-            let dx = closestX - pose.x;
-            let dy = closestY - pose.y;
-            if ((dx * dx) + (dy * dy) >= ROOT_COLLISION_RADIUS_MM * ROOT_COLLISION_RADIUS_MM) continue;
-            if (dx === 0 && dy === 0) {
-                dx = obstacle.x - pose.x;
-                dy = obstacle.y - pose.y;
+            // Clip the same hexagon used for drawing against the rectangle.
+            // Its intersection gives a contact point even for corners/thin walls.
+            let contact = outline;
+            for (const [axis, boundary, sign] of [
+                ['x', obstacle.x - obstacle.width / 2, 1],
+                ['x', obstacle.x + obstacle.width / 2, -1],
+                ['y', obstacle.y - obstacle.height / 2, 1],
+                ['y', obstacle.y + obstacle.height / 2, -1]
+            ]) {
+                const clipped = [];
+                for (let i = 0; i < contact.length; i++) {
+                    const a = contact[i];
+                    const b = contact[(i + 1) % contact.length];
+                    const insideA = (a[axis] - boundary) * sign >= -1e-9;
+                    const insideB = (b[axis] - boundary) * sign >= -1e-9;
+                    if (insideA) clipped.push(a);
+                    if (insideA !== insideB) {
+                        const t = clamp((boundary - a[axis]) / (b[axis] - a[axis]), 0, 1);
+                        clipped.push({x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t});
+                    }
+                }
+                contact = clipped;
+                if (!contact.length) break;
             }
-            const heading = headingRadians(pose.heading);
-            const rightX = Math.sin(heading);
-            const rightY = -Math.cos(heading);
+            if (!contact.length) continue;
+            const closestX = contact.reduce((sum, point) => sum + point.x, 0) / contact.length;
+            const closestY = contact.reduce((sum, point) => sum + point.y, 0) / contact.length;
+            const dx = closestX - pose.x;
+            const dy = closestY - pose.y;
             const lateral = (dx * rightX) + (dy * rightY);
-            const centerThreshold = ROOT_COLLISION_RADIUS_MM * 0.22;
+            const centerThreshold = ROOT_DRAW_RADIUS_MM * 0.22;
             return {
                 left: lateral <= centerThreshold,
                 right: lateral >= -centerThreshold,
@@ -463,9 +534,12 @@ class RootSimulator {
         addButton('addBlock', '+ Block', () => this.addObstacle('block'));
         addButton('delete', 'Delete', () => this.deleteSelectedObstacle());
         addButton('clearObstacles', 'Clear obstacles', () => this.clearObstacles());
-        if (this.enableRootPlacement) {
-            this._placementButton = addButton('rootPlacement', '▣ Place Roots', () => this.toggleRootPlacementMode());
-        }
+        this._placeRootButton = addButton('placeRoot', '▣ Place Root', () => {
+            this._setRootPlacementMode('free');
+        });
+        this._snapRootButton = addButton('snapRoot', '▦ Snap Root to Cell', () => {
+            this._setRootPlacementMode('grid');
+        });
         const speedLabel = document.createElement('label');
         speedLabel.style.cssText = 'color:#264c40;font-weight:bold;';
         const speedText = document.createElement('span');
@@ -515,16 +589,17 @@ class RootSimulator {
         this._localizedElements.push({
             element: help,
             id: 'help',
-            defaultText: 'Drag obstacles · Tap Root sensors'
+            defaultText: 'Drag obstacles · Drag empty space to pan · Tap Root sensors'
         });
         const canvas = document.createElement('canvas');
         canvas.width = 1000;
         canvas.height = 680;
-        canvas.style.cssText = 'width:100%;height:calc(100% - 108px);touch-action:none;background:#fff;';
+        canvas.style.cssText = 'width:100%;height:calc(100% - 108px);touch-action:none;background:#fff;cursor:grab;';
         canvas.addEventListener('pointerdown', event => this._pointerDown(event));
         canvas.addEventListener('pointermove', event => this._pointerMove(event));
         canvas.addEventListener('pointerup', event => this._pointerUp(event));
         canvas.addEventListener('pointercancel', event => this._pointerUp(event));
+        canvas.addEventListener('wheel', event => this._wheel(event), {passive: false});
         panel.tabIndex = 0;
         panel.addEventListener('keydown', event => {
             if (event.key === 'Backspace' || event.key === 'Delete') this.deleteSelectedObstacle();
@@ -541,28 +616,88 @@ class RootSimulator {
     }
 
     _eventWorld (event) {
-        const bounds = this._canvas.getBoundingClientRect();
-        const canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
-        const canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+        const canvasPoint = this._eventCanvasPoint(event);
+        const scale = SIMULATOR_SCALE * this.viewZoom;
         return {
-            x: (canvasX - this._canvas.width / 2) / (SIMULATOR_SCALE * this.viewZoom),
-            y: (this._canvas.height / 2 - canvasY) / (SIMULATOR_SCALE * this.viewZoom)
+            x: (canvasPoint.x - this._canvas.width / 2) / scale - this.viewOffset.x,
+            y: (this._canvas.height / 2 - canvasPoint.y) / scale - this.viewOffset.y
         };
+    }
+
+    _eventCanvasPoint (event) {
+        const bounds = this._canvas.getBoundingClientRect();
+        return {
+            x: (event.clientX - bounds.left) * this._canvas.width / bounds.width,
+            y: (event.clientY - bounds.top) * this._canvas.height / bounds.height
+        };
+    }
+
+    _panCentroid () {
+        const points = [...this._panPointerIds]
+            .map(pointerId => this._panCandidatePointers.get(pointerId))
+            .filter(Boolean);
+        if (!points.length) return null;
+        return points.reduce((sum, point) => ({x: sum.x + point.x, y: sum.y + point.y}), {x: 0, y: 0});
+    }
+
+    _panDistance () {
+        const points = [...this._panPointerIds]
+            .map(pointerId => this._panCandidatePointers.get(pointerId))
+            .filter(Boolean);
+        if (points.length !== 2) return null;
+        return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+    }
+
+    _startPan (pointerIds) {
+        this._panPointerIds = new Set(pointerIds);
+        const centroid = this._panCentroid();
+        this._panLastPoint = centroid ? {
+            x: centroid.x / this._panPointerIds.size,
+            y: centroid.y / this._panPointerIds.size
+        } : null;
+        this._pinchLastDistance = this._panPointerIds.size === 2 ? this._panDistance() : null;
+        this._canvas.style.cursor = 'grabbing';
+    }
+
+    _stopPan () {
+        this._panPointerIds.clear();
+        this._panLastPoint = null;
+        this._pinchLastDistance = null;
+        if (this._canvas) this._canvas.style.cursor = 'grab';
+    }
+
+    _wheel (event) {
+        event.preventDefault();
+        const factor = Math.exp(-event.deltaY * 0.002);
+        this.setViewZoom(this.viewZoom * factor, this._eventCanvasPoint(event), true);
     }
 
     _pointerDown (event) {
         const point = this._eventWorld(event);
-        const bounds = this._canvas.getBoundingClientRect();
-        const canvasX = (event.clientX - bounds.left) * this._canvas.width / bounds.width;
-        const canvasY = (event.clientY - bounds.top) * this._canvas.height / bounds.height;
+        const canvasPoint = this._eventCanvasPoint(event);
+        if (this._rootPlacementMode) {
+            // Grid lines are ±80 mm from each cell centre. Grid placement uses
+            // an integer 160 mm coordinate; free placement keeps the click's
+            // exact physical position for arbitrary experiment layouts.
+            this.homePose = {
+                x: this._rootPlacementMode === 'grid' ? Math.round(point.x / GRID_CELL_MM) * GRID_CELL_MM : point.x,
+                y: this._rootPlacementMode === 'grid' ? Math.round(point.y / GRID_CELL_MM) * GRID_CELL_MM : point.y,
+                heading: DEFAULT_HEADING
+            };
+            this.pose = {...this.homePose};
+            this.trail = [];
+            this._setRootPlacementMode(this._rootPlacementMode);
+            return;
+        }
         const scale = SIMULATOR_SCALE * this.viewZoom;
-        const rootCanvasX = this._canvas.width / 2 + this.pose.x * scale;
-        const rootCanvasY = this._canvas.height / 2 - this.pose.y * scale;
-        const rootDxPx = canvasX - rootCanvasX;
-        const rootDyPx = canvasY - rootCanvasY;
+        const rootCanvasX = this._canvas.width / 2 + (this.viewOffset.x + this.pose.x) * scale;
+        const rootCanvasY = this._canvas.height / 2 - (this.viewOffset.y + this.pose.y) * scale;
+        const rootDxPx = canvasPoint.x - rootCanvasX;
+        const rootDyPx = canvasPoint.y - rootCanvasY;
         const dx = point.x - this.pose.x;
         const dy = point.y - this.pose.y;
-        if ((rootDxPx * rootDxPx) + (rootDyPx * rootDyPx) <= ROOT_TOUCH_HIT_RADIUS_PX * ROOT_TOUCH_HIT_RADIUS_PX) {
+        const rootTouchHitRadius = Math.max(ROOT_TOUCH_HIT_MIN_RADIUS_PX, ROOT_DRAW_RADIUS_MM * scale);
+        if ((rootDxPx * rootDxPx) + (rootDyPx * rootDyPx) <= rootTouchHitRadius * rootTouchHitRadius) {
             const heading = headingRadians(this.pose.heading);
             const forward = (dx * Math.cos(heading)) + (dy * Math.sin(heading));
             const right = (dx * Math.sin(heading)) - (dy * Math.cos(heading));
@@ -584,10 +719,45 @@ class RootSimulator {
                 break;
             }
         }
+        if (this._selectedObstacle < 0) {
+            this._panCandidatePointers.set(event.pointerId, canvasPoint);
+            this._canvas.setPointerCapture(event.pointerId);
+            if (event.pointerType === 'touch') {
+                if (this._panCandidatePointers.size >= 2) {
+                    this._startPan([...this._panCandidatePointers.keys()].slice(-2));
+                }
+            } else {
+                this._startPan([event.pointerId]);
+            }
+        }
         this._draw();
     }
 
     _pointerMove (event) {
+        if (this._panCandidatePointers.has(event.pointerId)) {
+            this._panCandidatePointers.set(event.pointerId, this._eventCanvasPoint(event));
+        }
+        if (this._panPointerIds.has(event.pointerId)) {
+            const centroid = this._panCentroid();
+            if (centroid && this._panLastPoint) {
+                const scale = SIMULATOR_SCALE * this.viewZoom;
+                const current = {
+                    x: centroid.x / this._panPointerIds.size,
+                    y: centroid.y / this._panPointerIds.size
+                };
+                this.viewOffset.x += (current.x - this._panLastPoint.x) / scale;
+                this.viewOffset.y -= (current.y - this._panLastPoint.y) / scale;
+                this._panLastPoint = current;
+                const pinchDistance = this._panPointerIds.size === 2 ? this._panDistance() : null;
+                if (pinchDistance && this._pinchLastDistance) {
+                    this.setViewZoom(this.viewZoom * pinchDistance / this._pinchLastDistance, current, true);
+                } else {
+                    this._draw();
+                }
+                this._pinchLastDistance = pinchDistance;
+            }
+            return;
+        }
         if (!this._dragOffset || this._selectedObstacle < 0) return;
         const point = this._eventWorld(event);
         const obstacle = this.obstacles[this._selectedObstacle];
@@ -600,6 +770,13 @@ class RootSimulator {
         if (this._activeTouchPointer === event.pointerId) {
             this._activeTouchPointer = null;
             this._setTouchMask(0);
+        }
+        this._panCandidatePointers.delete(event.pointerId);
+        if (this._panPointerIds.has(event.pointerId)) {
+            this._panPointerIds.delete(event.pointerId);
+            // Touch panning deliberately requires two fingers so a one-finger
+            // gesture remains available for Root and obstacle interactions.
+            if (this._panPointerIds.size < (event.pointerType === 'touch' ? 2 : 1)) this._stopPan();
         }
         this._dragOffset = null;
         if (this._canvas.hasPointerCapture && this._canvas.hasPointerCapture(event.pointerId)) {
@@ -620,15 +797,25 @@ class RootSimulator {
             this._stopButton.disabled = !controlsEnabled;
             this._stopButton.style.opacity = controlsEnabled ? '1' : '0.45';
         }
+        this._updateRootPlacementButtons();
         const context = this._context;
         const {width, height} = this._canvas;
         const scale = SIMULATOR_SCALE * this.viewZoom;
-        const point = ({x, y}) => ({x: width / 2 + x * scale, y: height / 2 - y * scale});
+        const point = ({x, y}) => ({
+            x: width / 2 + (this.viewOffset.x + x) * scale,
+            y: height / 2 - (this.viewOffset.y + y) * scale
+        });
         context.clearRect(0, 0, width, height);
         context.fillStyle = '#fcfdfd'; context.fillRect(0, 0, width, height);
         context.strokeStyle = '#e0ebe7'; context.lineWidth = 1;
-        for (let x = width / 2 % (50 * scale); x < width; x += 50 * scale) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke(); }
-        for (let y = height / 2 % (50 * scale); y < height; y += 50 * scale) { context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke(); }
+        const gridCellPx = GRID_CELL_MM * scale;
+        const gridOffset = coordinate => ((coordinate % gridCellPx) + gridCellPx) % gridCellPx;
+        // The coordinate origin is the centre of a 16 cm cell, not a grid
+        // intersection. A Root at (0, 0) therefore fits in its starting cell.
+        const gridOriginX = width / 2 + (this.viewOffset.x + GRID_CELL_MM / 2) * scale;
+        const gridOriginY = height / 2 - (this.viewOffset.y - GRID_CELL_MM / 2) * scale;
+        for (let x = gridOffset(gridOriginX); x < width; x += gridCellPx) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, height); context.stroke(); }
+        for (let y = gridOffset(gridOriginY); y < height; y += gridCellPx) { context.beginPath(); context.moveTo(0, y); context.lineTo(width, y); context.stroke(); }
         this.obstacles.forEach((obstacle, index) => {
             const center = point(obstacle);
             const obstacleWidth = obstacle.width * scale;
@@ -663,10 +850,13 @@ class RootSimulator {
         context.strokeStyle = this.marker === 2 ? '#fff' : '#22a6a6'; context.lineWidth = 4; context.lineCap = 'round';
         for (const segment of this.trail) { const a = point({x: segment.x1, y: segment.y1}); const b = point({x: segment.x2, y: segment.y2}); context.beginPath(); context.moveTo(a.x, a.y); context.lineTo(b.x, b.y); context.stroke(); }
         const p = point(this.pose);
-        context.save(); context.translate(p.x, p.y); context.rotate((90 - this.pose.heading) * DEG);
+        // The original illustration has an outer radius of 36 units. Scale it
+        // from millimetres so its outside diameter always equals one grid cell.
+        const rootVisualScale = (ROOT_DRAW_RADIUS_MM * scale) / 36;
+        context.save(); context.translate(p.x, p.y); context.rotate((90 - this.pose.heading) * DEG); context.scale(rootVisualScale, rootVisualScale);
         context.fillStyle = '#fff'; context.strokeStyle = '#29343a'; context.lineWidth = 5;
         context.beginPath();
-        for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + i * Math.PI / 3; const x = Math.cos(a) * 36; const y = Math.sin(a) * 36; i ? context.lineTo(x, y) : context.moveTo(x, y); }
+        ROOT_OUTLINE.forEach(({x, y}, i) => { if (i) context.lineTo(x, y); else context.moveTo(x, y); });
         context.closePath(); context.fill(); context.stroke();
         context.lineCap = 'round';
         context.lineWidth = 8;
@@ -684,6 +874,9 @@ class RootSimulator {
         }
         context.strokeStyle = '#29343a'; context.lineWidth = 7; context.beginPath(); context.moveTo(0, -22); context.lineTo(0, 21); context.stroke();
         const ledColor = `rgb(${this.led.red},${this.led.green},${this.led.blue})`;
+        // Keep the unlit LED visibly black. This also provides the correct dark
+        // phase for blinking instead of exposing the white robot body beneath.
+        context.fillStyle = '#000'; context.beginPath(); context.arc(0, 0, 9, 0, Math.PI * 2); context.fill();
         if (this.led.effect === 3) {
             for (let i = 0; i < 4; i++) {
                 const angle = (this._ledPhase + i * 3) * Math.PI / 6;
@@ -697,18 +890,16 @@ class RootSimulator {
         }
         context.fillStyle = '#f2d941'; context.beginPath(); context.arc(0, -27, 6, 0, Math.PI * 2); context.fill();
         context.restore();
-        context.fillStyle = '#26353a'; context.font = 'bold 18px Arial';
-        context.fillText(`${this._t('simulating', 'Simulating')}: ${this.rootLabel}`, 18, 30);
-        context.font = '18px Arial';
-        context.fillText(`${this._t('x', 'x')}: ${this.pose.x.toFixed(1)} mm   ${this._t('y', 'y')}: ${this.pose.y.toFixed(1)} mm   ${this._t('heading', 'heading')}: ${this.pose.heading.toFixed(1)}°`, 18, 57);
+        context.fillStyle = '#26353a'; context.font = '18px Arial';
+        context.fillText(`${this.rootLabel} · ${this._t('x', 'x')}: ${this.pose.x.toFixed(1)} mm   ${this._t('y', 'y')}: ${this.pose.y.toFixed(1)} mm   ${this._t('heading', 'heading')}: ${this.pose.heading.toFixed(1)}°`, 18, 30);
         const markerStates = [this._t('up', 'up'), this._t('down', 'down'), this._t('eraser', 'eraser')];
         const ledStates = [this._t('off', 'off'), this._t('on', 'on'), this._t('blink', 'blink'), this._t('spin', 'spin')];
-        context.fillText(`${this._t('marker', 'marker')}: ${markerStates[this.marker]}   LED: ${ledStates[this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 84);
+        context.fillText(`${this._t('marker', 'marker')}: ${markerStates[this.marker]}   LED: ${ledStates[this.led.effect]} rgb(${this.led.red}, ${this.led.green}, ${this.led.blue})`, 18, 57);
         const bumper = this.last.leftBumper && this.last.rightBumper ? this._t('bothPush', 'BOTH PUSH') :
             (this.last.leftBumper ? this._t('leftPush', 'LEFT PUSH') :
                 (this.last.rightBumper ? this._t('rightPush', 'RIGHT PUSH') : this._t('none', 'none')));
-        context.fillText(`${this._t('bumper', 'bumper')}: ${bumper}   ${this._t('touchMask', 'touch mask')}: ${this.last.touchMask.toString(2).padStart(4, '0')}`, 18, 111);
-        if (this.phrase) context.fillText(`${this._t('say', 'say')}: ${this.phrase}`, 18, 138);
+        context.fillText(`${this._t('bumper', 'bumper')}: ${bumper}   ${this._t('touchMask', 'touch mask')}: ${this.last.touchMask.toString(2).padStart(4, '0')}`, 18, 84);
+        if (this.phrase) context.fillText(`${this._t('say', 'say')}: ${this.phrase}`, 18, 111);
     }
 }
 

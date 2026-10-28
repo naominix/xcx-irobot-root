@@ -34,6 +34,11 @@ const MOTION_WATCHDOG_BASE_MS = 2000;
 const MOTION_WATCHDOG_MIN_SPEED_MM_S = 20;
 const MOTION_WATCHDOG_SETTLE_MS = 300;
 const MOTION_COMMAND_GAP_MS = 300;
+const ACCELEROMETER_POLL_INTERVAL_MS = 100;
+const ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS = 250;
+const ACCELEROMETER_POLL_COMMAND_GAP_MS = 75;
+const ACCELEROMETER_FILTER_ALPHA = 0.2;
+const ROOT_NAME_CONFIRM_DELAY_MS = 200;
 const ROOT_HALF_TRACK_MM = 43;
 const CONTROL_MODE_AUTO = 'auto';
 const CONTROL_MODE_SIMULATOR = 'simulator';
@@ -190,7 +195,14 @@ class IrobotRootBlocks {
         if (runtime.formatMessage) formatMessage = runtime.formatMessage;
         this.rootManager = new RootManager(runtime, EXTENSION_ID, {
             onData: (session, packet) => this._receive(packet, session),
-            onReset: session => this._cancelPendingCommands(new Error('Root connection was reset'), session)
+            onReset: session => {
+                this._stopAccelerometerPolling(session);
+                this._resetAccelerometerFilter(session);
+                clearTimeout(session.rootNameConfirmTimer);
+                session.rootNameConfirmTimer = null;
+                this._cancelPendingCommands(new Error('Root connection was reset'), session);
+            },
+            onReady: session => this._requestRootName(session)
         });
         this._hatDispatchSessionId = null;
         // Preserve the established extension behaviour for existing projects.
@@ -211,8 +223,8 @@ class IrobotRootBlocks {
                 return translate(`simulator.${id}`, defaultText);
             },
             onRun: () => {
-                this.bumperState = 0;
-                this.touchState = 0;
+                this._activeSession().bumperState = 0;
+                this._activeSession().touchState = 0;
                 if (typeof this.runtime.greenFlag === 'function') this.runtime.greenFlag();
             },
             onStop: () => {
@@ -291,6 +303,12 @@ class IrobotRootBlocks {
                     text: translate('block.transportMode', 'Root connection method')},
                 {opcode: 'lastConnectionError', blockType: BlockType.REPORTER,
                     text: translate('block.lastConnectionError', 'last connection error')},
+                {opcode: 'rootName', blockType: BlockType.REPORTER,
+                    text: translate('block.rootName', 'Root name')},
+                {opcode: 'setRootName', blockType: BlockType.COMMAND,
+                    text: translate('block.setRootName', 'set Root name to [NAME]'), arguments: {
+                    NAME: {type: ArgumentType.STRING, defaultValue: 'ROOT'}
+                }},
                 {opcode: 'setControlMode', blockType: BlockType.COMMAND,
                     text: translate('block.setControlMode', 'set control mode to [MODE]'), arguments: {
                     MODE: {type: ArgumentType.STRING, menu: 'controlModeMenu'}
@@ -370,6 +388,22 @@ class IrobotRootBlocks {
                 {opcode: 'sensor', blockType: BlockType.REPORTER,
                     text: translate('block.sensor', '[VALUE] value'), arguments: {
                     VALUE: {type: ArgumentType.STRING, menu: 'valueMenu'}
+                }},
+                {opcode: 'setAccelerometerPolling', blockType: BlockType.COMMAND,
+                    text: translate('block.setAccelerometerPolling', 'set continuous accelerometer updates [STATE]'), arguments: {
+                    STATE: {type: ArgumentType.STRING, menu: 'pollingStateMenu'}
+                }},
+                {opcode: 'pitch', blockType: BlockType.REPORTER,
+                    text: translate('block.pitch', 'pitch (°)')},
+                {opcode: 'roll', blockType: BlockType.REPORTER,
+                    text: translate('block.roll', 'roll (°)')},
+                {opcode: 'isBumperPressed', blockType: BlockType.BOOLEAN,
+                    text: translate('block.isBumperPressed', '[BUMPER] bumper is pressed?'), arguments: {
+                    BUMPER: {type: ArgumentType.STRING, menu: 'bumperMenu'}
+                }},
+                {opcode: 'isTouchSensorTouched', blockType: BlockType.BOOLEAN,
+                    text: translate('block.isTouchSensorTouched', '[SENSOR] touch sensor is touched?'), arguments: {
+                    SENSOR: {type: ArgumentType.STRING, menu: 'touchSensorMenu'}
                 }},
                 {opcode: 'whenEvent', blockType: BlockType.HAT,
                     text: translate('block.whenEvent', 'when [ROOT] [EVENT] changes'), isEdgeActivated: false, arguments: {
@@ -462,7 +496,11 @@ class IrobotRootBlocks {
                     {text: translate('menu.controlMode.simulator', 'simulator'), value: CONTROL_MODE_SIMULATOR},
                     {text: translate('menu.controlMode.physical', 'physical Root'), value: CONTROL_MODE_PHYSICAL}
                 ]},
-                rootMenu: {acceptReporters: true, items: 'getRootMenu'}
+                rootMenu: {acceptReporters: true, items: 'getRootMenu'},
+                pollingStateMenu: {acceptReporters: true, items: [
+                    {text: translate('menu.polling.start', 'start'), value: 'start'},
+                    {text: translate('menu.polling.stop', 'stop'), value: 'stop'}
+                ]}
             }
         };
     }
@@ -515,7 +553,9 @@ class IrobotRootBlocks {
         // entering simulator mode, so a later selector block does not wipe
         // the selected Root's in-progress rehearsal.
         if (isSimulatorActive && !wasSimulatorActive) {
-            if (this.transport.isConnected()) this._send(this.protocol.motors(0, 0));
+            this._stopAccelerometerPolling(session);
+            this._resetAccelerometerFilter(session);
+            if (session.transport.isConnected()) this._send(session.protocol.motors(0, 0), session);
             this._cancelPendingCommands(new Error('Root control target changed to simulator'), session);
             this.simulator.reset();
             this.simulator.open();
@@ -694,13 +734,52 @@ class IrobotRootBlocks {
     }
 
     _playNoteForPicker (midiNote, category) {
-        if (category !== this.getInfo().name) return;
-        if (this._isSimulatorActive() && this._isSimulatedSession(this._activeSession())) {
-            this.simulator.playNote(midiNoteToFrequency(Cast.toNumber(midiNote)), 250);
+        // Scratch Blocks has used both the translated category name and the
+        // extension ID for custom extension fields. Accept either form so an
+        // editor update cannot silently disable piano-key previews.
+        if (category !== this.getInfo().name && category !== EXTENSION_ID) return;
+        const frequency = midiNoteToFrequency(Cast.toNumber(midiNote));
+        if (this._isSimulatorActive()) {
+            this.simulator.playNote(frequency, 250);
+            this._playLocalNotePreview(frequency, 250);
             return;
         }
-        if (!this.transport.isConnected()) return;
-        this._send(this.protocol.note(midiNoteToFrequency(Cast.toNumber(midiNote)), 250));
+        const session = this._activeSession();
+        if (session.transport.isConnected()) {
+            this._send(session.protocol.note(frequency, 250), session);
+            return;
+        }
+        // The picker is also used while composing a project before a Root is
+        // connected. In that case, use Scratch's existing Web Audio context so
+        // the selected pitch can still be checked on PCs and iPads.
+        this._playLocalNotePreview(frequency, 250);
+    }
+
+    _playLocalNotePreview (frequency, durationMs) {
+        const audioContext = this.runtime.audioEngine && this.runtime.audioEngine.audioContext;
+        if (!audioContext || typeof audioContext.createOscillator !== 'function' ||
+            typeof audioContext.createGain !== 'function') return false;
+        try {
+            if (audioContext.state === 'suspended' && typeof audioContext.resume === 'function') {
+                const resume = audioContext.resume();
+                if (resume && typeof resume.catch === 'function') resume.catch(() => {});
+            }
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const now = audioContext.currentTime;
+            const end = now + (Math.max(1, durationMs) / 1000);
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(frequency, now);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, end);
+            oscillator.connect(gain);
+            gain.connect(audioContext.destination);
+            oscillator.start(now);
+            oscillator.stop(end);
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
     sayPhrase (args, util) {
@@ -727,6 +806,155 @@ class IrobotRootBlocks {
         return session.last[args.VALUE] === undefined ? 0 : session.last[args.VALUE];
     }
 
+    setAccelerometerPolling (args, util) {
+        const session = this._activeSession(util);
+        if (String(args.STATE) === 'start') {
+            this._startAccelerometerPolling(session);
+        } else {
+            this._stopAccelerometerPolling(session);
+        }
+    }
+
+    rootName (args, util) {
+        const session = this._activeSession(util);
+        return session.last.rootName || session.transport.deviceName || '';
+    }
+
+    setRootName (args, util) {
+        const session = this._activeSession(util);
+        const name = String(args.NAME || '');
+        if (this._isSimulatorActive(null, session)) return;
+        this._send(session.protocol.setName(name), session);
+        if (session.rootNameConfirmTimer) clearTimeout(session.rootNameConfirmTimer);
+        session.rootNameConfirmTimer = setTimeout(() => {
+            session.rootNameConfirmTimer = null;
+            this._requestRootName(session);
+        }, ROOT_NAME_CONFIRM_DELAY_MS);
+    }
+
+    _requestRootName (session = this._activeSession()) {
+        if (!this._isSimulatorActive(null, session)) this._send(session.protocol.getName(), session);
+    }
+
+    _startAccelerometerPolling (session = this._activeSession()) {
+        if (this._isSimulatorActive(null, session)) return;
+        this._stopAccelerometerPolling(session);
+        session.accelerometerPollTimer = setInterval(
+            () => this._pollAccelerometer(session),
+            ACCELEROMETER_POLL_INTERVAL_MS
+        );
+        this._pollAccelerometer(session);
+    }
+
+    _stopAccelerometerPolling (session = this._activeSession()) {
+        if (session.accelerometerPollTimer) clearInterval(session.accelerometerPollTimer);
+        if (session.accelerometerPollTimeout) clearTimeout(session.accelerometerPollTimeout);
+        session.accelerometerPollTimer = null;
+        session.accelerometerPollTimeout = null;
+        session.accelerometerPollInFlight = false;
+    }
+
+    _pollAccelerometer (session = this._activeSession()) {
+        if (
+            !session.accelerometerPollTimer ||
+            session.accelerometerPollInFlight ||
+            !session.transport.isConnected() ||
+            session.pendingCommands.size > 0 ||
+            Date.now() - session.lastHardwareCommandAt < ACCELEROMETER_POLL_COMMAND_GAP_MS
+        ) return;
+        session.accelerometerPollInFlight = true;
+        session.accelerometerPollTimeout = setTimeout(() => {
+            session.accelerometerPollInFlight = false;
+            session.accelerometerPollTimeout = null;
+        }, ACCELEROMETER_POLL_RESPONSE_TIMEOUT_MS);
+        this._send(session.protocol.packet(16, 1), session, {accelerometerPoll: true});
+    }
+
+    _finishAccelerometerPoll (session = this._activeSession()) {
+        if (session.accelerometerPollTimeout) clearTimeout(session.accelerometerPollTimeout);
+        session.accelerometerPollTimeout = null;
+        session.accelerometerPollInFlight = false;
+    }
+
+    _resetAccelerometerFilter (session = this._activeSession()) {
+        session.filteredAcceleration = null;
+    }
+
+    _updateFilteredAcceleration (decoded, session = this._activeSession()) {
+        if (decoded.accelX === undefined) return;
+        const sample = {
+            accelX: Number(decoded.accelX) || 0,
+            accelY: Number(decoded.accelY) || 0,
+            accelZ: Number(decoded.accelZ) || 0
+        };
+        if (!session.filteredAcceleration) {
+            session.filteredAcceleration = sample;
+            return;
+        }
+        for (const axis of Object.keys(sample)) {
+            session.filteredAcceleration[axis] +=
+                ACCELEROMETER_FILTER_ALPHA * (sample[axis] - session.filteredAcceleration[axis]);
+        }
+    }
+
+    _accelerometerAngles (session = this._activeSession()) {
+        const source = this._isSimulatorActive(null, session) ? {
+            accelX: this.simulator.getSensor('accelX'),
+            accelY: this.simulator.getSensor('accelY'),
+            accelZ: this.simulator.getSensor('accelZ')
+        } : (session.filteredAcceleration || session.last);
+        const x = Number(source.accelX) || 0;
+        const y = Number(source.accelY) || 0;
+        const z = Number(source.accelZ) || 0;
+
+        // Pitch and roll can be derived from the gravity vector while Root is
+        // stationary. A zero vector means the accelerometer has not yet been
+        // read, so return the neutral angle instead of NaN.
+        if (x === 0 && y === 0 && z === 0) return {pitch: 0, roll: 0};
+        const toDegrees = radians => {
+            const degrees = Math.round((radians * 1800) / Math.PI) / 10;
+            return degrees === 0 ? 0 : degrees;
+        };
+        return {
+            // With the Root held so the power button points forward, Root's
+            // X measures front/back tilt (pitch); Y measures side tilt (roll).
+            // Use the magnitude of the two non-pitch axes. This keeps a flat
+            // Root at 0° whether its accelerometer reports gravity as +Z or
+            // -Z, instead of displaying an equivalent ±180° angle.
+            // Front-up is positive pitch; right-down is positive roll.
+            pitch: toDegrees(Math.atan2(-x, Math.hypot(y, z))),
+            roll: toDegrees(Math.atan2(-y, Math.hypot(x, z)))
+        };
+    }
+
+    pitch (args, util) {
+        return this._accelerometerAngles(this._activeSession(util)).pitch;
+    }
+
+    roll (args, util) {
+        return this._accelerometerAngles(this._activeSession(util)).roll;
+    }
+
+    // Unlike the event hats, these report the current state continuously.
+    // They are intentionally backed by the state updated from unsolicited
+    // sensor packets, so they are safe to use in `forever` and `if` blocks
+    // without sending a BLE query for every Scratch frame.
+    isBumperPressed (args, util) {
+        const session = this._activeSession(util);
+        const bumper = String(args.BUMPER || '').toUpperCase();
+        if (bumper === 'LEFT') return Boolean(session.bumperState & 0x80);
+        if (bumper === 'RIGHT') return Boolean(session.bumperState & 0x40);
+        if (bumper === 'BOTH') return (session.bumperState & 0xC0) === 0xC0;
+        return false;
+    }
+
+    isTouchSensorTouched (args, util) {
+        const session = this._activeSession(util);
+        const masks = {FL: 0x8, FR: 0x4, RL: 0x1, RR: 0x2};
+        const mask = masks[String(args.SENSOR || '').toUpperCase()];
+        return Boolean(mask && (session.touchState & mask));
+    }
+
     whenEvent (args, util) {
         return this._matchesThreadSession(args, util) &&
             String(args.EVENT).toUpperCase() === this._activeSession(util).currentEvent;
@@ -751,17 +979,22 @@ class IrobotRootBlocks {
 
     lastPacket (args, util) { return this._activeSession(util).last.raw || ''; }
     detailedEvent (args, util) { return this._activeSession(util).lastDetailedEvent; }
-    _send (packet, session = this._activeSession()) {
+    _send (packet, session = this._activeSession(), options = {}) {
         // Hardware writes are fire-and-forget from Scratch's point of view.
         // Scratch Link/Scrub may leave the JSON-RPC write promise pending even
         // after CoreBluetooth accepted the bytes; returning that promise would
         // leave the command block and the rest of its stack permanently waiting.
         try {
+            if (!options.accelerometerPoll) session.lastHardwareCommandAt = Date.now();
             const pendingWrite = session.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
-                pendingWrite.catch(error => session.transport.setError(error));
+                pendingWrite.catch(error => {
+                    if (options.accelerometerPoll) this._finishAccelerometerPoll(session);
+                    session.transport.setError(error);
+                });
             }
         } catch (error) {
+            if (options.accelerometerPoll) this._finishAccelerometerPoll(session);
             session.transport.setError(error);
         }
     }
@@ -814,6 +1047,7 @@ class IrobotRootBlocks {
         // versions leave it pending after CoreBluetooth has accepted the bytes.
         // The Scratch block waits only for Root's own matching Finished packet.
         try {
+            session.lastHardwareCommandAt = Date.now();
             const pendingWrite = session.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
                 pendingWrite.catch(error => this._rejectPendingCommand(key, error, session));
@@ -848,6 +1082,7 @@ class IrobotRootBlocks {
         });
 
         try {
+            session.lastHardwareCommandAt = Date.now();
             const pendingWrite = session.transport.write(packet);
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
                 pendingWrite.catch(error => this._rejectPendingCommand(key, error, session));
@@ -873,6 +1108,7 @@ class IrobotRootBlocks {
 
     _sendMotionStop (pendingKey, session = this._activeSession()) {
         try {
+            session.lastHardwareCommandAt = Date.now();
             const pendingWrite = session.transport.write(session.protocol.motors(0, 0));
             if (pendingWrite && typeof pendingWrite.catch === 'function') {
                 pendingWrite.catch(error => this._rejectPendingCommand(pendingKey, error, session));
@@ -996,6 +1232,11 @@ class IrobotRootBlocks {
         const decoded = session.protocol.decode(packet);
         if (!decoded) return;
         session.last = Object.assign({}, session.last, decoded);
+        if (decoded.name !== undefined) session.last.rootName = decoded.name;
+        if (decoded.accelX !== undefined) {
+            this._updateFilteredAcceleration(decoded, session);
+            this._finishAccelerometerPoll(session);
+        }
         this._resolvePendingCommand(decoded, session);
         if (decoded.command !== 0) return;
         if (decoded.device === 12) this._receiveBumperEvent(decoded, session);
